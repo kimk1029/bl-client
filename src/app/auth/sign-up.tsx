@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useTheme } from "@/context/ThemeContext";
+import { createApiUrl } from "@/utils/apiConfig";
 
 interface SignUpProps {
     onToggle: Dispatch<SetStateAction<boolean>>;
@@ -51,7 +52,7 @@ const SignUp: React.FC<SignUpProps> = ({ onToggle, email }) => {
 
         try {
             const response = await axios.post(
-                'https://kimk1029.synology.me:8080/kh1/api/auth/register',
+                createApiUrl('/auth/register'),
                 data
             );
             if (response.status === 201) {
@@ -80,7 +81,7 @@ const SignUp: React.FC<SignUpProps> = ({ onToggle, email }) => {
         setServerError(null);
         try {
             const response = await axios.post(
-                'https://kimk1029.synology.me:8080/kh1/api/auth/check-email',
+                createApiUrl('/auth/check-email'),
                 { email: emailValue }
             );
             setIsEmailAvailable(!response.data.exists);
@@ -97,7 +98,7 @@ const SignUp: React.FC<SignUpProps> = ({ onToggle, email }) => {
         setServerError(null);
         try {
             const response = await axios.post(
-                'https://kimk1029.synology.me:8080/kh1/api/auth/check-username',
+                createApiUrl('/auth/check-username'),
                 { username: usernameValue }
             );
             setIsUsernameAvailable(!response.data.exists);

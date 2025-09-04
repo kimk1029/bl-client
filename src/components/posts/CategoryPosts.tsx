@@ -39,7 +39,7 @@ const CategoryPosts: React.FC<CategoryPostsProps> = ({ category }) => {
                                     {post.title}
                                 </p>
                                 <div className={`flex items-center space-x-1 mt-1 text-[10px] ${theme === 'dark' ? 'text-gray-400' : 'text-gray-400'}`}>
-                                    <span>{post.author?.username}</span>
+                                    <span>{post.author.username}</span>
                                     <span>•</span>
                                     <span>{post.created_at}</span>
                                 </div>
@@ -49,11 +49,11 @@ const CategoryPosts: React.FC<CategoryPostsProps> = ({ category }) => {
                         <div className="flex items-center space-x-3 mt-1 sm:mt-0">
                             <div className={`flex items-center space-x-1 text-[10px] ${theme === 'dark' ? 'text-gray-400' : 'text-gray-400'}`}>
                                 <FaThumbsUp className="w-3 h-3" />
-                                <span>{post.likeCount}</span>
+                                <span>{post.likes}</span>
                             </div>
                             <div className={`flex items-center space-x-1 text-[10px] ${theme === 'dark' ? 'text-gray-400' : 'text-gray-400'}`}>
                                 <FaComment className="w-3 h-3" />
-                                <span>{post.commentCount}</span>
+                                <span>{post.comments}</span>
                             </div>
                         </div>
                     </li>

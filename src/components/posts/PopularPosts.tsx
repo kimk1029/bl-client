@@ -34,26 +34,26 @@ const PopularPosts: React.FC = () => {
             {popularPosts.map((post) => (
                 <li
                     key={post.id}
-                    className={`group flex items-center p-1 border-b last:border-b-0 ${theme === 'dark'
+                    className={`group flex items-center p-1 border-b last:border-b-0 transition-colors duration-200 ${theme === 'dark'
                         ? 'border-gray-700 hover:bg-gray-700'
                         : 'border-gray-100 hover:bg-gray-50'
                         }`}
                 >
                     {/* Rank */}
-                    <div className={`w-6 text-center text-xs font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                    <div className={`w-6 text-center text-xs font-medium transition-colors duration-200 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
                         }`}>
                         {post.rank}
                     </div>
 
                     {/* Title and Company */}
                     <div className="ml-2 flex-1">
-                        <p className={`text-xs font-medium truncate ${theme === 'dark'
+                        <p className={`text-xs font-medium truncate transition-colors duration-200 ${theme === 'dark'
                             ? 'text-gray-200 group-hover:text-blue-400'
                             : 'text-gray-900 group-hover:text-blue-600'
                             }`}>
                             {post.title}
                         </p>
-                        <p className={`text-[10px] ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
+                        <p className={`text-[10px] transition-colors duration-200 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
                             }`}>
                             {post.company}
                         </p>

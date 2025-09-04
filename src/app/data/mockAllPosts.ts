@@ -10,9 +10,9 @@ const mockAllPosts: Post[] = [
     created_at: "June 15, 2025",
     author: { id: 1, username: "Dr. Sarah Chen" },
     views: 102,
-    likeCount: 432,
-    commentCount: 58,
-    liked: false,
+    likes: 432,
+    comments: 58,
+    category: "technology"
   },
   {
     id: 6,
@@ -21,9 +21,9 @@ const mockAllPosts: Post[] = [
     created_at: "June 3, 2025",
     author: { id: 2, username: "Dr. Robert Klein" },
     views: 87,
-    likeCount: 254,
-    commentCount: 41,
-    liked: false,
+    likes: 254,
+    comments: 41,
+    category: "technology"
   },
   {
     id: 7,
@@ -32,9 +32,9 @@ const mockAllPosts: Post[] = [
     created_at: "June 1, 2025",
     author: { id: 3, username: "Alex Johnson" },
     views: 34,
-    likeCount: 24,
-    commentCount: 7,
-    liked: false,
+    likes: 24,
+    comments: 7,
+    category: "technology"
   },
 
   // Science posts
@@ -45,9 +45,9 @@ const mockAllPosts: Post[] = [
     created_at: "June 12, 2025",
     author: { id: 4, username: "Mike Reynolds" },
     views: 98,
-    likeCount: 385,
-    commentCount: 43,
-    liked: false,
+    likes: 385,
+    comments: 43,
+    category: "science"
   },
   {
     id: 8,
@@ -56,9 +56,9 @@ const mockAllPosts: Post[] = [
     created_at: "June 10, 2025",
     author: { id: 5, username: "Dr. Elena Rodriguez" },
     views: 45,
-    likeCount: 42,
-    commentCount: 13,
-    liked: false,
+    likes: 42,
+    comments: 13,
+    category: "science"
   },
   {
     id: 12,
@@ -67,9 +67,9 @@ const mockAllPosts: Post[] = [
     created_at: "May 28, 2025",
     author: { id: 6, username: "Dr. James Wilson" },
     views: 76,
-    likeCount: 210,
-    commentCount: 45,
-    liked: false,
+    likes: 210,
+    comments: 45,
+    category: "science"
   },
 
   // Health posts
@@ -80,9 +80,9 @@ const mockAllPosts: Post[] = [
     created_at: "June 10, 2025",
     author: { id: 7, username: "Emma Watson" },
     views: 110,
-    likeCount: 327,
-    commentCount: 92,
-    liked: false,
+    likes: 327,
+    comments: 92,
+    category: "health"
   },
   {
     id: 9,
@@ -91,9 +91,9 @@ const mockAllPosts: Post[] = [
     created_at: "June 8, 2025",
     author: { id: 8, username: "Thomas Lee" },
     views: 52,
-    likeCount: 67,
-    commentCount: 22,
-    liked: false,
+    likes: 67,
+    comments: 22,
+    category: "health"
   },
   {
     id: 13,
@@ -102,9 +102,9 @@ const mockAllPosts: Post[] = [
     created_at: "May 25, 2025",
     author: { id: 9, username: "Dr. Lisa Zhang" },
     views: 69,
-    likeCount: 182,
-    commentCount: 34,
-    liked: false,
+    likes: 182,
+    comments: 34,
+    category: "health"
   },
 
   // Business posts
@@ -115,9 +115,9 @@ const mockAllPosts: Post[] = [
     created_at: "June 8, 2025",
     author: { id: 10, username: "James Wilson" },
     views: 88,
-    likeCount: 298,
-    commentCount: 37,
-    liked: false,
+    likes: 298,
+    comments: 37,
+    category: "business"
   },
   {
     id: 10,
@@ -126,9 +126,9 @@ const mockAllPosts: Post[] = [
     created_at: "June 5, 2025",
     author: { id: 11, username: "Michelle Park" },
     views: 41,
-    likeCount: 31,
-    commentCount: 15,
-    liked: false,
+    likes: 31,
+    comments: 15,
+    category: "business"
   },
   {
     id: 14,
@@ -137,9 +137,9 @@ const mockAllPosts: Post[] = [
     created_at: "May 22, 2025",
     author: { id: 12, username: "Robert Chang" },
     views: 57,
-    likeCount: 156,
-    commentCount: 28,
-    liked: false,
+    likes: 156,
+    comments: 28,
+    category: "business"
   },
 
   // Entertainment posts
@@ -150,9 +150,9 @@ const mockAllPosts: Post[] = [
     created_at: "June 5, 2025",
     author: { id: 13, username: "Lisa Zhang" },
     views: 73,
-    likeCount: 275,
-    commentCount: 29,
-    liked: false,
+    likes: 275,
+    comments: 29,
+    category: "entertainment"
   },
   {
     id: 11,
@@ -161,9 +161,9 @@ const mockAllPosts: Post[] = [
     created_at: "June 2, 2025",
     author: { id: 14, username: "Kevin Smith" },
     views: 36,
-    likeCount: 58,
-    commentCount: 27,
-    liked: false,
+    likes: 58,
+    comments: 27,
+    category: "entertainment"
   },
   {
     id: 15,
@@ -172,9 +172,9 @@ const mockAllPosts: Post[] = [
     created_at: "May 20, 2025",
     author: { id: 15, username: "Emily Johnson" },
     views: 65,
-    likeCount: 143,
-    commentCount: 32,
-    liked: false,
+    likes: 143,
+    comments: 32,
+    category: "entertainment"
   },
 ];
 
