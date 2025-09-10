@@ -1,23 +1,34 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import useSWR from "swr";
 import { useSession } from "next-auth/react";
 import PostList from "@/components/posts/PostList";
 import { Post } from "@/types/type";
 import { Topic } from "@/types/type";
+import { useSearchParams } from 'next/navigation';
 
 
 const categories: Topic[] = ['technology', 'science', 'health', 'business', 'entertainment'];
 
 const GridFormatBoard: React.FC = () => {
     const { data: session } = useSession();
+    const searchParams = useSearchParams();
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedCategory, setSelectedCategory] = useState<Topic | 'all'>('all');
     const pageSize = 10;
     const [isOpen, setIsOpen] = useState(false);
 
     const { data, error, mutate } = useSWR<Post[]>('/api/posts', (url: string) => fetch(url).then((res) => res.json()));
+
+    // URL 쿼리(category)로 초기 카테고리 설정
+    useEffect(() => {
+        const cat = searchParams.get('category') as Topic | null;
+        if (cat && categories.includes(cat)) {
+            setSelectedCategory(cat);
+            setCurrentPage(1);
+        }
+    }, [searchParams]);
 
     if (error) {
         return <div>Failed to load posts</div>;

@@ -128,10 +128,10 @@ export async function DELETE(req: Request) {
   const segments = pathname.split("/");
   const id = segments[segments.length - 1];
   console.log("삭제 게시글 ID:", id);
-
   try {
     // 인증 헤더 추출
     const authHeader = req.headers.get("Authorization");
+    console.log("authHeader", authHeader);
     if (!authHeader) {
       return NextResponse.json(
         { message: "인증 헤더가 필요합니다." },

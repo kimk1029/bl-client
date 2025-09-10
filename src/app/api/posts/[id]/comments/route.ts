@@ -1,23 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { cookies, headers } from "next/headers";
+import { createApiUrl } from "@/utils/apiConfig";
 
 // 댓글 목록 조회
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const token = await getToken({
             req: request,
             secret: process.env.NEXTAUTH_SECRET 
         });
+        console.log('[comments.GET] getToken:', token);
         
-        const { id } = params;
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts/${id}/comments`, {
-            headers: {
-                'Authorization': `Bearer ${token?.accessToken}`,
-            },
+        const { id } = await params;
+        const response = await fetch(createApiUrl(`/posts/${id}/comments`), {
+            headers: token?.accessToken ? { 'Authorization': `Bearer ${token.accessToken}` } : {},
         });
 
         if (!response.ok) {
@@ -38,17 +37,18 @@ export async function GET(
 // 댓글 작성
 export async function POST(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const token = await getToken({ 
             req: request,
             secret: process.env.NEXTAUTH_SECRET 
         });
+        console.log('[comments.POST] getToken:', token);
         const body = await request.json();
-        const { id } = params;
+        const { id } = await params;
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts/${id}/comments`, {
+        const response = await fetch(createApiUrl(`/posts/${id}/comments`), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -74,7 +74,7 @@ export async function POST(
 // 댓글 삭제
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const token = await getToken({ 
@@ -82,7 +82,7 @@ export async function DELETE(
             secret: process.env.NEXTAUTH_SECRET 
         });
         const commentId = new URL(request.url).searchParams.get('commentId');
-        const { id } = params;
+        const { id } = await params;
 
         if (!commentId) {
             return NextResponse.json(
@@ -92,12 +92,10 @@ export async function DELETE(
         }
 
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/posts/${id}/comments/${commentId}`,
+            createApiUrl(`/posts/${id}/comments/${commentId}`),
             {
                 method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token?.accessToken}`,
-                },
+                headers: token?.accessToken ? { 'Authorization': `Bearer ${token.accessToken}` } : {},
             }
         );
 

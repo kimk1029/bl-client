@@ -13,8 +13,8 @@ const Navigation = ({ isMobile = false }: NavigationProps) => {
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     const menuItems = [
-        { name: 'Topics', href: '/topics', hasDropdown: true },
-        { name: 'Church', href: '/posts' },
+        { name: 'Posts', href: '/posts', hasDropdown: true },
+        { name: 'Church', href: '#' },
         { name: 'Study', href: '/study' },
         { name: 'Jobs', href: '/jobs', isNew: true },
     ];
@@ -76,7 +76,7 @@ const Navigation = ({ isMobile = false }: NavigationProps) => {
                             {['technology', 'science', 'health', 'business', 'entertainment'].map(topic => (
                                 <Link
                                     key={topic}
-                                    href={`/topics/${topic}`}
+                                    href={`/posts?category=${topic}`}
                                     className={`block px-4 py-2 transition-colors duration-200 ${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'
                                         }`}
                                     onClick={() => setOpenDropdown(null)}

@@ -28,11 +28,16 @@ const Login: React.FC<LoginProps> = ({ onToggle }) => {
         setIsLoading(true);
         setServerError(null);
         try {
+            console.log("🚀 [Login] 로그인 시도 시작");
+            console.log("🚀 [Login] 입력 데이터:", data);
+            
             const result = await signIn("credentials", {
                 redirect: false,
                 email: data.email,
                 password: data.password,
             });
+            
+            console.log("🚀 [Login] signIn 결과:", result);
             if (result?.error) {
                 setServerError(result.error);
             } else {

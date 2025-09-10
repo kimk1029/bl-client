@@ -9,8 +9,11 @@ import { FaRegCommentDots, FaRegThumbsUp, FaThumbsUp } from "react-icons/fa";
 import { AiOutlineEye, AiOutlineClockCircle } from "react-icons/ai";
 import { PostContentProps } from "@/types/type";
 import Comments from "./Comments";
+import PostActions from "@/components/posts/PostActions";
+
 import { Eye, ThumbsUp, MessageSquare, ArrowLeft } from 'lucide-react';
 import { useTheme } from "@/context/ThemeContext";
+import { showSuccess, showError } from '@/components/toast';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 const URL_POST = (id: number | string) => `/api/posts/${id}`;
@@ -37,45 +40,35 @@ export default function PostContent({ post, isAnonymous = false, backUrl }: Post
     const [isAnimating, setIsAnimating] = useState<boolean>(false);
     const [showForm, setShowForm] = useState<boolean>(false);
 
-    // --- 삭제
-    const handleDelete = async () => {
-        if (!confirm("정말 게시글을 삭제하시겠습니까?")) return;
-        try {
-            const response = await fetch(URL_POST(post.id), {
-                method: 'DELETE',
-            });
-            if (!response.ok) throw new Error('삭제 실패');
-            router.push(backUrl);
-        } catch {
-            alert("게시글 삭제 중 오류가 발생했습니다.");
-        }
-    };
-
     // --- 좋아요
     const handleLike = async () => {
         if (!session) {
-            alert("로그인 후 사용해주세요.");
+            showError('로그인 후 사용해주세요.');
             router.push("/auth");
             return;
         }
         try {
             const response = await fetch(URL_LIKE(post.id), {
                 method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${session.accessToken}`,
+                },
             });
             if (!response.ok) throw new Error('좋아요 실패');
             setLikeCount(prev => (isLiked ? prev - 1 : prev + 1));
             setIsLiked(!isLiked);
             setIsAnimating(true);
             setTimeout(() => setIsAnimating(false), 300);
+            showSuccess(isLiked ? '좋아요가 취소되었습니다.' : '좋아요가 반영되었습니다.');
         } catch {
-            console.error("좋아요 요청 실패");
+            showError('좋아요 요청에 실패했습니다.');
         }
     };
 
     // --- 댓글 폼 토글
     const handleCommentToggle = () => {
         if (!session) {
-            alert("로그인 후 사용해주세요.");
+            showError('로그인 후 사용해주세요.');
             router.push("/auth");
             return;
         }
@@ -133,14 +126,11 @@ export default function PostContent({ post, isAnonymous = false, backUrl }: Post
 
             {/* 삭제/수정 버튼 */}
             {session?.user?.id === post.author?.id && (
-                <div className="flex justify-end mt-4 space-x-2">
-                    <button onClick={handleDelete} className="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded transition-colors duration-200">
-                        삭제
-                    </button>
-                    <button onClick={() => router.push(`${backUrl}/${post.id}/edit`)} className="bg-yellow-400 hover:bg-yellow-500 text-white py-1 px-3 rounded transition-colors duration-200">
-                        수정
-                    </button>
-                </div>
+                <PostActions
+                    postId={post.id}
+                    backUrl={backUrl}
+                    onDeleted={() => router.push(backUrl)}
+                />
             )}
 
             {/* 좋아요/댓글 */}

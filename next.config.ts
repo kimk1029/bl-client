@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 
+
 // 환경별 API URL 설정
 const getApiUrl = () => {
   // 환경변수에서 직접 가져오기 (dotenv가 자동으로 로드됨)
@@ -14,8 +15,9 @@ const nextConfig: NextConfig = {
     const apiUrl = getApiUrl();
     console.log(`🔗 API URL: ${apiUrl}`);
     return [
+      // 외부 백엔드 호출은 '/proxy/*'로만 프록시. '/api/*'는 모두 Next 내부에서 처리
       {
-        source: '/api/:path*',
+        source: '/proxy/:path*',
         destination: `${apiUrl}/:path*`,
       },
     ];

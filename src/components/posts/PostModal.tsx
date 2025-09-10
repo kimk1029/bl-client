@@ -7,6 +7,7 @@ import { X } from 'lucide-react';
 import { Topic } from '@/types/type';
 import { useSession } from 'next-auth/react';
 import ImageUploader from './ImageUploader';
+import { showSuccess, showError } from '@/components/toast';
 
 interface PostModalProps {
     isOpen: boolean;
@@ -47,11 +48,17 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSuccess, apiEn
             });
 
             if (response.ok) {
+                showSuccess('게시글이 등록되었습니다.');
                 onSuccess();
                 onClose();
+            } else {
+                const msg = await response.text();
+                showError('게시글 등록에 실패했습니다.');
+                console.error('Post submit failed:', msg);
             }
         } catch (error) {
             console.error('Error submitting post:', error);
+            showError('게시글 등록 중 오류가 발생했습니다.');
         }
     };
 

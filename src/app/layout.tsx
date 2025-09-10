@@ -7,6 +7,7 @@ import { SessionProvider } from "next-auth/react";
 import CustomSessionProvider from "@/components/SessionProvider";
 import Header from "@/components/layout/Header";
 import { useTheme } from '@/context/ThemeContext';
+import { Toaster } from 'sonner';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -37,6 +38,7 @@ export default function RootLayout({
           <CustomSessionProvider>
             <ThemeProvider>
               <RootLayoutContent>{children}</RootLayoutContent>
+              <Toaster position="top-center" richColors closeButton />
             </ThemeProvider>
           </CustomSessionProvider>
         </SessionProvider>

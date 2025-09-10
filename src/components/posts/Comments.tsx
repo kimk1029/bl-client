@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import useSWR from "swr";
 import { Comment } from "@/types/type";
 import { useTheme } from "@/context/ThemeContext";
+import { showSuccess, showError } from '@/components/toast';
 
 // Fetcher for SWR
 const fetcher = async (url: string) => {
@@ -145,7 +146,7 @@ export default function Comments({ postId, showForm, setShowForm, isAnonymous = 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         if (!session) {
-            alert("로그인 후 댓글을 작성할 수 있습니다.");
+            showError('로그인 후 댓글을 작성할 수 있습니다.');
             return;
         }
         try {
@@ -160,9 +161,9 @@ export default function Comments({ postId, showForm, setShowForm, isAnonymous = 
             setContent("");
             setShowForm(false);
             mutate();
-            alert("댓글이 작성되었습니다.");
+            showSuccess('댓글이 작성되었습니다.');
         } catch {
-            alert("댓글 작성에 실패했습니다.");
+            showError('댓글 작성에 실패했습니다.');
         }
     };
 

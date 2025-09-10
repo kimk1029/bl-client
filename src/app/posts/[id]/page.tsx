@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import useSWR from "swr";
 import { useSession } from "next-auth/react";
 import PostContent from "@/components/posts/PostContent";
+import { showSuccess, showError } from '@/components/toast';
 
 const fetcher = (url: string, token: string) => fetch(url, {
     headers: {
@@ -50,15 +51,16 @@ const PostDetailPage: React.FC = () => {
                 }
             });
             if (!res.ok) throw new Error("삭제에 실패했습니다.");
+            showSuccess('게시글이 삭제되었습니다.');
             router.push("/posts");
         } catch {
-            alert("게시글 삭제 중 오류가 발생했습니다.");
+            showError('게시글 삭제 중 오류가 발생했습니다.');
         }
     };
 
     const handleLike = async () => {
         if (status === "unauthenticated") {
-            alert("로그인 후 사용해주세요.");
+            showError('로그인 후 사용해주세요.');
             router.push("/auth");
             return;
         }
@@ -74,14 +76,15 @@ const PostDetailPage: React.FC = () => {
             setIsLiked(!isLiked);
             setIsAnimating(true);
             setTimeout(() => setIsAnimating(false), 300);
+            showSuccess(isLiked ? '좋아요가 취소되었습니다.' : '좋아요가 반영되었습니다.');
         } catch (err) {
-            console.error(err);
+            showError('좋아요 요청에 실패했습니다.');
         }
     };
 
     const handleCommentToggle = () => {
         if (status === "unauthenticated") {
-            alert("로그인 후 사용해주세요.");
+            showError('로그인 후 사용해주세요.');
             router.push("/auth");
             return;
         }

@@ -1,9 +1,10 @@
 'use client';
 
 import React from 'react';
-import { Topic } from '@/types/type';
+import { Topic, Post } from '@/types/type';
 import { FaChevronRight, FaComment, FaThumbsUp } from 'react-icons/fa';
-import mockAllPosts from '@/app/data/mockAllPosts';
+import useSWR from 'swr';
+import Link from 'next/link';
 import { useTheme } from '@/context/ThemeContext';
 
 interface CategoryPostsProps {
@@ -12,7 +13,9 @@ interface CategoryPostsProps {
 
 const CategoryPosts: React.FC<CategoryPostsProps> = ({ category }) => {
     const { theme } = useTheme();
-    const posts = mockAllPosts;
+    // 백엔드가 category 쿼리를 지원하지 않아 전체를 받아와 클라이언트에서 필터링
+    const { data: all } = useSWR<Post[]>(`/api/posts`, (url: string) => fetch(url).then(res => res.json()));
+    const posts = (all || []).filter(p => p.category === category);
 
     return (
         <div className={`border ${theme === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'} rounded-md shadow-sm overflow-hidden`}>
@@ -21,9 +24,12 @@ const CategoryPosts: React.FC<CategoryPostsProps> = ({ category }) => {
                 <h3 className={`text-sm font-semibold capitalize ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
                     {category}
                 </h3>
-                <button className={`flex items-center text-xs font-medium ${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-sky-600'}`}>
+                <Link
+                    href={`/posts?category=${category}`}
+                    className={`flex items-center text-xs font-medium ${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-sky-600'}`}
+                >
                     More <FaChevronRight className="ml-1 w-3 h-3" />
-                </button>
+                </Link>
             </div>
 
             {/* Content List */}

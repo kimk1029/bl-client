@@ -17,6 +17,27 @@ export default function PostList({
     const router = useRouter();
     const { theme } = useTheme();
 
+    const formatRelativeTime = (isoString: string): string => {
+        const date = new Date(isoString);
+        const now = new Date();
+        const diffMs = now.getTime() - date.getTime();
+        const diffMinutes = Math.floor(diffMs / (60 * 1000));
+        const diffHours = Math.floor(diffMs / (60 * 60 * 1000));
+
+        if (diffHours < 24) {
+            if (diffHours >= 1) {
+                return `${diffHours}시간전`;
+            }
+            const minutes = Math.max(diffMinutes, 1);
+            return `${minutes}분전`;
+        }
+
+        const yy = String(date.getFullYear()).slice(2);
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        return `${yy}년 ${mm}월 ${dd}일`;
+    };
+
     const handleRowClick = (postId: number) => {
         const base = isAnonymous ? '/anonymous' : '/posts';
         router.push(`${base}/${postId}`);
@@ -63,7 +84,7 @@ export default function PostList({
                                         </div>
                                         <div className="flex items-center space-x-1">
                                             <AiOutlineClockCircle className="w-4 h-4" />
-                                            <span>{post.created_at}</span>
+                                            <span>{formatRelativeTime(post.created_at)}</span>
                                         </div>
                                     </div>
                                 </div>

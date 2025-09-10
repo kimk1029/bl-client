@@ -7,21 +7,27 @@ import axios from "axios";
 import { createApiUrl } from "@/utils/apiConfig";
 
 const handler = NextAuth({
+  debug: true,
   providers: [
-    // Google OAuth Provider
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-    }),
+    // Google OAuth Provider (환경변수가 있을 때만 활성화)
+    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET ? [
+      GoogleProvider({
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      })
+    ] : []),
     // Credentials Provider
     CredentialsProvider({
-      name: "Credentials",
+      id: "credentials",
+      name: "credentials",
       credentials: {
         email: { label: "이메일", type: "email", placeholder: "이메일 입력" },
         password: { label: "비밀번호", type: "password" },
       },
       async authorize(credentials, req) {
-        console.log("CredentialsProvider authorize called with:", credentials);
+        console.log("🔐 [CredentialsProvider] authorize 함수 호출됨!");
+        console.log("🔐 [CredentialsProvider] 받은 credentials:", credentials);
+        console.log("🔐 [CredentialsProvider] 요청 정보:", req);
 
         if (!credentials?.email || !credentials.password) {
           throw new Error("이메일과 비밀번호를 모두 입력해주세요.");
@@ -29,7 +35,7 @@ const handler = NextAuth({
 
         try {
           const apiUrl = createApiUrl('/auth/login');
-            
+            console.log("apiUrl>>", apiUrl);
           const res = await fetch(apiUrl, {
             method: "POST",
             headers: { "Content-Type": "application/json" },

@@ -3,15 +3,13 @@ export const getApiBaseUrl = (): string => {
   const nodeEnv = process.env.NODE_ENV;
   
   switch (nodeEnv) {
-    case 'local':
-      return 'http://localhost:8080/api';
     case 'development':
-      return 'https://kimk1029.synology.me:8080/kh1/api';
+      return 'http://localhost:8080';
     case 'production':
-      return 'https://kimk1029.synology.me:8080/kh1/api';
+      return 'https://kimk1029.synology.me:8080/kh1';
     default:
       // 기본값은 로컬 환경
-      return 'http://localhost:8080/api';
+      return 'http://localhost:8080';
   }
 };
 
@@ -23,5 +21,5 @@ export const getEnvironment = (): string => {
 // API URL 생성 헬퍼 함수
 export const createApiUrl = (endpoint: string): string => {
   const baseUrl = getApiBaseUrl();
-  return `${baseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+  return `${baseUrl}/api${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
 };
