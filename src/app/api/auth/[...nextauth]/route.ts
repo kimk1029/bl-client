@@ -77,7 +77,7 @@ const handler = NextAuth({
     strategy: "jwt",
     maxAge:  60 * 60, // 30일
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET || "fallback-secret-for-development",
   callbacks: {
     // JWT 콜백에서 사용자 정보를 토큰에 포함
     async jwt({ token, user, account }) {

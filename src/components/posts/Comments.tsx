@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, FormEvent } from "react";
+import React, { useState, FormEvent, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import useSWR from "swr";
 import { Comment } from "@/types/type";
@@ -99,28 +99,23 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onReply }) => {
             <p className={`whitespace-pre-wrap mb-2 text-base transition-colors duration-200 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
                 }`}>{comment.content}</p>
             {comment.replies && comment.replies.length > 0 && (
-                <div className={`pl-6 border-l space-y-4 transition-colors duration-200 ${theme === 'dark' ? 'border-gray-600' : 'border-gray-300'
-                    }`}>
+                <div className="ml-6 mt-3 space-y-3">
                     {comment.replies.map(reply => (
-                        <div key={reply.id} className={`p-3 rounded transition-colors duration-200 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'
-                            }`}>
-                            <div className="flex justify-between items-center mb-1">
+                        <div key={reply.id}>
+                            <div className="flex justify-between items-start mb-1">
                                 <div className="flex items-center space-x-2">
                                     <img
                                         src={reply.author.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(reply.author.username)}&background=random`}
                                         alt={reply.author.username}
                                         className="w-6 h-6 rounded-full"
                                     />
-                                    <span className={`font-medium text-sm transition-colors duration-200 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
-                                        }`}>{reply.author.username}</span>
+                                    <span className={`font-medium text-sm transition-colors duration-200 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>{reply.author.username}</span>
                                 </div>
-                                <span className={`text-xs transition-colors duration-200 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                                    }`}>
+                                <span className={`text-xs transition-colors duration-200 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                                     {new Date(reply.created_at).toLocaleString()}
                                 </span>
                             </div>
-                            <p className={`whitespace-pre-wrap text-sm transition-colors duration-200 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
-                                }`}>{reply.content}</p>
+                            <p className={`whitespace-pre-wrap text-sm transition-colors duration-200 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>{reply.content}</p>
                         </div>
                     ))}
                 </div>
@@ -138,10 +133,36 @@ interface CommentsProps {
 export default function Comments({ postId, showForm, setShowForm, isAnonymous = false }: CommentsProps) {
     const { data: session } = useSession();
     const [content, setContent] = useState("");
+    const [replyParentId, setReplyParentId] = useState<number | null>(null);
     const { theme } = useTheme();
 
     const url = isAnonymous ? `/api/anonymous/${postId}/comments` : `/api/posts/${postId}/comments`;
     const { data: comments, mutate } = useSWR<Comment[]>(url, fetcher);
+
+    // Build nested comments by parentId
+    const nestedComments = useMemo(() => {
+        if (!comments || comments.length === 0) return [] as Comment[];
+        const map = new Map<number, Comment & { replies: Comment[] }>();
+        comments.forEach(c => {
+            map.set(c.id, { ...c, replies: Array.isArray(c.replies) ? c.replies : [] });
+        });
+        const roots: (Comment & { replies: Comment[] })[] = [];
+        comments.forEach(c => {
+            const node = map.get(c.id)!;
+            if (c.parentId) {
+                const parent = map.get(c.parentId);
+                if (parent) {
+                    if (!Array.isArray(parent.replies)) parent.replies = [] as any;
+                    (parent.replies as any).push(node);
+                } else {
+                    roots.push(node);
+                }
+            } else {
+                roots.push(node);
+            }
+        });
+        return roots as unknown as Comment[];
+    }, [comments]);
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -150,16 +171,23 @@ export default function Comments({ postId, showForm, setShowForm, isAnonymous = 
             return;
         }
         try {
+            const payload: any = { content };
+            if (replyParentId) {
+                // 서버 호환을 위해 parent / parentId 둘 다 포함
+                payload.parent = replyParentId;
+                payload.parentId = replyParentId;
+            }
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ content }),
+                body: JSON.stringify(payload),
             });
             if (!response.ok) throw new Error('댓글 작성 실패');
             setContent("");
             setShowForm(false);
+            setReplyParentId(null);
             mutate();
             showSuccess('댓글이 작성되었습니다.');
         } catch {
@@ -168,12 +196,12 @@ export default function Comments({ postId, showForm, setShowForm, isAnonymous = 
     };
 
     return (
-        <div className="mt-8">
+        <div className="mt-10">
             <h3 className={`text-lg font-semibold mb-4 transition-colors duration-200 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
                 }`}>댓글</h3>
             {!showForm ? (
                 <button
-                    onClick={() => setShowForm(true)}
+                    onClick={() => { setReplyParentId(null); setShowForm(true); }}
                     className={`w-full h-16 text-left px-4 bg-transparent text-base border border-dashed rounded transition-colors duration-200 ${theme === 'dark'
                         ? 'border-gray-600 hover:bg-gray-700 text-gray-100'
                         : 'border-gray-300 hover:bg-gray-100 text-gray-900'
@@ -186,21 +214,21 @@ export default function Comments({ postId, showForm, setShowForm, isAnonymous = 
                     content={content}
                     setContent={setContent}
                     onSubmit={handleSubmit}
-                    onCancel={() => setShowForm(false)}
+                    onCancel={() => { setShowForm(false); setReplyParentId(null); }}
                 />
             )}
 
             {!comments ? (
-                <div className="flex justify-center py-6">
+                <div className="flex justify-center py-8">
                     <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full" />
                 </div>
             ) : comments.length === 0 ? (
                 <p className={`text-center transition-colors duration-200 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
                     }`}>현재 작성된 댓글이 없습니다.</p>
             ) : (
-                <div className="space-y-4">
-                    {comments.map(cmt => (
-                        <CommentItem key={cmt.id} comment={cmt} onReply={() => setShowForm(true)} />
+                <div className="space-y-6 mt-4">
+                    {nestedComments.map(cmt => (
+                        <CommentItem key={cmt.id} comment={cmt} onReply={(id: number) => { setReplyParentId(id); setShowForm(true); }} />
                     ))}
                 </div>
             )}

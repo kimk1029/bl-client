@@ -30,15 +30,21 @@ const formatDate = (dateString: string) => {
     return `${year}년 ${month}월 ${day}일 ${hours}:${minutes}`;
 };
 
-export default function PostContent({ post, isAnonymous = false, backUrl }: PostContentProps) {
+export default function PostContent({ post, isAnonymous = false, backUrl, mutate }: PostContentProps) {
     const router = useRouter();
     const { data: session } = useSession();
     const { theme } = useTheme();
 
     const [likeCount, setLikeCount] = useState<number>(post.likeCount || 0);
-    const [isLiked, setIsLiked] = useState<boolean>(post.liked || false);
+    const [isLiked, setIsLiked] = useState<boolean>(!!post.liked);
     const [isAnimating, setIsAnimating] = useState<boolean>(false);
     const [showForm, setShowForm] = useState<boolean>(false);
+    const [isLiking, setIsLiking] = useState<boolean>(false);
+
+    // 좋아요 상태가 변경되었을 때만 로그 출력
+    useEffect(() => {
+        console.log('PostContent - Like state changed:', { likeCount, isLiked });
+    }, [likeCount, isLiked]);
 
     // --- 좋아요
     const handleLike = async () => {
@@ -47,6 +53,21 @@ export default function PostContent({ post, isAnonymous = false, backUrl }: Post
             router.push("/auth");
             return;
         }
+
+        if (isLiking) {
+            return;
+        }
+
+        setIsLiking(true);
+
+        // 낙관적 토글 적용
+        const prevLiked = isLiked;
+        const prevCount = likeCount;
+        const nextLiked = !prevLiked;
+        const nextCount = prevCount + (nextLiked ? 1 : -1);
+        setIsLiked(nextLiked);
+        setLikeCount(Math.max(0, nextCount));
+
         try {
             const response = await fetch(URL_LIKE(post.id), {
                 method: 'POST',
@@ -55,13 +76,27 @@ export default function PostContent({ post, isAnonymous = false, backUrl }: Post
                 },
             });
             if (!response.ok) throw new Error('좋아요 실패');
-            setLikeCount(prev => (isLiked ? prev - 1 : prev + 1));
-            setIsLiked(!isLiked);
+
+            const result = await response.json();
+            // 서버 값이 있으면 최종 동기화
+            if (result.likeCount !== undefined) {
+                setLikeCount(result.likeCount);
+            }
+            if (result.liked !== undefined) {
+                setIsLiked(!!result.liked);
+            }
+
             setIsAnimating(true);
             setTimeout(() => setIsAnimating(false), 300);
-            showSuccess(isLiked ? '좋아요가 취소되었습니다.' : '좋아요가 반영되었습니다.');
-        } catch {
+            const finalLiked = (result.liked !== undefined) ? !!result.liked : nextLiked;
+            showSuccess(finalLiked ? '좋아요가 반영되었습니다.' : '좋아요가 취소되었습니다.');
+        } catch (error) {
+            // 실패 시 롤백
+            setIsLiked(prevLiked);
+            setLikeCount(prevCount);
             showError('좋아요 요청에 실패했습니다.');
+        } finally {
+            setIsLiking(false);
         }
     };
 
@@ -76,7 +111,7 @@ export default function PostContent({ post, isAnonymous = false, backUrl }: Post
     };
 
     return (
-        <div className={`${theme === 'dark' ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-900'} rounded-lg shadow-md p-6 transition-all duration-200 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>
+        <div className={`${theme === 'dark' ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-900'} rounded-xl shadow-xl p-6 md:p-8 ring-1 ${theme === 'dark' ? 'ring-gray-800' : 'ring-gray-100'} transition-all duration-200`}>
             <div className="flex items-center mb-6">
                 <button
                     onClick={() => router.push(backUrl)}
@@ -87,13 +122,16 @@ export default function PostContent({ post, isAnonymous = false, backUrl }: Post
                 </button>
             </div>
 
-            <h1 className={`text-3xl font-bold mb-4 transition-colors duration-200 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+            <h1 className={`text-3xl font-bold mb-2 transition-colors duration-200 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                 {post.title}
             </h1>
 
+            {/* 메타 정보: 유저네임, 카테고리, 날짜 */}
             <div className={`flex items-center justify-between text-sm mb-8 transition-colors duration-200 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                <div className="flex items-center space-x-4">
-                    <span>{post.author?.username}</span>
+                <div className="flex items-center flex-wrap gap-x-3 gap-y-1">
+                    <span className="font-medium">{post.author?.username}</span>
+                    <span>•</span>
+                    {post.category && <span className="px-2 py-0.5 rounded-full text-xs bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300">{String(post.category)}</span>}
                     <span>•</span>
                     <time>{formatDate(post.created_at)}</time>
                 </div>

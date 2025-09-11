@@ -13,6 +13,7 @@ export default function PostList({
     totalPages,
     onPageChange,
     isAnonymous = false,
+    selectedCategory = 'all',
 }: PostListProps) {
     const router = useRouter();
     const { theme } = useTheme();
@@ -51,8 +52,21 @@ export default function PostList({
                 </div>
                 <div>
                     {posts.length === 0 ? (
-                        <div className={`p-4 text-center transition-colors duration-200 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                            게시글이 없습니다.
+                        <div className={`p-8 text-center transition-colors duration-200 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                            <div className="mb-4">
+                                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-lg font-medium mb-2">
+                                {selectedCategory === 'all' ? '게시글이 없습니다' : `${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} 카테고리에 게시글이 없습니다`}
+                            </h3>
+                            <p className="text-sm">
+                                {selectedCategory === 'all'
+                                    ? '아직 등록된 게시글이 없습니다.'
+                                    : '다른 카테고리를 확인해보시거나 새로운 게시글을 작성해보세요.'
+                                }
+                            </p>
                         </div>
                     ) : (
                         posts.map(post => (

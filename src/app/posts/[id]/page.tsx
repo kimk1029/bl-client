@@ -7,10 +7,10 @@ import { useSession } from "next-auth/react";
 import PostContent from "@/components/posts/PostContent";
 import { showSuccess, showError } from '@/components/toast';
 
-const fetcher = (url: string, token: string) => fetch(url, {
-    headers: {
+const fetcher = (url: string, token?: string) => fetch(url, {
+    headers: token ? {
         'Authorization': `Bearer ${token}`
-    }
+    } : {}
 }).then((res) => {
     if (!res.ok) throw new Error("Network response was not ok");
     return res.json();
@@ -27,11 +27,16 @@ const PostDetailPage: React.FC = () => {
     const [isLiked, setIsLiked] = useState<boolean>(false);
     const [isAnimating, setIsAnimating] = useState<boolean>(false);
     const [showForm, setShowForm] = useState<boolean>(false);
+    const [isLiking, setIsLiking] = useState<boolean>(false);
     const id = Number(params.id);
+    console.log("PostDetailPage - ID:", id, "Type:", typeof id);
 
-    const { data: postData, error } = useSWR(
-        session?.accessToken ? [URL_POST(id), session.accessToken] : null,
-        ([url, token]) => fetcher(url, token)
+    const { data: postData, error, mutate } = useSWR(
+        URL_POST(id),
+        (url) => {
+            console.log("Fetching post from URL:", url);
+            return fetcher(url, session?.accessToken);
+        }
     );
 
     useEffect(() => {
@@ -40,6 +45,11 @@ const PostDetailPage: React.FC = () => {
             setIsLiked(!!postData.liked);
         }
     }, [postData]);
+
+    // 좋아요 상태가 변경되었을 때만 로그 출력
+    useEffect(() => {
+        console.log('Like state changed:', { likeCount, isLiked });
+    }, [likeCount, isLiked]);
 
     const handleDelete = async () => {
         if (!confirm("정말 게시글을 삭제하시겠습니까?")) return;
@@ -64,6 +74,21 @@ const PostDetailPage: React.FC = () => {
             router.push("/auth");
             return;
         }
+
+        if (isLiking) {
+            return;
+        }
+
+        setIsLiking(true);
+
+        // 낙관적 토글 적용
+        const prevLiked = isLiked;
+        const prevCount = likeCount;
+        const nextLiked = !prevLiked;
+        const nextCount = prevCount + (nextLiked ? 1 : -1);
+        setIsLiked(nextLiked);
+        setLikeCount(Math.max(0, nextCount));
+
         try {
             const res = await fetch(URL_LIKE(id), {
                 method: "POST",
@@ -72,13 +97,27 @@ const PostDetailPage: React.FC = () => {
                 }
             });
             if (!res.ok) throw new Error("좋아요 요청 실패");
-            setLikeCount((prev) => (isLiked ? prev - 1 : prev + 1));
-            setIsLiked(!isLiked);
+
+            const result = await res.json();
+            // 서버에서 liked/likeCount를 주면 그 값으로 최종 동기화
+            if (result.likeCount !== undefined) {
+                setLikeCount(result.likeCount);
+            }
+            if (result.liked !== undefined) {
+                setIsLiked(!!result.liked);
+            }
+
             setIsAnimating(true);
             setTimeout(() => setIsAnimating(false), 300);
-            showSuccess(isLiked ? '좋아요가 취소되었습니다.' : '좋아요가 반영되었습니다.');
+            const finalLiked = (result.liked !== undefined) ? !!result.liked : nextLiked;
+            showSuccess(finalLiked ? '좋아요가 반영되었습니다.' : '좋아요가 취소되었습니다.');
         } catch (err) {
+            // 실패 시 롤백
+            setIsLiked(prevLiked);
+            setLikeCount(prevCount);
             showError('좋아요 요청에 실패했습니다.');
+        } finally {
+            setIsLiking(false);
         }
     };
 
@@ -115,7 +154,7 @@ const PostDetailPage: React.FC = () => {
 
     return (
         <div className="max-w-screen-xl mx-auto px-4 py-8">
-            <PostContent post={postData} backUrl="/posts" />
+            <PostContent post={postData} backUrl="/posts" mutate={mutate} />
         </div>
     );
 };

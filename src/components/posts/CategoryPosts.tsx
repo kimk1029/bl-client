@@ -5,6 +5,7 @@ import { Topic, Post } from '@/types/type';
 import { FaChevronRight, FaComment, FaThumbsUp } from 'react-icons/fa';
 import useSWR from 'swr';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useTheme } from '@/context/ThemeContext';
 
 interface CategoryPostsProps {
@@ -13,9 +14,19 @@ interface CategoryPostsProps {
 
 const CategoryPosts: React.FC<CategoryPostsProps> = ({ category }) => {
     const { theme } = useTheme();
+    const router = useRouter();
     // 백엔드가 category 쿼리를 지원하지 않아 전체를 받아와 클라이언트에서 필터링
-    const { data: all } = useSWR<Post[]>(`/api/posts`, (url: string) => fetch(url).then(res => res.json()));
-    const posts = (all || []).filter(p => p.category === category);
+    const { data: all, error, isLoading } = useSWR<Post[]>(`/api/posts`, (url: string) => fetch(url).then(res => res.json()));
+
+    // 안전한 필터링
+    const posts = React.useMemo(() => {
+        if (!all || !Array.isArray(all)) return [];
+        return all.filter(p => p && p.category === category);
+    }, [all, category]);
+
+    const handlePostClick = (postId: number) => {
+        router.push(`/posts/${postId}`);
+    };
 
     return (
         <div className={`border ${theme === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'} rounded-md shadow-sm overflow-hidden`}>
@@ -33,38 +44,54 @@ const CategoryPosts: React.FC<CategoryPostsProps> = ({ category }) => {
             </div>
 
             {/* Content List */}
-            <ul className={`divide-y ${theme === 'dark' ? 'divide-gray-700' : 'divide-gray-100'}`}>
-                {posts.map((post) => (
-                    <li
-                        key={post.id}
-                        className={`px-3 py-2 ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-50'} last:border-0 flex flex-col sm:flex-row justify-between`}
-                    >
-                        <div className="flex-1">
-                            <a href="#" className="block">
-                                <p className={`text-sm font-medium truncate ${theme === 'dark' ? 'text-white hover:text-blue-400' : 'text-gray-900 hover:text-sky-600'}`}>
-                                    {post.title}
-                                </p>
-                                <div className={`flex items-center space-x-1 mt-1 text-[10px] ${theme === 'dark' ? 'text-gray-400' : 'text-gray-400'}`}>
-                                    <span>{post.author.username}</span>
-                                    <span>•</span>
-                                    <span>{post.created_at}</span>
+            {isLoading ? (
+                <div className={`p-4 text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto"></div>
+                    <p className="text-sm mt-2">Loading...</p>
+                </div>
+            ) : error ? (
+                <div className={`p-4 text-center ${theme === 'dark' ? 'text-red-400' : 'text-red-500'}`}>
+                    <p className="text-sm">Failed to load posts</p>
+                </div>
+            ) : posts.length === 0 ? (
+                <div className={`p-4 text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                    <p className="text-sm">No posts found</p>
+                </div>
+            ) : (
+                <ul className={`divide-y ${theme === 'dark' ? 'divide-gray-700' : 'divide-gray-100'}`}>
+                    {posts.map((post) => (
+                        <li
+                            key={post.id}
+                            className={`px-3 py-2 ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-50'} last:border-0 flex flex-col sm:flex-row justify-between cursor-pointer`}
+                            onClick={() => handlePostClick(post.id)}
+                        >
+                            <div className="flex-1">
+                                <div className="block">
+                                    <p className={`text-sm font-medium truncate ${theme === 'dark' ? 'text-white hover:text-blue-400' : 'text-gray-900 hover:text-sky-600'}`}>
+                                        {post.title}
+                                    </p>
+                                    <div className={`flex items-center space-x-1 mt-1 text-[10px] ${theme === 'dark' ? 'text-gray-400' : 'text-gray-400'}`}>
+                                        <span>{post.author.username}</span>
+                                        <span>•</span>
+                                        <span>{post.created_at}</span>
+                                    </div>
                                 </div>
-                            </a>
-                        </div>
+                            </div>
 
-                        <div className="flex items-center space-x-3 mt-1 sm:mt-0">
-                            <div className={`flex items-center space-x-1 text-[10px] ${theme === 'dark' ? 'text-gray-400' : 'text-gray-400'}`}>
-                                <FaThumbsUp className="w-3 h-3" />
-                                <span>{post.likes}</span>
+                            <div className="flex items-center space-x-3 mt-1 sm:mt-0">
+                                <div className={`flex items-center space-x-1 text-[10px] ${theme === 'dark' ? 'text-gray-400' : 'text-gray-400'}`}>
+                                    <FaThumbsUp className="w-3 h-3" />
+                                    <span>{post.likes}</span>
+                                </div>
+                                <div className={`flex items-center space-x-1 text-[10px] ${theme === 'dark' ? 'text-gray-400' : 'text-gray-400'}`}>
+                                    <FaComment className="w-3 h-3" />
+                                    <span>{post.comments}</span>
+                                </div>
                             </div>
-                            <div className={`flex items-center space-x-1 text-[10px] ${theme === 'dark' ? 'text-gray-400' : 'text-gray-400'}`}>
-                                <FaComment className="w-3 h-3" />
-                                <span>{post.comments}</span>
-                            </div>
-                        </div>
-                    </li>
-                ))}
-            </ul>
+                        </li>
+                    ))}
+                </ul>
+            )}
         </div>
     );
 };

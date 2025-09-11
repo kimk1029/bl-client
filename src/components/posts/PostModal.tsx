@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useTheme } from '@/context/ThemeContext';
 import { X } from 'lucide-react';
@@ -23,11 +23,40 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSuccess, apiEn
     const [content, setContent] = useState('');
     const [category, setCategory] = useState<Topic>('technology');
     const [images, setImages] = useState<File[]>([]);
-    const { data: session } = useSession();
+    const { data: session, status } = useSession();
     const categories: Topic[] = ['technology', 'science', 'health', 'business', 'entertainment'];
+
+    console.log('PostModal - Session status:', status);
+    console.log('PostModal - Session data:', session);
+    console.log('PostModal - Access token:', session?.accessToken);
+
+    // 모달이 닫힐 때 폼 초기화
+    useEffect(() => {
+        if (!isOpen) {
+            setTitle('');
+            setContent('');
+            setCategory('technology');
+            setImages([]);
+        }
+    }, [isOpen]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // 필수 필드 검증
+        if (!title.trim()) {
+            showError('제목을 입력해주세요.');
+            return;
+        }
+        if (!content.trim()) {
+            showError('내용을 입력해주세요.');
+            return;
+        }
+        if (!session?.accessToken) {
+            showError('로그인이 필요합니다.');
+            return;
+        }
+
         try {
             const formData = new FormData();
             formData.append('title', title);
@@ -38,6 +67,10 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSuccess, apiEn
                 formData.append(`image`, image);
             });
 
+            console.log('Submitting post:', { title, content, category, hasImages: images.length > 0 });
+            console.log('API Endpoint:', apiEndpoint);
+            console.log('Session token exists:', !!session?.accessToken);
+
             const token = session?.accessToken;
             const response = await fetch(apiEndpoint, {
                 method: 'POST',
@@ -47,14 +80,24 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSuccess, apiEn
                 body: formData
             });
 
+            console.log('Response status:', response.status);
+            console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
             if (response.ok) {
+                const result = await response.json();
+                console.log('Success response:', result);
                 showSuccess('게시글이 등록되었습니다.');
+                // 폼 초기화
+                setTitle('');
+                setContent('');
+                setCategory('technology');
+                setImages([]);
                 onSuccess();
                 onClose();
             } else {
                 const msg = await response.text();
-                showError('게시글 등록에 실패했습니다.');
-                console.error('Post submit failed:', msg);
+                console.error('Post submit failed:', response.status, msg);
+                showError(`게시글 등록에 실패했습니다. (${response.status})`);
             }
         } catch (error) {
             console.error('Error submitting post:', error);

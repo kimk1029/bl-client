@@ -10,7 +10,7 @@ export async function GET(
     try {
         const token = await getToken({
             req: request,
-            secret: process.env.NEXTAUTH_SECRET 
+            secret: process.env.NEXTAUTH_SECRET || "fallback-secret-for-development"
         });
         console.log('[comments.GET] getToken:', token);
         
@@ -42,7 +42,7 @@ export async function POST(
     try {
         const token = await getToken({ 
             req: request,
-            secret: process.env.NEXTAUTH_SECRET 
+            secret: process.env.NEXTAUTH_SECRET || "fallback-secret-for-development"
         });
         console.log('[comments.POST] getToken:', token);
         const body = await request.json();
@@ -79,7 +79,7 @@ export async function DELETE(
     try {
         const token = await getToken({ 
             req: request,
-            secret: process.env.NEXTAUTH_SECRET 
+            secret: process.env.NEXTAUTH_SECRET || "fallback-secret-for-development"
         });
         const commentId = new URL(request.url).searchParams.get('commentId');
         const { id } = await params;

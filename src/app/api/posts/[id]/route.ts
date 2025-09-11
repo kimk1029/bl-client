@@ -1,5 +1,6 @@
 // src/app/api/posts/[id]/route.ts
 import { NextResponse } from "next/server";
+import { createApiUrl } from "@/utils/apiConfig";
 
 export interface Author {
   id: number;
@@ -29,27 +30,32 @@ export async function GET(req: Request) {
   const segments = pathname.split("/");
   const id = segments[segments.length - 1];
   console.log("GET게시글 ID:", id);
-  // 인증 헤더 추출
+  
+  // 인증 헤더 추출 (선택적)
   const authHeader = req.headers.get("Authorization");
-  if (!authHeader) {
-    return NextResponse.json(
-      { message: "인증 헤더가 필요합니다." },
-      { status: 401 }
-    );
-  }
+  console.log("Auth header exists:", !!authHeader);
+  
   // 실제 API 주소
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/posts/${id}`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: authHeader, // 인증 헤더 전달
-        },
-      }
-    );
+    const headers: Record<string, string> = {};
+    if (authHeader) {
+      headers.Authorization = authHeader;
+    }
+
+    const apiUrl = createApiUrl(`/posts/${id}`);
+    console.log("Requesting to:", apiUrl);
+    console.log("Headers:", headers);
+
+    const res = await fetch(apiUrl, {
+      method: "GET",
+      headers,
+    });
+
+    console.log("External API response status:", res.status);
 
     if (!res.ok) {
+      const errorText = await res.text();
+      console.error("External API error:", res.status, errorText);
       return NextResponse.json(
         { message: "해당 게시글을 찾을 수 없습니다." },
         { status: 404 }
@@ -57,6 +63,7 @@ export async function GET(req: Request) {
     }
 
     const data: Post = await res.json();
+    console.log("Successfully fetched post:", data.id, data.title);
     return NextResponse.json(data);
   } catch (error) {
     console.error("외부 API 요청 실패:", error);
@@ -93,17 +100,15 @@ export async function PUT(req: Request) {
     }
 
     // 외부 API에 수정 요청
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/posts/${id}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: authHeader, // 인증 헤더 전달
-        },
-        body: JSON.stringify({ title, content }),
-      }
-    );
+    const apiUrl = createApiUrl(`/posts/${id}`);
+    const res = await fetch(apiUrl, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: authHeader, // 인증 헤더 전달
+      },
+      body: JSON.stringify({ title, content }),
+    });
 
     if (!res.ok) {
       const errorData = await res.json();
@@ -140,15 +145,13 @@ export async function DELETE(req: Request) {
     }
 
     // 외부 API에 삭제 요청
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/posts/${id}`,
-      {
-        method: "DELETE",
-        headers: {
-          Authorization: authHeader, // 인증 헤더 전달
-        },
-      }
-    );
+    const apiUrl = createApiUrl(`/posts/${id}`);
+    const res = await fetch(apiUrl, {
+      method: "DELETE",
+      headers: {
+        Authorization: authHeader, // 인증 헤더 전달
+      },
+    });
 
     if (!res.ok) {
       const errorData = await res.json();

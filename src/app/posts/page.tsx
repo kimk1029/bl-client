@@ -30,6 +30,19 @@ const GridFormatBoard: React.FC = () => {
         }
     }, [searchParams]);
 
+    // 안전한 필터링 - 모든 Hook은 조건문 이전에 호출
+    const filteredPosts = React.useMemo(() => {
+        if (!data || !Array.isArray(data)) return [];
+        return selectedCategory === 'all'
+            ? data
+            : data.filter(post => post && post.category === selectedCategory);
+    }, [data, selectedCategory]);
+
+    const totalPages = Math.ceil(filteredPosts.length / pageSize);
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const currentPosts = filteredPosts.slice(startIndex, endIndex);
+
     if (error) {
         return <div>Failed to load posts</div>;
     }
@@ -41,15 +54,6 @@ const GridFormatBoard: React.FC = () => {
             </div>
         );
     }
-
-    const filteredPosts = selectedCategory === 'all'
-        ? data
-        : data.filter(post => post.category === selectedCategory);
-
-    const totalPages = Math.ceil(filteredPosts.length / pageSize);
-    const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const currentPosts = filteredPosts.slice(startIndex, endIndex);
 
     return (
         <div className="w-full mt-10 shadow-xl p-0 md:p-4 rounded-md max-w-[1100px] mx-auto">
@@ -93,6 +97,7 @@ const GridFormatBoard: React.FC = () => {
                 currentPage={currentPage}
                 totalPages={totalPages}
                 onPageChange={setCurrentPage}
+                selectedCategory={selectedCategory}
             />
 
 
