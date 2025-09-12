@@ -63,9 +63,9 @@ const SignUp: React.FC<SignUpProps> = ({ onToggle, email }) => {
             } else {
                 setServerError('회원가입에 실패했습니다. 다시 시도해주세요.');
             }
-        } catch (error: any) {
-            const msg = error.response?.data?.message || '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
-            setServerError(msg);
+        } catch (error) {
+            console.error('SignUp Error:', error);
+            setServerError('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
         } finally {
             setIsLoading(false);
         }
@@ -85,7 +85,8 @@ const SignUp: React.FC<SignUpProps> = ({ onToggle, email }) => {
                 { email: emailValue }
             );
             setIsEmailAvailable(!response.data.exists);
-        } catch {
+        } catch (error) {
+            console.error('Check Email Error:', error);
             setServerError('이메일 중복 검사 중 오류가 발생했습니다.');
         } finally { setEmailCheckLoading(false); }
     };
@@ -102,7 +103,8 @@ const SignUp: React.FC<SignUpProps> = ({ onToggle, email }) => {
                 { username: usernameValue }
             );
             setIsUsernameAvailable(!response.data.exists);
-        } catch {
+        } catch (error) {
+            console.error('Check Username Error:', error);
             setServerError('유저네임 중복 검사 중 오류가 발생했습니다.');
         } finally { setUsernameCheckLoading(false); }
     };

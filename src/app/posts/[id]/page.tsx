@@ -51,7 +51,7 @@ const PostDetailPage: React.FC = () => {
         console.log('Like state changed:', { likeCount, isLiked });
     }, [likeCount, isLiked]);
 
-    const handleDelete = async () => {
+    const _handleDelete = async () => {
         if (!confirm("정말 게시글을 삭제하시겠습니까?")) return;
         try {
             const res = await fetch(URL_POST(id), {
@@ -68,7 +68,7 @@ const PostDetailPage: React.FC = () => {
         }
     };
 
-    const handleLike = async () => {
+    const _handleLike = async () => {
         if (status === "unauthenticated") {
             showError('로그인 후 사용해주세요.');
             router.push("/auth");
@@ -121,7 +121,7 @@ const PostDetailPage: React.FC = () => {
         }
     };
 
-    const handleCommentToggle = () => {
+    const _handleCommentToggle = () => {
         if (status === "unauthenticated") {
             showError('로그인 후 사용해주세요.');
             router.push("/auth");

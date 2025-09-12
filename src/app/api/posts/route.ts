@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { createApiUrl } from '@/utils/apiConfig';
-import mockAllPosts from '@/app/data/mockAllPosts';
+// import mockAllPosts from '@/app/data/mockAllPosts';
 
 export async function GET(request: NextRequest) {
     try {
@@ -78,10 +78,10 @@ export async function POST(request: NextRequest) {
       const data = await apiRes.json();
       console.log("Successfully created post:", data);
       return NextResponse.json(data, { status: 201 });
-    } catch (err: any) {
+    } catch (err) {
       console.error("게시글 작성 중 오류:", err);
       return NextResponse.json(
-        { error: err.message || "게시글 작성 실패" },
+        { error: "게시글 작성 실패" },
         { status: 500 }
       );
     }

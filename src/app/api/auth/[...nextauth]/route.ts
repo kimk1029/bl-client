@@ -52,19 +52,21 @@ const handler = NextAuth({
           const result = await res.json();
           const { user, token } = result;
           // 사용자 객체에 필수 필드 포함
+          console.log("user>>", user);
           if (user && user.id && user.username && user.email && token) {
             return {
               id: user.id,
               username: user.username, // API 응답에 username 필드가 있는지 확인
               email: user.email,
               accessToken: token,
+              affiliation: user.affiliation || null,
             };
           } else {
             throw new Error("사용자 정보를 불러오는 데 실패했습니다.");
           }
-        } catch (error: any) {
-          console.error("Authorize Error:", error);
-          throw new Error(error.message || "로그인 중 오류가 발생했습니다.");
+        } catch (err) {
+          console.error("Authorize Error:", err);
+          throw new Error("로그인 중 오류가 발생했습니다.");
         }
       },
     }),
@@ -80,11 +82,18 @@ const handler = NextAuth({
   secret: process.env.NEXTAUTH_SECRET || "fallback-secret-for-development",
   callbacks: {
     // JWT 콜백에서 사용자 정보를 토큰에 포함
-    async jwt({ token, user, account }) {
-      console.log("token>>", token);
-      console.log("user>>", user);
-      console.log("account>>", account);
-      console.log("expired>>", new Date((token.exp as number) * 1000));
+    async jwt({ token, user }) {
+      type AuthUser = {
+        id: string | number;
+        username: string;
+        email: string;
+        accessToken?: string;
+        affiliation?: string | null;
+        organization?: string | null;
+        org?: string | null;
+        name?: string;
+        image?: string;
+      };
       if (user) {
         try {
           const checkUserUrl = createApiUrl('/auth/check-user');
@@ -104,22 +113,28 @@ const handler = NextAuth({
           console.error("Error checking user existence:", error);
           token.needsSignUp = false; // 기본값 설정하여 로그인 차단 방지
         }
-        token.accessToken = user.accessToken; // user.accessToken 할당
-        token.id = user.id;
-        token.username = user.username; // username을 name으로 매핑
-        token.email = user.email;
+        const u = user as unknown as AuthUser;
+        (token as unknown as { accessToken?: string }).accessToken = u.accessToken; // user.accessToken 할당
+        (token as unknown as { id?: string | number }).id = u.id;
+        (token as unknown as { username?: string }).username = u.username; // username을 name으로 매핑
+        (token as unknown as { email?: string }).email = u.email;
+        // affiliation 매핑 (백엔드 키가 다를 경우 대비해 유연하게 수용)
+        (token as unknown as { affiliation?: string | null }).affiliation = u.affiliation ?? u.organization ?? u.org ?? null;
       }
+
+      // 외부 호출로 보강하지 않음. 값이 없으면 null 유지
       return token;
     },
     // 세션 콜백에서 토큰 정보를 세션에 포함
     async session({ session, token }) {
       if (token && session.user) {
-        session.user.id = token.id as string;
-        session.user.name = token.username as string;
-        session.user.email = token.email as string;
-        session.accessToken = token.accessToken as string; // 타입 단언 사용
+        session.user.id = (token as unknown as { id?: string | number }).id as string;
+        session.user.name = (token as unknown as { username?: string }).username as string;
+        session.user.email = (token as unknown as { email?: string }).email as string;
+        (session.user as unknown as { affiliation?: string | null }).affiliation = (token as unknown as { affiliation?: string | null }).affiliation ?? null;
+        session.accessToken = (token as unknown as { accessToken?: string }).accessToken as string; // 타입 단언 사용
       }
-      console.log("#####session", session);
+      // 외부 호출 보강 없이 키는 유지. 없으면 null로 노출
       return session;
     },
   },

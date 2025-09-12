@@ -25,8 +25,8 @@ export async function GET(
 
         const data = await response.json();
         return NextResponse.json(data);
-    } catch (error) {
-        console.error('Error fetching comments:', error);
+    } catch (e) {
+        console.error('Error fetching comments:', e);
         return NextResponse.json(
             { error: '댓글을 불러오는데 실패했습니다.' },
             { status: 500 }
@@ -63,7 +63,7 @@ export async function POST(
 
         const data = await response.json();
         return NextResponse.json(data);
-    } catch (error) {
+    } catch {
         return NextResponse.json(
             { error: "댓글 작성에 실패했습니다." },
             { status: 500 }
@@ -104,7 +104,7 @@ export async function DELETE(
         }
 
         return NextResponse.json({ message: "댓글이 삭제되었습니다." });
-    } catch (error) {
+    } catch {
         return NextResponse.json(
             { error: "댓글 삭제에 실패했습니다." },
             { status: 500 }

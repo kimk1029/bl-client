@@ -5,12 +5,11 @@ import { Topic } from "@/types/type";
 import CategoryPosts from "@/components/posts/CategoryPosts";
 import PopularPosts from "@/components/posts/PopularPosts";
 import { useTheme } from "@/context/ThemeContext";
-import { FaSun, FaMoon } from 'react-icons/fa';
+// import { FaSun, FaMoon } from 'react-icons/fa';
 import SearchBar from "@/components/SearchBar";
 
 const Home: React.FC = () => {
-  const { data: session } = useSession();
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
   const categories: Topic[] = [
     'technology',
     'science',
@@ -19,14 +18,6 @@ const Home: React.FC = () => {
     'entertainment',
   ];
   const [activeCategories, setActiveCategories] = useState<Topic[]>(categories);
-
-  const toggleCategory = (category: Topic) => {
-    setActiveCategories((prev) =>
-      prev.includes(category)
-        ? prev.filter((c) => c !== category)
-        : [...prev, category]
-    );
-  };
 
   return (
     <div className={`min-h-screen transition-colors duration-200 ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>

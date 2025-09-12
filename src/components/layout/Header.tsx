@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useTheme } from '@/context/ThemeContext';
-import { FaSun, FaMoon } from 'react-icons/fa';
+// import { FaSun, FaMoon } from 'react-icons/fa';
 import { Search, Menu, X } from 'lucide-react';
 import Navigation from './Navigation';
 import UserAuth from './UserAuth';

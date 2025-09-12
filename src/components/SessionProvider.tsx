@@ -1,12 +1,11 @@
 'use client';
 
 import { useSession, signOut } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 export default function SessionProvider({ children }: { children: React.ReactNode }) {
     const { data: session, status } = useSession();
-    const router = useRouter();
+    // const router = useRouter();
 
     useEffect(() => {
         // 세션이 로드되었고, 세션이 있는 경우에만 토큰 유효성 검사

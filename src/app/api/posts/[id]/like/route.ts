@@ -40,7 +40,7 @@ export async function POST(
     const data = await res.json();
     console.log("External API response data:", data);
     return NextResponse.json(data);
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "좋아요 처리 중 오류" }, { status: 500 });
   }
 }
