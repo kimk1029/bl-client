@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { createApiUrl } from "@/utils/apiConfig";
 
 // 댓글 목록 조회
@@ -8,15 +9,13 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const token = await getToken({
-            req: request,
-            secret: process.env.NEXTAUTH_SECRET || "fallback-secret-for-development"
-        });
-        console.log('[comments.GET] getToken:', token);
+        const session = await getServerSession(authOptions);
+        const accessToken = (session as unknown as { accessToken?: string })?.accessToken;
+        console.log('[comments.GET] accessToken exists:', !!accessToken);
         
         const { id } = await params;
         const response = await fetch(createApiUrl(`/posts/${id}/comments`), {
-            headers: token?.accessToken ? { 'Authorization': `Bearer ${token.accessToken}` } : {},
+            headers: accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {},
         });
 
         if (!response.ok) {
@@ -40,11 +39,9 @@ export async function POST(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const token = await getToken({ 
-            req: request,
-            secret: process.env.NEXTAUTH_SECRET || "fallback-secret-for-development"
-        });
-        console.log('[comments.POST] getToken:', token);
+        const session = await getServerSession(authOptions);
+        const accessToken = (session as unknown as { accessToken?: string })?.accessToken;
+        console.log('[comments.POST] accessToken exists:', !!accessToken);
         const body = await request.json();
         const { id } = await params;
 
@@ -52,7 +49,7 @@ export async function POST(
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token?.accessToken}`,
+                ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
             },
             body: JSON.stringify(body),
         });
@@ -77,10 +74,8 @@ export async function DELETE(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const token = await getToken({ 
-            req: request,
-            secret: process.env.NEXTAUTH_SECRET || "fallback-secret-for-development"
-        });
+        const session = await getServerSession(authOptions);
+        const accessToken = (session as unknown as { accessToken?: string })?.accessToken;
         const commentId = new URL(request.url).searchParams.get('commentId');
         const { id } = await params;
 
@@ -95,7 +90,7 @@ export async function DELETE(
             createApiUrl(`/posts/${id}/comments/${commentId}`),
             {
                 method: 'DELETE',
-                headers: token?.accessToken ? { 'Authorization': `Bearer ${token.accessToken}` } : {},
+                headers: accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {},
             }
         );
 

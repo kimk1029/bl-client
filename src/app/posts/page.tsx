@@ -7,6 +7,7 @@ import PostList from "@/components/posts/PostList";
 import { Post } from "@/types/type";
 import { Topic } from "@/types/type";
 import { useSearchParams } from 'next/navigation';
+import { apiFetcher } from "@/lib/fetcher";
 
 
 const categories: Topic[] = ['technology', 'science', 'health', 'business', 'entertainment'];
@@ -19,7 +20,7 @@ const GridFormatBoard: React.FC = () => {
     const pageSize = 10;
     const [isOpen, setIsOpen] = useState(false);
 
-    const { data, error, mutate } = useSWR<Post[]>('/api/posts', (url: string) => fetch(url).then((res) => res.json()));
+    const { data, error, mutate } = useSWR<Post[]>('/api/posts', apiFetcher);
 
     // URL 쿼리(category)로 초기 카테고리 설정
     useEffect(() => {

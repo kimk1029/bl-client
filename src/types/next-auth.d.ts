@@ -6,6 +6,8 @@ declare module "next-auth" {
         username: string;
         accessToken?: string;
         affiliation?: string;
+        points?: number;
+        level?: number;
     }
 
     interface Session {
@@ -21,6 +23,8 @@ declare module "next-auth" {
             username: string;
             accessToken?: string;
             affiliation?: string;
+            points?: number;
+            level?: number;
         } & DefaultSession["user"];
     }
 }
@@ -31,6 +35,8 @@ declare module "next-auth/jwt" {
         username: string;
         accessToken?: string;
         affiliation?: string;
+        points?: number;
+        level?: number;
         needsSignUp?: boolean;
         googleData?: {
             email: string;

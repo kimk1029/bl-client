@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getToken } from 'next-auth/jwt';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { createApiUrl } from '@/utils/apiConfig';
 // import mockAllPosts from '@/app/data/mockAllPosts';
 
@@ -38,14 +39,13 @@ export async function POST(request: NextRequest) {
       console.log("Content-Type:", contentType);
       
       // 2) NextAuth 세션 토큰 가져오기
-      const sessionToken = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET || "fallback-secret-for-development" });
-      console.log("Session token exists:", !!sessionToken?.accessToken);
-      console.log("Session token data:", sessionToken);
+      const session = await getServerSession(authOptions);
+      const accessToken = (session as any)?.accessToken as string | undefined;
+      console.log("Session token exists:", !!accessToken);
       console.log("NEXTAUTH_SECRET exists:", !!process.env.NEXTAUTH_SECRET);
       
-      if (!sessionToken?.accessToken) {
+      if (!accessToken) {
         console.log("No access token found");
-        console.log("Available session token keys:", sessionToken ? Object.keys(sessionToken) : 'null');
         return NextResponse.json({ message: '인증이 필요합니다.' }, { status: 401 });
       }
       
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
         method: "POST",
         headers: {
           ...(contentType ? { "Content-Type": contentType } : {}),
-          "Authorization": `Bearer ${sessionToken.accessToken}`
+          "Authorization": `Bearer ${accessToken}`
         },
         body,  // ✨ 멀티파트 바디가 온전하게 전달됩니다
       });

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { createApiUrl } from "@/utils/apiConfig";
 
 // 좋아요 토글/추가
@@ -8,8 +9,9 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET || "fallback-secret-for-development" });
-    if (!token?.accessToken) {
+    const session = await getServerSession(authOptions);
+    const accessToken = (session as unknown as { accessToken?: string })?.accessToken;
+    if (!accessToken) {
       return NextResponse.json({ error: "인증이 필요합니다." }, { status: 401 });
     }
 
@@ -17,12 +19,12 @@ export async function POST(
     const apiUrl = createApiUrl(`/posts/${id}/like`);
 
     console.log("Requesting like to:", apiUrl);
-    console.log("User token:", token.accessToken ? "exists" : "missing");
+    console.log("User token:", accessToken ? "exists" : "missing");
 
     const res = await fetch(apiUrl, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${token.accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     });
 
