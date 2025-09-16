@@ -70,10 +70,14 @@ export default function ProfilePage() {
                 setUsernameError(null);
                 return;
             }
-            const res = await fetch(`/api/users/check-username?username=${encodeURIComponent(q)}`);
+            const res = await fetch(`/api/auth/check-username`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: q })
+            });
             const data = await res.json();
-            const ok = data?.available ?? data?.ok ?? (data?.exists === false);
-            if (ok) {
+            const exists = Boolean(data?.exists);
+            if (!exists) {
                 setUsernameValid(true);
                 setUsernameError(null);
             } else {

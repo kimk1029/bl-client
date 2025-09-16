@@ -44,8 +44,41 @@ const SignUp: React.FC<SignUpProps> = ({ onToggle, email }) => {
         setServerError(null);
         setSuccessMessage(null);
 
+        // 사전 중복 검사: 이메일/유저네임 버튼을 누르지 않아도 서버로 확인
         if (isEmailAvailable === false || isUsernameAvailable === false) {
             setServerError('이메일 또는 유저네임이 이미 사용 중입니다.');
+            setIsLoading(false);
+            return;
+        }
+
+        try {
+            // Username 자동 중복 확인
+            if (isUsernameAvailable == null) {
+                const resUser = await axios.post(createApiUrl('/auth/check-username'), { username: data.username });
+                if (resUser.data?.exists) {
+                    setServerError('유저네임이 이미 사용 중입니다.');
+                    setIsLoading(false);
+                    setIsUsernameAvailable(false);
+                    return;
+                } else {
+                    setIsUsernameAvailable(true);
+                }
+            }
+            // Email 자동 중복 확인 (이메일 입력 가능한 경우만)
+            if (!session?.user?.email && isEmailAvailable == null) {
+                const resEmail = await axios.post(createApiUrl('/auth/check-email'), { email: data.email });
+                if (resEmail.data?.exists) {
+                    setServerError('이메일이 이미 사용 중입니다.');
+                    setIsLoading(false);
+                    setIsEmailAvailable(false);
+                    return;
+                } else {
+                    setIsEmailAvailable(true);
+                }
+            }
+        } catch (err) {
+            console.error('Pre-check Error:', err);
+            setServerError('중복 검사 중 오류가 발생했습니다.');
             setIsLoading(false);
             return;
         }

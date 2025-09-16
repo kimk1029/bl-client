@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { ChevronDown, User, FileText, Settings, LogOut } from 'lucide-react';
@@ -17,6 +17,19 @@ const UserAuth = () => {
     const userId = (session?.user as unknown as { id?: string | number })?.id;
     const accountKey = userId ? `/api/users/account/${userId}` : null;
     const { data: account, mutate: mutateAccount } = useSWR(accountKey, (url: string) => fetch(url, { cache: 'no-store' }).then(res => res.json()));
+    const detailsRef = useRef<HTMLDetailsElement>(null);
+
+    useEffect(() => {
+        const handleOutsideClick = (e: MouseEvent) => {
+            const el = detailsRef.current;
+            if (!el) return;
+            if (el.open && e.target instanceof Node && !el.contains(e.target)) {
+                el.open = false;
+            }
+        };
+        document.addEventListener('mousedown', handleOutsideClick);
+        return () => document.removeEventListener('mousedown', handleOutsideClick);
+    }, []);
 
     // 로딩 중에는 아무 것도 렌더링하지 않아 로그인 버튼이 깜빡이지 않도록 함
     if (status === 'loading') {
@@ -94,7 +107,7 @@ const UserAuth = () => {
                 Write
             </button>
             <div className="relative">
-                <details className="group">
+                <details ref={detailsRef} className="group">
                     <summary className={`flex items-center space-x-1 border px-3 py-1 text-sm rounded cursor-pointer transition-colors duration-200 ${theme === 'dark'
                         ? 'border-gray-600 text-gray-300 hover:bg-gray-700'
                         : 'border-gray-300 text-gray-700 hover:bg-gray-100'
