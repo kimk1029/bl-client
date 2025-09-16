@@ -38,12 +38,25 @@ const Login: React.FC<LoginProps> = ({ onToggle }) => {
             });
 
             console.log("🚀 [Login] signIn 결과:", result);
+
             if (result?.error) {
-                setServerError(result.error);
-            } else {
+                console.error("🚀 [Login] 로그인 에러:", result.error);
+                // NextAuth 에러 메시지를 사용자 친화적으로 변환
+                let errorMessage = result.error;
+                if (result.error === "CredentialsSignin") {
+                    errorMessage = "이메일 또는 비밀번호가 올바르지 않습니다.";
+                } else if (result.error.includes("Internal server error")) {
+                    errorMessage = "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+                }
+                setServerError(errorMessage);
+            } else if (result?.ok) {
+                console.log("🚀 [Login] 로그인 성공, 리다이렉트");
                 window.location.href = "/";
+            } else {
+                setServerError("알 수 없는 오류가 발생했습니다.");
             }
-        } catch {
+        } catch (error) {
+            console.error("🚀 [Login] 예외 발생:", error);
             setServerError("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
         } finally {
             setIsLoading(false);

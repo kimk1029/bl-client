@@ -42,7 +42,8 @@ export const authOptions = {
 
         try {
           const apiUrl = createApiUrl('/auth/login');
-            console.log("apiUrl>>", apiUrl);
+          console.log("apiUrl>>", apiUrl);
+          
           const res = await fetch(apiUrl, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -51,31 +52,48 @@ export const authOptions = {
               password: credentials.password,
             }),
           });
+          
+          console.log("API Response status:", res.status);
+          
           if (!res.ok) {
-            const errorData = await res.json();
-            throw new Error(errorData.message || "로그인에 실패했습니다.");
+            let errorMessage = "로그인에 실패했습니다.";
+            try {
+              const errorData = await res.json();
+              errorMessage = errorData.message || errorMessage;
+              console.error("API Error response:", errorData);
+            } catch (parseError) {
+              console.error("Error parsing API response:", parseError);
+              errorMessage = `서버 오류 (${res.status}): ${res.statusText}`;
+            }
+            console.error("Login failed:", errorMessage);
+            return null; // NextAuth에서 null 반환 시 로그인 실패로 처리
           }
 
           const result = await res.json();
+          console.log("API Success response:", result);
+          
           const { user, token } = result;
+          
           // 사용자 객체에 필수 필드 포함
-          console.log("user>>", user);
           if (user && user.id && user.username && user.email && token) {
-            return {
+            const userData = {
               id: user.id,
-              username: user.username, // API 응답에 username 필드가 있는지 확인
+              username: user.username,
               email: user.email,
               accessToken: stripBearer(token),
               affiliation: user.affiliation || null,
               points: typeof user.points === 'number' ? user.points : 0,
-              level: typeof user.level === 'number' ? user.level : 1,
-            } as any;
+              level: typeof user.level === 'number' ? Math.max(user.level, 1) : 1,
+            };
+            console.log("Returning user data:", userData);
+            return userData as any;
           } else {
-            throw new Error("사용자 정보를 불러오는 데 실패했습니다.");
+            console.error("Invalid user data structure:", { user, token });
+            return null;
           }
         } catch (err) {
           console.error("Authorize Error:", err);
-          throw new Error("로그인 중 오류가 발생했습니다.");
+          return null; // NextAuth에서 null 반환 시 로그인 실패로 처리
         }
       },
     }),
@@ -92,46 +110,58 @@ export const authOptions = {
   callbacks: {
     // JWT 콜백에서 사용자 정보를 토큰에 포함 및 클라이언트 update 반영
     async jwt({ token, user, trigger, session }: any) {
-      type AuthUser = {
-        id: string | number;
-        username: string;
-        email: string;
-        accessToken?: string;
-        affiliation?: string | null;
-        organization?: string | null;
-        org?: string | null;
-        name?: string;
-        image?: string;
-      };
+      console.log('JWT callback triggered:', { hasUser: !!user, trigger, hasSession: !!session });
+      
       if (user) {
-        try {
-          const checkUserUrl = createApiUrl('/auth/check-user');
-            
-          const response = await axios.post(checkUserUrl, { email: user.email });
-          if (!response.data.exists) {
-            (token as any).needsSignUp = true;
-            (token as any).googleData = {
-              email: user.email as string,
-              name: (user as any).name as string,
-              image: (user as any).image as string,
-            };
-          } else {
-            (token as any).needsSignUp = false;
+        console.log('Processing user in JWT callback:', { 
+          id: user.id, 
+          email: user.email, 
+          hasAccessToken: !!(user as any).accessToken,
+          hasImage: !!(user as any).image 
+        });
+        
+        // Google 로그인인 경우에만 사용자 존재 여부 체크
+        if ((user as any).image && !(user as any).accessToken) {
+          console.log('Google login detected, checking user existence...');
+          try {
+            const checkUserUrl = createApiUrl('/auth/check-user');
+              
+            const response = await axios.post(checkUserUrl, { email: user.email });
+            if (!response.data.exists) {
+              (token as any).needsSignUp = true;
+              (token as any).googleData = {
+                email: user.email as string,
+                name: (user as any).name as string,
+                image: (user as any).image as string,
+              };
+            } else {
+              (token as any).needsSignUp = false;
+            }
+          } catch (error) {
+            console.error("Error checking user existence:", error);
+            (token as any).needsSignUp = false; // 기본값 설정하여 로그인 차단 방지
           }
-        } catch (error) {
-          console.error("Error checking user existence:", error);
-          (token as any).needsSignUp = false; // 기본값 설정하여 로그인 차단 방지
+        } else {
+          // Credentials 로그인인 경우
+          console.log('Credentials login detected');
+          (token as any).needsSignUp = false;
         }
-        const u = user as unknown as AuthUser;
-        (token as any).accessToken = stripBearer(u.accessToken); // user.accessToken 정규화
-        (token as any).id = u.id;
-        (token as any).username = u.username; // username을 name으로 매핑
-        (token as any).email = u.email;
-        // affiliation 매핑 (백엔드 키가 다를 경우 대비해 유연하게 수용)
-        (token as any).affiliation = u.affiliation ?? u.organization ?? u.org ?? null;
-        // 포인트/레벨 매핑
+        
+        // 사용자 정보를 토큰에 저장
+        (token as any).accessToken = stripBearer((user as any).accessToken);
+        (token as any).id = user.id;
+        (token as any).username = (user as any).username;
+        (token as any).email = user.email;
+        (token as any).affiliation = (user as any).affiliation ?? null;
         (token as any).points = typeof (user as any).points === 'number' ? (user as any).points : 0;
-        (token as any).level = typeof (user as any).level === 'number' ? (user as any).level : 1;
+        (token as any).level = typeof (user as any).level === 'number' ? Math.max((user as any).level, 1) : 1;
+        
+        console.log('Token updated with user data:', { 
+          id: (token as any).id, 
+          username: (token as any).username, 
+          points: (token as any).points, 
+          level: (token as any).level 
+        });
       }
 
       // 클라이언트에서 session.update(...) 호출 시 토큰 동기화
@@ -160,7 +190,7 @@ export const authOptions = {
         (session.user as any).affiliation = (token as any).affiliation ?? null;
         (session as any).accessToken = (token as any).accessToken as string; // 타입 단언 사용
         (session.user as any).points = (token as any).points ?? 0;
-        (session.user as any).level = (token as any).level ?? 1;
+        (session.user as any).level = Math.max((token as any).level ?? 1, 1);
       }
       // 외부 호출 보강 없이 키는 유지. 없으면 null로 노출
       return session;
@@ -169,34 +199,6 @@ export const authOptions = {
 } as any;
 
 const handler = NextAuth(authOptions as any);
-
-// POST 요청으로 세션 업데이트 처리
-export async function POST(request: Request) {
-  try {
-    const body = await request.json();
-    if (body.action === 'update' && body.user) {
-      // JWT 토큰을 직접 업데이트
-      const session = await getServerSession(authOptions);
-      if (session) {
-        // 여기서는 단순히 성공 응답만 반환
-        // 실제 JWT 업데이트는 클라이언트의 session.update()가 처리
-        return new Response(JSON.stringify({ success: true }), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
-    }
-    return new Response(JSON.stringify({ error: 'Invalid request' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  } catch (error) {
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  }
-}
-
-// GET과 POST 메서드로 핸들러 내보내기
+// GET과 POST 메서드로 NextAuth 핸들러 내보내기
 export { handler as GET };
+export { handler as POST };

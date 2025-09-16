@@ -54,27 +54,28 @@ const UserAuth = () => {
                                 // 현재 사용자 정보를 백엔드에서 최신 데이터로 가져와서 세션 업데이트
                                 const userId = (session.user as any)?.id;
                                 if (userId) {
-                                    // 백엔드에서 최신 사용자 정보 가져오기
-                                    const userResponse = await fetch(`/api/users/${userId}`, {
+                                    // 백엔드에서 최신 사용자 정보 가져오기 (/api/users/account/:id 사용)
+                                    const accountResponse = await fetch(`/api/users/account/${userId}`, {
                                         method: 'GET',
                                         cache: 'no-store'
                                     });
 
-                                    if (userResponse.ok) {
-                                        const userData = await userResponse.json();
-                                        console.log('Latest user data from backend:', userData);
+                                    if (accountResponse.ok) {
+                                        const accountData = await accountResponse.json();
+                                        console.log('Latest account data from backend:', accountData);
 
-                                        // 세션 업데이트
-                                        await update?.({
-                                            user: {
-                                                ...(session.user as any),
-                                                points: userData.points ?? (session.user as any)?.points,
-                                                level: userData.level ?? (session.user as any)?.level,
-                                                affiliation: userData.affiliation ?? (session.user as any)?.affiliation,
-                                            }
-                                        } as any);
+                                        // user 객체에서 포인트와 레벨만 추출하여 세션 업데이트
+                                        if (accountData.user) {
+                                            await update?.({
+                                                user: {
+                                                    ...(session.user as any),
+                                                    points: accountData.user.points ?? (session.user as any)?.points,
+                                                    level: accountData.user.level ?? (session.user as any)?.level,
+                                                }
+                                            } as any);
 
-                                        console.log('Session updated with latest user data');
+                                            console.log('Session updated with latest points and level');
+                                        }
                                     }
                                 }
                             } else {
