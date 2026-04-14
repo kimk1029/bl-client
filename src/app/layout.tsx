@@ -6,7 +6,7 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import { SessionProvider } from "next-auth/react";
 import CustomSessionProvider from "@/components/SessionProvider";
 import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+import BottomNav from "@/components/layout/BottomNav";
 import { useTheme } from '@/context/ThemeContext';
 import { Toaster } from 'sonner';
 
@@ -22,10 +22,10 @@ function RootLayoutContent({ children }: { children: React.ReactNode }) {
         className={`mx-auto flex flex-col min-h-screen w-full max-w-[800px] transition-colors duration-200 ${isDark ? 'bg-gray-900' : 'bg-white'} md:shadow-[0_0_40px_rgba(0,0,0,0.06)]`}
       >
         <Header />
-        <main className="flex-1 w-full px-4 py-6">
+        <main className="flex-1 w-full px-4 py-4 pb-20">
           {children}
         </main>
-        <Footer />
+        <BottomNav />
       </div>
     </div>
   );
