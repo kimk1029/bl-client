@@ -14,12 +14,15 @@ const inter = Inter({ subsets: ["latin"] });
 
 function RootLayoutContent({ children }: { children: React.ReactNode }) {
   const { theme } = useTheme();
+  const isDark = theme === 'dark';
 
   return (
-    <div className={`min-h-screen transition-colors duration-200 ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
-      <div className="min-h-screen flex flex-col">
+    <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-gray-950 text-white' : 'bg-gray-100 text-gray-900'}`}>
+      <div
+        className={`mx-auto flex flex-col min-h-screen w-full max-w-[800px] transition-colors duration-200 ${isDark ? 'bg-gray-900' : 'bg-white'} md:shadow-[0_0_40px_rgba(0,0,0,0.06)]`}
+      >
         <Header />
-        <main className="flex-1 w-full max-w-[800px] mx-auto px-4 py-6">
+        <main className="flex-1 w-full px-4 py-6">
           {children}
         </main>
         <Footer />
