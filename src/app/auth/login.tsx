@@ -69,8 +69,7 @@ const Login: React.FC<LoginProps> = ({ onToggle }) => {
     };
 
     return (
-        <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} shadow-lg rounded-lg p-8 w-full max-w-md mx-auto mt-10`}>
-            <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-700'} mb-6 text-center`}>로그인</h2>
+        <div>
             {serverError && (
                 <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                     <strong className="font-bold">에러!</strong>

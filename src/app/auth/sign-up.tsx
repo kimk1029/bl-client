@@ -15,6 +15,7 @@ interface SignUpFormData {
     username: string;
     email: string;
     password: string;
+    affiliation?: string;
 }
 
 const SignUp: React.FC<SignUpProps> = ({ onToggle, email }) => {
@@ -143,23 +144,20 @@ const SignUp: React.FC<SignUpProps> = ({ onToggle, email }) => {
     };
 
     return (
-        <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} shadow-lg rounded-lg p-8 w-full max-w-md mx-auto mt-10`}>
-            <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-700'}`}>
-                회원가입
-            </h2>
+        <div>
             {serverError && (
-                <div className="mt-4 bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded">
+                <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                     <strong className="font-semibold">에러!</strong>
                     <span className="ml-2">{serverError}</span>
                 </div>
             )}
             {successMessage && (
-                <div className="mt-4 bg-green-50 border border-green-400 text-green-700 px-4 py-3 rounded">
+                <div className="bg-green-50 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
                     <strong className="font-semibold">성공!</strong>
                     <span className="ml-2">{successMessage}</span>
                 </div>
             )}
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 {/* Username */}
                 <div>
                     <label htmlFor="username" className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-600'}`}>
@@ -213,6 +211,22 @@ const SignUp: React.FC<SignUpProps> = ({ onToggle, email }) => {
                         </button>
                     </div>
                     {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>}
+                </div>
+
+                {/* Affiliation (교회 소속) */}
+                <div>
+                    <label htmlFor="affiliation" className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-600'}`}>
+                        교회 <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'} text-xs`}>(선택)</span>
+                    </label>
+                    <div className="mt-1">
+                        <input
+                            id="affiliation"
+                            type="text"
+                            placeholder="예: 명성교회, 온누리교회"
+                            {...register('affiliation')}
+                            className={`w-full px-3 py-2 ${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-200'} border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === 'dark' ? 'focus:bg-gray-700' : 'focus:bg-white'}`}
+                        />
+                    </div>
                 </div>
 
                 {/* Password */}
