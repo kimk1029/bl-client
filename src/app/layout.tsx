@@ -19,7 +19,7 @@ function RootLayoutContent({ children }: { children: React.ReactNode }) {
     <div className={`min-h-screen transition-colors duration-200 ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
       <div className="min-h-screen flex flex-col">
         <Header />
-        <main className="flex-1 container mx-auto px-4 py-8">
+        <main className="flex-1 w-full max-w-[800px] mx-auto px-4 py-6">
           {children}
         </main>
         <Footer />

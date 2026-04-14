@@ -29,7 +29,7 @@ const Header = () => {
             <Topbar />
             {/* Main nav */}
             <div className={`border-b transition-colors duration-200 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-                <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+                <div className="max-w-[800px] mx-auto px-4 py-3 flex items-center justify-between">
                     {/* Logo & desktop nav */}
                     <div className="flex items-center space-x-6">
                         <Link href="/" className={`text-xl font-bold transition-colors duration-200 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-500'}`}>BLESSING</Link>

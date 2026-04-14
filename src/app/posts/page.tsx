@@ -51,7 +51,7 @@ const GridFormatBoardContent: React.FC = () => {
     }
 
     return (
-        <div className="w-full max-w-[800px] mx-auto px-4">
+        <div className="w-full">
             <div className="-mx-4 px-4 mb-3 overflow-x-auto no-scrollbar">
                 <div className="flex gap-2 whitespace-nowrap">
                     <button

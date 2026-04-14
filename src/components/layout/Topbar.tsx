@@ -5,7 +5,7 @@ import { FaMoon, FaSun } from "react-icons/fa";
 const Topbar = () => {
     const { theme, toggleTheme } = useTheme();
     return (
-        < div className="max-w-7xl mx-auto px-4 py-2 flex justify-between text-sm" >
+        < div className="max-w-[800px] mx-auto px-4 py-2 flex justify-between text-sm" >
             <Link href="/services" className={`transition-colors duration-200 ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}>
                 BLESSING Services &rarr;
             </Link>
