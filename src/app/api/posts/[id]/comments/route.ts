@@ -1,108 +1,99 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/authOptions";
-import { createApiUrl } from "@/utils/apiConfig";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { requireUser } from '@/lib/apiAuth';
 
-// 댓글 목록 조회
 export async function GET(
-    request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-    try {
-        const session = await getServerSession(authOptions);
-        const accessToken = (session as unknown as { accessToken?: string })?.accessToken;
-        console.log('[comments.GET] accessToken exists:', !!accessToken);
-        
-        const { id } = await params;
-        const response = await fetch(createApiUrl(`/posts/${id}/comments`), {
-            headers: accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {},
-        });
+  try {
+    const { id: idStr } = await params;
+    const id = Number(idStr);
+    if (!Number.isFinite(id)) return NextResponse.json({ error: 'invalid id' }, { status: 400 });
 
-        if (!response.ok) {
-            throw new Error('API 요청 실패');
-        }
+    const comments = await prisma.comment.findMany({
+      where: { post_id: id, parent_id: null },
+      orderBy: { created_at: 'asc' },
+      include: {
+        author: { select: { id: true, username: true } },
+        replies: {
+          include: { author: { select: { id: true, username: true } } },
+          orderBy: { created_at: 'asc' },
+        },
+      },
+    });
 
-        const data = await response.json();
-        return NextResponse.json(data);
-    } catch (e) {
-        console.error('Error fetching comments:', e);
-        return NextResponse.json(
-            { error: '댓글을 불러오는데 실패했습니다.' },
-            { status: 500 }
-        );
-    }
+    return NextResponse.json(comments);
+  } catch (err) {
+    console.error('comments GET error:', err);
+    return NextResponse.json({ error: '서버 오류' }, { status: 500 });
+  }
 }
 
-// 댓글 작성
 export async function POST(
-    request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-    try {
-        const session = await getServerSession(authOptions);
-        const accessToken = (session as unknown as { accessToken?: string })?.accessToken;
-        console.log('[comments.POST] accessToken exists:', !!accessToken);
-        const body = await request.json();
-        const { id } = await params;
+  try {
+    const user = await requireUser(request);
+    if (!user) return NextResponse.json({ error: '인증이 필요합니다.' }, { status: 401 });
+    const { id: idStr } = await params;
+    const id = Number(idStr);
+    if (!Number.isFinite(id)) return NextResponse.json({ error: 'invalid id' }, { status: 400 });
 
-        const response = await fetch(createApiUrl(`/posts/${id}/comments`), {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
-            },
-            body: JSON.stringify(body),
-        });
+    const body = await request.json();
+    const content = String(body?.content ?? '').trim();
+    const parentId = body?.parentId ?? body?.parent_id ?? null;
+    if (!content) return NextResponse.json({ error: 'content 필수' }, { status: 400 });
 
-        if (!response.ok) {
-            throw new Error('Failed to create comment');
-        }
-
-        const data = await response.json();
-        return NextResponse.json(data);
-    } catch {
-        return NextResponse.json(
-            { error: "댓글 작성에 실패했습니다." },
-            { status: 500 }
-        );
+    if (parentId != null) {
+      const parent = await prisma.comment.findUnique({ where: { id: Number(parentId) } });
+      if (!parent) return NextResponse.json({ error: '부모 댓글 없음' }, { status: 404 });
     }
+
+    const comment = await prisma.comment.create({
+      data: {
+        content,
+        post_id: id,
+        author_id: user.id,
+        parent_id: parentId != null ? Number(parentId) : null,
+      },
+      include: { author: { select: { id: true, username: true } } },
+    });
+    return NextResponse.json(comment, { status: 201 });
+  } catch (err) {
+    console.error('comments POST error:', err);
+    return NextResponse.json({ error: '서버 오류' }, { status: 500 });
+  }
 }
 
-// 댓글 삭제
 export async function DELETE(
-    request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-    try {
-        const session = await getServerSession(authOptions);
-        const accessToken = (session as unknown as { accessToken?: string })?.accessToken;
-        const commentId = new URL(request.url).searchParams.get('commentId');
-        const { id } = await params;
+  try {
+    const user = await requireUser(request);
+    if (!user) return NextResponse.json({ error: '인증이 필요합니다.' }, { status: 401 });
+    const url = new URL(request.url);
+    const commentIdStr = url.searchParams.get('commentId');
+    const commentId = Number(commentIdStr);
+    if (!Number.isFinite(commentId))
+      return NextResponse.json({ error: 'commentId 필수' }, { status: 400 });
+    const { id: idStr } = await params;
+    const postId = Number(idStr);
 
-        if (!commentId) {
-            return NextResponse.json(
-                { error: "댓글 ID가 필요합니다." },
-                { status: 400 }
-            );
-        }
+    const existing = await prisma.comment.findFirst({
+      where: { id: commentId, post_id: postId },
+      select: { author_id: true },
+    });
+    if (!existing) return NextResponse.json({ error: 'not found' }, { status: 404 });
+    if (existing.author_id !== user.id)
+      return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
 
-        const response = await fetch(
-            createApiUrl(`/posts/${id}/comments/${commentId}`),
-            {
-                method: 'DELETE',
-                headers: accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {},
-            }
-        );
-
-        if (!response.ok) {
-            throw new Error('Failed to delete comment');
-        }
-
-        return NextResponse.json({ message: "댓글이 삭제되었습니다." });
-    } catch {
-        return NextResponse.json(
-            { error: "댓글 삭제에 실패했습니다." },
-            { status: 500 }
-        );
-    }
-} 
+    await prisma.comment.delete({ where: { id: commentId } });
+    return NextResponse.json({ message: '삭제되었습니다.' });
+  } catch (err) {
+    console.error('comment DELETE error:', err);
+    return NextResponse.json({ error: '서버 오류' }, { status: 500 });
+  }
+}

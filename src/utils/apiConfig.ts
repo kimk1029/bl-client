@@ -1,25 +1,15 @@
-// 환경별 API 엔드포인트 설정
+// 모든 API는 Next.js 자체 /api 라우트로 통합됨 (Phase 4 포팅 완료).
+// 클라이언트(브라우저)에서는 상대 경로를, 서버 사이드에서는 NEXTAUTH_URL 기반 절대 경로를 사용.
 export const getApiBaseUrl = (): string => {
-  const nodeEnv = process.env.NODE_ENV;
-  
-  switch (nodeEnv) {
-    case 'development':
-      return 'http://localhost:8080';
-    case 'production':
-      return 'https://kimk1029.synology.me:8080/kh1';
-    default:
-      // 기본값은 로컬 환경
-      return 'http://localhost:8080';
+  if (typeof window === 'undefined') {
+    return process.env.NEXTAUTH_URL || 'http://localhost:3000';
   }
+  return '';
 };
 
-// 환경 정보 반환
-export const getEnvironment = (): string => {
-  return process.env.NODE_ENV || 'local';
-};
+export const getEnvironment = (): string => process.env.NODE_ENV || 'local';
 
-// API URL 생성 헬퍼 함수
 export const createApiUrl = (endpoint: string): string => {
-  const baseUrl = getApiBaseUrl();
-  return `${baseUrl}/api${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+  const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  return `${getApiBaseUrl()}/api${path}`;
 };

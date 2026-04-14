@@ -1,50 +1,50 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/authOptions";
-import { createApiUrl } from "@/utils/apiConfig";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { requireUser } from '@/lib/apiAuth';
 
-// 좋아요 토글/추가
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    const accessToken = (session as unknown as { accessToken?: string })?.accessToken;
-    if (!accessToken) {
-      return NextResponse.json({ error: "인증이 필요합니다." }, { status: 401 });
-    }
+    const user = await requireUser(request);
+    if (!user) return NextResponse.json({ error: '인증이 필요합니다.' }, { status: 401 });
+    const { id: idStr } = await params;
+    const id = Number(idStr);
+    if (!Number.isFinite(id)) return NextResponse.json({ error: 'invalid id' }, { status: 400 });
 
-    const { id } = await params;
-    const apiUrl = createApiUrl(`/posts/${id}/like`);
+    const post = await prisma.post.findUnique({ where: { id }, select: { id: true, author_id: true } });
+    if (!post) return NextResponse.json({ error: 'not found' }, { status: 404 });
 
-    console.log("Requesting like to:", apiUrl);
-    console.log("User token:", accessToken ? "exists" : "missing");
-
-    const res = await fetch(apiUrl, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
+    const existing = await prisma.like.findUnique({
+      where: { post_id_user_id: { post_id: id, user_id: user.id } },
     });
 
-    console.log("External API response status:", res.status);
-
-    if (!res.ok) {
-      const details = await res.text();
-      console.error("External API error:", res.status, details);
-      return NextResponse.json(
-        { error: "좋아요 요청 실패", details },
-        { status: res.status }
-      );
+    if (existing) {
+      await prisma.$transaction([
+        prisma.like.delete({ where: { id: existing.id } }),
+        prisma.user.update({
+          where: { id: post.author_id },
+          data: { points: { decrement: 1 } },
+        }),
+        prisma.user.updateMany({
+          where: { id: post.author_id, points: { lt: 0 } },
+          data: { points: 0 },
+        }),
+      ]);
+      return NextResponse.json({ liked: false, message: '좋아요 취소' });
+    } else {
+      await prisma.$transaction([
+        prisma.like.create({ data: { post_id: id, user_id: user.id } }),
+        prisma.user.update({
+          where: { id: post.author_id },
+          data: { points: { increment: 1 } },
+        }),
+      ]);
+      return NextResponse.json({ liked: true, message: '좋아요' });
     }
-
-    const data = await res.json();
-    console.log("External API response data:", data);
-    return NextResponse.json(data);
-  } catch {
-    return NextResponse.json({ error: "좋아요 처리 중 오류" }, { status: 500 });
+  } catch (err) {
+    console.error('like toggle error:', err);
+    return NextResponse.json({ error: '서버 오류' }, { status: 500 });
   }
 }
-
-

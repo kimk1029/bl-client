@@ -1,17 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireUser } from '@/lib/apiAuth';
 import { toImageUrl } from '@/lib/uploads';
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireUser(request);
-    if (!user) return NextResponse.json({ error: '인증이 필요합니다.' }, { status: 401 });
+    const url = new URL(request.url);
+    const q = url.searchParams.get('q') || url.searchParams.get('query') || '';
+    if (!q) return NextResponse.json([]);
 
     const posts = await prisma.post.findMany({
-      where: { author_id: user.id },
+      where: {
+        OR: [
+          { title: { contains: q, mode: 'insensitive' } },
+          { content: { contains: q, mode: 'insensitive' } },
+        ],
+      },
       orderBy: { created_at: 'desc' },
       include: {
+        author: { select: { id: true, username: true } },
         _count: { select: { comments: true, likes: true } },
       },
     });
@@ -20,16 +26,17 @@ export async function GET(request: NextRequest) {
       title: p.title,
       content: p.content,
       created_at: p.created_at,
+      views: p.views,
       tag: p.tag,
       category: p.tag,
-      views: p.views,
+      author: p.author,
       commentCount: p._count.comments,
       likeCount: p._count.likes,
       imageUrls: (p.images ?? []).map(toImageUrl),
     }));
     return NextResponse.json(data);
   } catch (err) {
-    console.error('posts/my error:', err);
+    console.error('posts/search error:', err);
     return NextResponse.json({ error: '서버 오류' }, { status: 500 });
   }
 }

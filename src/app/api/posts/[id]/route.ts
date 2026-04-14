@@ -1,174 +1,105 @@
-// src/app/api/posts/[id]/route.ts
-import { NextResponse } from "next/server";
-import { createApiUrl } from "@/utils/apiConfig";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { requireUser, getAuthUser } from '@/lib/apiAuth';
+import { toImageUrl } from '@/lib/uploads';
 
-export interface Author {
-  id: number;
-  username: string;
-  email: string;
-  password: string;
-  created_at: string; // ISO 8601 형식의 날짜 문자열
-}
+const parseId = (id: string) => {
+  const n = Number(id);
+  return Number.isFinite(n) ? n : null;
+};
 
-export interface Post {
-  id: number;
-  title: string;
-  content: string;
-  created_at: string; // ISO 8601 형식의 날짜 문자열
-  author: Author;
-  views: number;
-  comments: number;
-  tag: string;
-  commentCount: number;
-  likeCount: number;
-  liked: boolean;
-}
-
-// ⚠️ 두 번째 인자(context)는 쓰지 않음!
-export async function GET(req: Request) {
-  const { pathname } = new URL(req.url);
-  const segments = pathname.split("/");
-  const id = segments[segments.length - 1];
-  console.log("GET게시글 ID:", id);
-  
-  // 인증 헤더 추출 (선택적)
-  const authHeader = req.headers.get("Authorization");
-  console.log("Auth header exists:", !!authHeader);
-  
-  // 실제 API 주소
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const headers: Record<string, string> = {};
-    if (authHeader) {
-      headers.Authorization = authHeader;
-    }
+    const { id: idStr } = await params;
+    const id = parseId(idStr);
+    if (id == null) return NextResponse.json({ error: 'invalid id' }, { status: 400 });
 
-    const apiUrl = createApiUrl(`/posts/${id}`);
-    console.log("Requesting to:", apiUrl);
-    console.log("Headers:", headers);
+    await prisma.post.update({ where: { id }, data: { views: { increment: 1 } } }).catch(() => null);
 
-    const res = await fetch(apiUrl, {
-      method: "GET",
-      headers,
-    });
-
-    console.log("External API response status:", res.status);
-
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error("External API error:", res.status, errorText);
-      return NextResponse.json(
-        { message: "해당 게시글을 찾을 수 없습니다." },
-        { status: 404 }
-      );
-    }
-
-    const data: Post = await res.json();
-    console.log("Successfully fetched post:", data.id, data.title);
-    return NextResponse.json(data);
-  } catch (error) {
-    console.error("외부 API 요청 실패:", error);
-    return NextResponse.json(
-      { message: "외부 API 요청 실패" },
-      { status: 500 }
-    );
-  }
-}
-export async function PUT(req: Request) {
-  const { pathname } = new URL(req.url);
-  const segments = pathname.split("/");
-  const id = segments[segments.length - 1];
-  console.log("게시글 ID:", id);
-
-  try {
-    // 요청 본문 파싱
-    const { title, content } = await req.json();
-
-    if (!title || !content) {
-      return NextResponse.json(
-        { message: "제목과 내용을 모두 제공해야 합니다." },
-        { status: 400 }
-      );
-    }
-
-    // 인증 헤더 추출
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      return NextResponse.json(
-        { message: "인증 헤더가 필요합니다." },
-        { status: 401 }
-      );
-    }
-
-    // 외부 API에 수정 요청
-    const apiUrl = createApiUrl(`/posts/${id}`);
-    const res = await fetch(apiUrl, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: authHeader, // 인증 헤더 전달
-      },
-      body: JSON.stringify({ title, content }),
-    });
-
-    if (!res.ok) {
-      const errorData = await res.json();
-      return NextResponse.json(
-        { message: errorData.message || "게시글 수정에 실패했습니다." },
-        { status: res.status }
-      );
-    }
-
-    const data: Post = await res.json();
-    return NextResponse.json(data);
-  } catch (error) {
-    console.error("게시글 수정 중 오류 발생:", error);
-    return NextResponse.json(
-      { message: "게시글 수정 중 오류가 발생했습니다." },
-      { status: 500 }
-    );
-  }
-}
-export async function DELETE(req: Request) {
-  const { pathname } = new URL(req.url);
-  const segments = pathname.split("/");
-  const id = segments[segments.length - 1];
-  console.log("삭제 게시글 ID:", id);
-  try {
-    // 인증 헤더 추출
-    const authHeader = req.headers.get("Authorization");
-    console.log("authHeader", authHeader);
-    if (!authHeader) {
-      return NextResponse.json(
-        { message: "인증 헤더가 필요합니다." },
-        { status: 401 }
-      );
-    }
-
-    // 외부 API에 삭제 요청
-    const apiUrl = createApiUrl(`/posts/${id}`);
-    const res = await fetch(apiUrl, {
-      method: "DELETE",
-      headers: {
-        Authorization: authHeader, // 인증 헤더 전달
+    const post = await prisma.post.findUnique({
+      where: { id },
+      include: {
+        author: { select: { id: true, username: true } },
+        _count: { select: { comments: true, likes: true } },
       },
     });
+    if (!post) return NextResponse.json({ error: 'not found' }, { status: 404 });
 
-    if (!res.ok) {
-      const errorData = await res.json();
-      return NextResponse.json(
-        { message: errorData.message || "게시글 삭제에 실패했습니다." },
-        { status: res.status }
-      );
+    const me = await getAuthUser(request);
+    let liked = false;
+    if (me) {
+      const like = await prisma.like.findUnique({
+        where: { post_id_user_id: { post_id: id, user_id: me.id } },
+      });
+      liked = !!like;
     }
 
-    // 성공 응답 처리 (예: 메시지 반환)
-    const data = await res.json();
-    return NextResponse.json(data);
-  } catch (error) {
-    console.error("게시글 삭제 중 오류 발생:", error);
-    return NextResponse.json(
-      { message: "게시글 삭제 중 오류가 발생했습니다." },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      ...post,
+      category: post.tag,
+      commentCount: post._count.comments,
+      likeCount: post._count.likes,
+      liked,
+      imageUrls: (post.images ?? []).map(toImageUrl),
+    });
+  } catch (err) {
+    console.error('post GET error:', err);
+    return NextResponse.json({ error: '서버 오류' }, { status: 500 });
+  }
+}
+
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const user = await requireUser(request);
+    if (!user) return NextResponse.json({ error: '인증이 필요합니다.' }, { status: 401 });
+    const { id: idStr } = await params;
+    const id = parseId(idStr);
+    if (id == null) return NextResponse.json({ error: 'invalid id' }, { status: 400 });
+
+    const existing = await prisma.post.findUnique({ where: { id }, select: { author_id: true } });
+    if (!existing) return NextResponse.json({ error: 'not found' }, { status: 404 });
+    if (existing.author_id !== user.id)
+      return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
+
+    const body = await request.json();
+    const { title, content } = body ?? {};
+    if (!title || !content)
+      return NextResponse.json({ error: 'title/content 필수' }, { status: 400 });
+
+    const post = await prisma.post.update({ where: { id }, data: { title, content } });
+    return NextResponse.json(post);
+  } catch (err) {
+    console.error('post PUT error:', err);
+    return NextResponse.json({ error: '서버 오류' }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const user = await requireUser(request);
+    if (!user) return NextResponse.json({ error: '인증이 필요합니다.' }, { status: 401 });
+    const { id: idStr } = await params;
+    const id = parseId(idStr);
+    if (id == null) return NextResponse.json({ error: 'invalid id' }, { status: 400 });
+
+    const existing = await prisma.post.findUnique({ where: { id }, select: { author_id: true } });
+    if (!existing) return NextResponse.json({ error: 'not found' }, { status: 404 });
+    if (existing.author_id !== user.id)
+      return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
+
+    await prisma.post.delete({ where: { id } });
+    return NextResponse.json({ message: '삭제되었습니다.' });
+  } catch (err) {
+    console.error('post DELETE error:', err);
+    return NextResponse.json({ error: '서버 오류' }, { status: 500 });
   }
 }

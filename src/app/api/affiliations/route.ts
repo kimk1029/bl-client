@@ -1,38 +1,73 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { buildAuthHeaders } from '@/lib/authServer';
-import { createApiUrl } from '@/utils/apiConfig';
+import { prisma } from '@/lib/prisma';
+import { requireUser } from '@/lib/apiAuth';
+import { saveUploadedFile, toImageUrl } from '@/lib/uploads';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const headers = await buildAuthHeaders();
-    const upstream = await fetch(createApiUrl('/affiliations'), { headers });
-    if (!upstream.ok) {
-      const text = await upstream.text().catch(() => '');
-      return NextResponse.json({ message: text || '목록 조회 실패' }, { status: upstream.status });
+    const me = await requireUser(request);
+    if (!me) return NextResponse.json({ error: '인증이 필요합니다.' }, { status: 401 });
+
+    const user = await prisma.user.findUnique({
+      where: { id: me.id },
+      select: { affiliation: true },
+    });
+    if (!user?.affiliation?.trim()) {
+      return NextResponse.json({ message: '교회 소속이 설정되지 않았습니다.' }, { status: 400 });
     }
-    const data = await upstream.json();
-    return NextResponse.json(data);
-  } catch (e) {
-    return NextResponse.json({ message: '서버 오류' }, { status: 500 });
+
+    const posts = await prisma.affiliationPost.findMany({
+      where: { affiliation: user.affiliation },
+      orderBy: { created_at: 'desc' },
+      include: { author: { select: { id: true, username: true } } },
+    });
+    return NextResponse.json(
+      posts.map((p) => ({ ...p, imageUrls: (p.images ?? []).map(toImageUrl) }))
+    );
+  } catch (err) {
+    console.error('affiliations GET error:', err);
+    return NextResponse.json({ error: '서버 오류' }, { status: 500 });
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const formData = await request.formData();
-    const headers = await buildAuthHeaders();
-    const upstream = await fetch(createApiUrl('/affiliations'), {
-      method: 'POST',
-      headers: headers,
-      body: formData,
+    const me = await requireUser(request);
+    if (!me) return NextResponse.json({ error: '인증이 필요합니다.' }, { status: 401 });
+
+    const user = await prisma.user.findUnique({
+      where: { id: me.id },
+      select: { affiliation: true },
     });
-    if (!upstream.ok) {
-      const text = await upstream.text().catch(() => '');
-      return NextResponse.json({ message: text || '생성 실패' }, { status: upstream.status });
+    if (!user?.affiliation?.trim()) {
+      return NextResponse.json({ message: '교회 소속이 설정되지 않았습니다.' }, { status: 400 });
     }
-    const data = await upstream.json();
-    return NextResponse.json(data);
-  } catch (e) {
-    return NextResponse.json({ message: '서버 오류' }, { status: 500 });
+
+    const fd = await request.formData();
+    const title = String(fd.get('title') ?? '');
+    const content = String(fd.get('content') ?? '');
+    if (!title || !content)
+      return NextResponse.json({ error: 'title/content 필수' }, { status: 400 });
+
+    const images: string[] = [];
+    const file = fd.get('image');
+    if (file && file instanceof File && file.size > 0) {
+      const filename = await saveUploadedFile(file);
+      images.push(filename);
+    }
+
+    const post = await prisma.affiliationPost.create({
+      data: {
+        title,
+        content,
+        affiliation: user.affiliation,
+        images,
+        author: { connect: { id: me.id } },
+      },
+    });
+    return NextResponse.json({ ...post, imageUrls: images.map(toImageUrl) }, { status: 201 });
+  } catch (err) {
+    console.error('affiliations POST error:', err);
+    return NextResponse.json({ error: '서버 오류' }, { status: 500 });
   }
 }

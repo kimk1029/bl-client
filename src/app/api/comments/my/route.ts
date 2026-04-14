@@ -1,33 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/authOptions';
-import { createApiUrl } from '@/utils/apiConfig';
+import { prisma } from '@/lib/prisma';
+import { requireUser } from '@/lib/apiAuth';
 
 export async function GET(request: NextRequest) {
-    try {
-        const session = await getServerSession(authOptions);
-        const accessToken = (session as unknown as { accessToken?: string })?.accessToken;
-
-        const upstreamUrl = createApiUrl('/comments/my');
-        const res = await fetch(upstreamUrl, {
-            headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
-            cache: 'no-store',
-        });
-
-        if (!res.ok) {
-            const text = await res.text().catch(() => '');
-            return NextResponse.json(
-                { error: '내 댓글을 불러오는데 실패했습니다.', status: res.status, message: text },
-                { status: res.status }
-            );
-        }
-
-        const data = await res.json();
-        return NextResponse.json(data);
-    } catch (error) {
-        return NextResponse.json(
-            { error: '내 댓글을 불러오는데 실패했습니다.' },
-            { status: 500 }
-        );
-    }
+  try {
+    const user = await requireUser(request);
+    if (!user) return NextResponse.json({ error: '인증이 필요합니다.' }, { status: 401 });
+    const comments = await prisma.comment.findMany({
+      where: { author_id: user.id },
+      orderBy: { created_at: 'desc' },
+      include: { post: { select: { id: true, title: true } } },
+    });
+    return NextResponse.json(
+      comments.map((c) => ({
+        id: c.id,
+        content: c.content,
+        created_at: c.created_at,
+        postId: c.post_id,
+        postTitle: c.post?.title,
+      }))
+    );
+  } catch (err) {
+    console.error('comments/my error:', err);
+    return NextResponse.json({ error: '서버 오류' }, { status: 500 });
+  }
 }

@@ -1,58 +1,111 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { buildAuthHeaders } from '@/lib/authServer';
-import { createApiUrl } from '@/utils/apiConfig';
+import { prisma } from '@/lib/prisma';
+import { requireUser } from '@/lib/apiAuth';
+import { saveUploadedFile, toImageUrl } from '@/lib/uploads';
 
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+const parseId = (s: string) => {
+  const n = Number(s);
+  return Number.isFinite(n) ? n : null;
+};
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const { id } = await params;
-    const headers = await buildAuthHeaders();
-    const upstream = await fetch(createApiUrl(`/affiliations/${id}`), { headers });
-    if (!upstream.ok) {
-      const text = await upstream.text().catch(() => '');
-      return NextResponse.json({ message: text || '상세 조회 실패' }, { status: upstream.status });
-    }
-    const data = await upstream.json();
-    return NextResponse.json(data);
-  } catch (e) {
-    return NextResponse.json({ message: '서버 오류' }, { status: 500 });
+    const me = await requireUser(request);
+    if (!me) return NextResponse.json({ error: '인증이 필요합니다.' }, { status: 401 });
+    const { id: idStr } = await params;
+    const id = parseId(idStr);
+    if (id == null) return NextResponse.json({ error: 'invalid id' }, { status: 400 });
+
+    const user = await prisma.user.findUnique({
+      where: { id: me.id },
+      select: { affiliation: true },
+    });
+    if (!user?.affiliation?.trim())
+      return NextResponse.json({ message: '교회 소속이 설정되지 않았습니다.' }, { status: 400 });
+
+    const post = await prisma.affiliationPost.findUnique({
+      where: { id },
+      include: { author: { select: { id: true, username: true } } },
+    });
+    if (!post) return NextResponse.json({ error: 'not found' }, { status: 404 });
+    if (post.affiliation !== user.affiliation)
+      return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
+
+    await prisma.affiliationPost
+      .update({ where: { id }, data: { views: { increment: 1 } } })
+      .catch(() => null);
+
+    return NextResponse.json({ ...post, imageUrls: (post.images ?? []).map(toImageUrl) });
+  } catch (err) {
+    console.error('affiliation GET error:', err);
+    return NextResponse.json({ error: '서버 오류' }, { status: 500 });
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const { id } = await params;
-    const formData = await request.formData();
-    const headers = await buildAuthHeaders();
-    const upstream = await fetch(createApiUrl(`/affiliations/${id}`), {
-      method: 'PUT',
-      headers,
-      body: formData,
+    const me = await requireUser(request);
+    if (!me) return NextResponse.json({ error: '인증이 필요합니다.' }, { status: 401 });
+    const { id: idStr } = await params;
+    const id = parseId(idStr);
+    if (id == null) return NextResponse.json({ error: 'invalid id' }, { status: 400 });
+
+    const existing = await prisma.affiliationPost.findUnique({
+      where: { id },
+      select: { author_id: true, images: true },
     });
-    if (!upstream.ok) {
-      const text = await upstream.text().catch(() => '');
-      return NextResponse.json({ message: text || '수정 실패' }, { status: upstream.status });
+    if (!existing) return NextResponse.json({ error: 'not found' }, { status: 404 });
+    if (existing.author_id !== me.id)
+      return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
+
+    const fd = await request.formData();
+    const title = fd.get('title');
+    const content = fd.get('content');
+    const data: any = {};
+    if (typeof title === 'string' && title) data.title = title;
+    if (typeof content === 'string' && content) data.content = content;
+    const file = fd.get('image');
+    if (file && file instanceof File && file.size > 0) {
+      const filename = await saveUploadedFile(file);
+      data.images = [filename];
     }
-    const data = await upstream.json();
-    return NextResponse.json(data);
-  } catch (e) {
-    return NextResponse.json({ message: '서버 오류' }, { status: 500 });
+    const post = await prisma.affiliationPost.update({ where: { id }, data });
+    return NextResponse.json({ ...post, imageUrls: (post.images ?? []).map(toImageUrl) });
+  } catch (err) {
+    console.error('affiliation PUT error:', err);
+    return NextResponse.json({ error: '서버 오류' }, { status: 500 });
   }
 }
 
-export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const { id } = await params;
-    const headers = await buildAuthHeaders();
-    const upstream = await fetch(createApiUrl(`/affiliations/${id}`), {
-      method: 'DELETE',
-      headers,
+    const me = await requireUser(request);
+    if (!me) return NextResponse.json({ error: '인증이 필요합니다.' }, { status: 401 });
+    const { id: idStr } = await params;
+    const id = parseId(idStr);
+    if (id == null) return NextResponse.json({ error: 'invalid id' }, { status: 400 });
+
+    const existing = await prisma.affiliationPost.findUnique({
+      where: { id },
+      select: { author_id: true },
     });
-    if (!upstream.ok) {
-      const text = await upstream.text().catch(() => '');
-      return NextResponse.json({ message: text || '삭제 실패' }, { status: upstream.status });
-    }
-    return NextResponse.json({});
-  } catch (e) {
-    return NextResponse.json({ message: '서버 오류' }, { status: 500 });
+    if (!existing) return NextResponse.json({ error: 'not found' }, { status: 404 });
+    if (existing.author_id !== me.id)
+      return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
+
+    await prisma.affiliationPost.delete({ where: { id } });
+    return new NextResponse(null, { status: 204 });
+  } catch (err) {
+    console.error('affiliation DELETE error:', err);
+    return NextResponse.json({ error: '서버 오류' }, { status: 500 });
   }
 }
