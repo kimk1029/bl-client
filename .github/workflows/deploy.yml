@@ -40,6 +40,7 @@ jobs:
           yarn install --immutable
           yarn prisma generate
           yarn prisma db push --accept-data-loss
+          node prisma/seed-churches.mjs
           yarn build
           pm2 restart "$PM2_NAME" --update-env || pm2 start yarn --name "$PM2_NAME" -- start
           pm2 save

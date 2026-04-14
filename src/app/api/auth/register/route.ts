@@ -7,7 +7,7 @@ import { computeLevel } from '@/utils/level';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { username, email, password, affiliation } = body ?? {};
+    const { username, email, password, affiliation, church_id } = body ?? {};
 
     if (!username || !email || !password) {
       return NextResponse.json({ message: '필수 항목 누락' }, { status: 400 });
@@ -26,12 +26,15 @@ export async function POST(request: NextRequest) {
 
     const hashed = await bcrypt.hash(password, 10);
     const affil = typeof affiliation === 'string' ? affiliation.trim() : '';
+    const churchIdNum = Number.isInteger(church_id) ? church_id : null;
+
     const user = await prisma.user.create({
       data: {
         username,
         email,
         password: hashed,
         affiliation: affil ? affil : null,
+        ...(churchIdNum ? { church_id: churchIdNum } : {}),
       },
     });
 

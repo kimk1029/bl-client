@@ -5,6 +5,7 @@ import axios from "axios";
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useTheme } from "@/context/ThemeContext";
 import { createApiUrl } from "@/utils/apiConfig";
+import ChurchSearch from "@/components/ChurchSearch";
 
 interface SignUpProps {
     onToggle: Dispatch<SetStateAction<boolean>>;
@@ -15,7 +16,6 @@ interface SignUpFormData {
     username: string;
     email: string;
     password: string;
-    affiliation?: string;
 }
 
 const SignUp: React.FC<SignUpProps> = ({ onToggle, email }) => {
@@ -29,6 +29,8 @@ const SignUp: React.FC<SignUpProps> = ({ onToggle, email }) => {
     const [isUsernameAvailable, setIsUsernameAvailable] = useState<boolean | null>(null);
     const [emailCheckLoading, setEmailCheckLoading] = useState(false);
     const [usernameCheckLoading, setUsernameCheckLoading] = useState(false);
+    const [churchName, setChurchName] = useState('');
+    const [churchId, setChurchId] = useState<number | null>(null);
 
     const {
         register,
@@ -87,7 +89,7 @@ const SignUp: React.FC<SignUpProps> = ({ onToggle, email }) => {
         try {
             const response = await axios.post(
                 createApiUrl('/auth/register'),
-                data
+                { ...data, affiliation: churchName || null, church_id: churchId }
             );
             if (response.status === 201) {
                 setSuccessMessage('회원가입이 성공적으로 완료되었습니다!');
@@ -213,19 +215,19 @@ const SignUp: React.FC<SignUpProps> = ({ onToggle, email }) => {
                     {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>}
                 </div>
 
-                {/* Affiliation (교회 소속) */}
+                {/* 교회 검색 */}
                 <div>
-                    <label htmlFor="affiliation" className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-600'}`}>
+                    <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-600'}`}>
                         교회 <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'} text-xs`}>(선택)</span>
                     </label>
                     <div className="mt-1">
-                        <input
-                            id="affiliation"
-                            type="text"
-                            placeholder="예: 명성교회, 온누리교회"
-                            {...register('affiliation')}
-                            className={`w-full px-3 py-2 ${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-200'} border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === 'dark' ? 'focus:bg-gray-700' : 'focus:bg-white'}`}
+                        <ChurchSearch
+                            theme={theme}
+                            onChange={(name, id) => { setChurchName(name); setChurchId(id); }}
                         />
+                        {churchId && (
+                            <p className="mt-1 text-xs text-green-600">✓ 교회가 선택되었습니다</p>
+                        )}
                     </div>
                 </div>
 

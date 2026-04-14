@@ -19,12 +19,33 @@ enum PostTag {
   news
 }
 
+model Church {
+  id        Int     @id @default(autoincrement())
+  name      String
+  address   String?
+  city      String?
+  district  String?
+  phone     String?
+  pastor_nm String?
+  lat       Float?
+  lon       Float?
+  source    String?
+
+  users     User[]
+
+  @@index([name])
+  @@index([city])
+  @@map("churches")
+}
+
 model User {
   id                     Int       @id @default(autoincrement())
   username               String    @unique
   email                  String    @unique
   password               String
   affiliation            String?   @db.VarChar(255)
+  church_id              Int?
+  church                 Church?   @relation(fields: [church_id], references: [id], onDelete: SetNull)
   points                 Int       @default(0)
   last_login_reward_date String?   @db.VarChar(10)
   created_at             DateTime  @default(now())
@@ -34,6 +55,8 @@ model User {
   comments          Comment[]
   likes             Like[]
   affiliation_posts AffiliationPost[]
+
+  @@index([church_id])
 }
 
 model Post {
