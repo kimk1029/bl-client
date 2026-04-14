@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import { useTheme } from '@/context/ThemeContext';
 import SearchBar from '@/components/SearchBar';
 import { Post } from '@/types/type';
 
-const SearchPage = () => {
+const SearchContent = () => {
     const searchParams = useSearchParams();
     const router = useRouter();
     const query = searchParams.get('q');
@@ -114,4 +114,10 @@ const SearchPage = () => {
     );
 };
 
-export default SearchPage; 
+const SearchPage = () => (
+    <Suspense fallback={<div className="flex justify-center items-center h-64"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500" /></div>}>
+        <SearchContent />
+    </Suspense>
+);
+
+export default SearchPage;

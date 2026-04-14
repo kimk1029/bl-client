@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import useSWR from "swr";
 import { useSession } from "next-auth/react";
 import PostList from "@/components/posts/PostList";
@@ -12,7 +12,7 @@ import { apiFetcher } from "@/lib/fetcher";
 
 const categories: Topic[] = ['technology', 'science', 'health', 'business', 'entertainment'];
 
-const GridFormatBoard: React.FC = () => {
+const GridFormatBoardContent: React.FC = () => {
     const { data: session } = useSession();
     const searchParams = useSearchParams();
     const [currentPage, setCurrentPage] = useState(1);
@@ -105,5 +105,11 @@ const GridFormatBoard: React.FC = () => {
         </div>
     );
 };
+
+const GridFormatBoard: React.FC = () => (
+    <Suspense fallback={<div className="flex justify-center items-center h-64"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" /></div>}>
+        <GridFormatBoardContent />
+    </Suspense>
+);
 
 export default GridFormatBoard;
