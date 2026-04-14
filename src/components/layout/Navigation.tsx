@@ -14,7 +14,7 @@ const Navigation = ({ isMobile = false }: NavigationProps) => {
 
     const menuItems = [
         { name: 'Posts', href: '/posts', hasDropdown: true },
-        { name: 'Church', href: '#' },
+        { name: 'Church', href: '/church' },
         { name: 'Study', href: '/study' },
         { name: 'Jobs', href: '/jobs', isNew: true },
     ];

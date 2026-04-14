@@ -8,6 +8,7 @@ import { computeLevel } from "@/utils/level";
 import { showSuccess, showError } from "@/components/toast";
 import { Check, Pencil, X } from "lucide-react";
 import { apiFetcher } from "@/lib/fetcher";
+import { createApiUrl } from "@/utils/apiConfig";
 
 const fetcher = apiFetcher;
 
@@ -70,7 +71,7 @@ export default function ProfilePage() {
                 setUsernameError(null);
                 return;
             }
-            const res = await fetch(`/api/auth/check-username`, {
+            const res = await fetch(createApiUrl('/auth/check-username'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: q })

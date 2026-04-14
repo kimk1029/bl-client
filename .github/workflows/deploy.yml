@@ -1,0 +1,43 @@
+name: Deploy to Synology
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-synology
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Deploy over SSH
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          PROJECT_PATH: /root/blessing/bl-client
+          PM2_NAME: bl-client
+        run: |
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" bash -s <<EOF
+          set -euo pipefail
+          cd "$PROJECT_PATH"
+          git fetch --all --prune
+          git reset --hard origin/main
+          yarn install --immutable
+          yarn prisma generate
+          yarn prisma db push --accept-data-loss
+          yarn build
+          pm2 restart "$PM2_NAME" --update-env || pm2 start yarn --name "$PM2_NAME" -- start
+          pm2 save
+          EOF

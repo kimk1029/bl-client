@@ -1,0 +1,152 @@
+// Prisma schema for blessing
+// Migrated from kh-server TypeORM entities
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PostTag {
+  technology
+  science
+  health
+  business
+  entertainment
+  news
+}
+
+model User {
+  id                     Int       @id @default(autoincrement())
+  username               String    @unique
+  email                  String    @unique
+  password               String
+  affiliation            String?   @db.VarChar(255)
+  points                 Int       @default(0)
+  last_login_reward_date String?   @db.VarChar(10)
+  created_at             DateTime  @default(now())
+  updated_at             DateTime  @updatedAt
+
+  posts             Post[]
+  comments          Comment[]
+  likes             Like[]
+  affiliation_posts AffiliationPost[]
+}
+
+model Post {
+  id         Int      @id @default(autoincrement())
+  title      String
+  content    String   @db.Text
+  views      Int      @default(0)
+  tag        PostTag  @default(news)
+  images     String[] @default([])
+  created_at DateTime @default(now())
+
+  author_id Int
+  author    User @relation(fields: [author_id], references: [id], onDelete: Cascade)
+
+  comments Comment[]
+  likes    Like[]
+
+  @@index([author_id])
+  @@index([tag])
+  @@index([created_at])
+}
+
+model Comment {
+  id         Int      @id @default(autoincrement())
+  content    String   @db.Text
+  created_at DateTime @default(now())
+
+  author_id Int
+  author    User @relation(fields: [author_id], references: [id], onDelete: Cascade)
+
+  post_id Int
+  post    Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
+
+  parent_id Int?
+  parent    Comment?  @relation("CommentReplies", fields: [parent_id], references: [id], onDelete: Cascade)
+  replies   Comment[] @relation("CommentReplies")
+
+  @@index([post_id])
+  @@index([author_id])
+  @@index([parent_id])
+}
+
+model Like {
+  id Int @id @default(autoincrement())
+
+  post_id Int
+  post    Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
+
+  user_id Int
+  user    User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([post_id, user_id])
+  @@index([post_id])
+  @@index([user_id])
+}
+
+model AnonymousPost {
+  id         Int      @id @default(autoincrement())
+  title      String
+  content    String   @db.Text
+  ip_address String
+  views      Int      @default(0)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  comments AnonymousComment[]
+  likes    AnonymousLike[]
+
+  @@index([created_at])
+}
+
+model AnonymousComment {
+  id         String   @id @default(uuid())
+  content    String
+  ip_address String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  post_id Int
+  post    AnonymousPost @relation(fields: [post_id], references: [id], onDelete: Cascade)
+
+  parent_id String?
+  parent    AnonymousComment?  @relation("AnonCommentReplies", fields: [parent_id], references: [id], onDelete: Cascade)
+  replies   AnonymousComment[] @relation("AnonCommentReplies")
+
+  @@index([post_id])
+  @@index([parent_id])
+}
+
+model AnonymousLike {
+  id         Int    @id @default(autoincrement())
+  ip_address String
+
+  post_id Int
+  post    AnonymousPost @relation(fields: [post_id], references: [id], onDelete: Cascade)
+
+  @@unique([post_id, ip_address])
+  @@index([post_id])
+}
+
+model AffiliationPost {
+  id          Int      @id @default(autoincrement())
+  title       String
+  content     String   @db.Text
+  views       Int      @default(0)
+  affiliation String?  @db.VarChar(255)
+  images      String[] @default([])
+  created_at  DateTime @default(now())
+
+  author_id Int
+  author    User @relation(fields: [author_id], references: [id], onDelete: Cascade)
+
+  @@index([author_id])
+  @@index([affiliation])
+  @@index([created_at])
+}
