@@ -29,6 +29,9 @@ jobs:
           PROJECT_PATH: /root/blessing/bl-client
           PM2_NAME: bl-client
         run: |
+          SSH_HOST="$(printf '%s' "$SSH_HOST" | tr -d '[:space:]')"
+          SSH_PORT="$(printf '%s' "$SSH_PORT" | tr -d '[:space:]')"
+          SSH_USER="$(printf '%s' "$SSH_USER" | tr -d '[:space:]')"
           ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" bash -s <<EOF
           set -euo pipefail
           cd "$PROJECT_PATH"
