@@ -2,27 +2,26 @@
 
 import React, { Suspense, useEffect, useState } from "react";
 import useSWR from "swr";
-import { useSession } from "next-auth/react";
 import PostList from "@/components/posts/PostList";
 import { Post } from "@/types/type";
 import { Topic } from "@/types/type";
 import { useSearchParams } from 'next/navigation';
 import { apiFetcher } from "@/lib/fetcher";
+import { useTheme } from "@/context/ThemeContext";
 
 
 const categories: Topic[] = ['technology', 'science', 'health', 'business', 'entertainment'];
 
 const GridFormatBoardContent: React.FC = () => {
-    const { data: session } = useSession();
     const searchParams = useSearchParams();
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedCategory, setSelectedCategory] = useState<Topic | 'all'>('all');
     const pageSize = 10;
-    const [isOpen, setIsOpen] = useState(false);
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
 
-    const { data, error, mutate } = useSWR<Post[]>('/api/posts', apiFetcher);
+    const { data, error } = useSWR<Post[]>('/api/posts', apiFetcher);
 
-    // URL 쿼리(category)로 초기 카테고리 설정
     useEffect(() => {
         const cat = searchParams.get('category') as Topic | null;
         if (cat && categories.includes(cat)) {
@@ -31,7 +30,6 @@ const GridFormatBoardContent: React.FC = () => {
         }
     }, [searchParams]);
 
-    // 안전한 필터링 - 모든 Hook은 조건문 이전에 호출
     const filteredPosts = React.useMemo(() => {
         if (!data || !Array.isArray(data)) return [];
         return selectedCategory === 'all'
@@ -41,35 +39,26 @@ const GridFormatBoardContent: React.FC = () => {
 
     const totalPages = Math.ceil(filteredPosts.length / pageSize);
     const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const currentPosts = filteredPosts.slice(startIndex, endIndex);
+    const currentPosts = filteredPosts.slice(startIndex, startIndex + pageSize);
 
-    if (error) {
-        return <div>Failed to load posts</div>;
-    }
-
+    if (error) return <div className="text-center py-10 text-sm text-red-500">게시글을 불러오지 못했습니다.</div>;
     if (!data) {
         return (
             <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
             </div>
         );
     }
 
     return (
-        <div className="w-full mt-10 shadow-xl p-0 md:p-4 rounded-md max-w-[1100px] mx-auto">
-
-            <div className="mb-6">
-                <div className="flex flex-wrap gap-2">
+        <div className="w-full max-w-[800px] mx-auto px-4">
+            <div className="-mx-4 px-4 mb-3 overflow-x-auto no-scrollbar">
+                <div className="flex gap-2 whitespace-nowrap">
                     <button
-                        onClick={() => {
-                            setSelectedCategory('all');
-                            setCurrentPage(1);
-                        }}
-                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors
-                            ${selectedCategory === 'all'
-                                ? 'bg-blue-500 text-white'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        onClick={() => { setSelectedCategory('all'); setCurrentPage(1); }}
+                        className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${selectedCategory === 'all'
+                            ? (isDark ? 'bg-white text-gray-900' : 'bg-gray-900 text-white')
+                            : (isDark ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200')
                             }`}
                     >
                         전체
@@ -77,17 +66,13 @@ const GridFormatBoardContent: React.FC = () => {
                     {categories.map((category) => (
                         <button
                             key={category}
-                            onClick={() => {
-                                setSelectedCategory(category);
-                                setCurrentPage(1);
-                            }}
-                            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors
-                                ${selectedCategory === category
-                                    ? 'bg-blue-500 text-white'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            onClick={() => { setSelectedCategory(category); setCurrentPage(1); }}
+                            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${selectedCategory === category
+                                ? (isDark ? 'bg-white text-gray-900' : 'bg-gray-900 text-white')
+                                : (isDark ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200')
                                 }`}
                         >
-                            {category.charAt(0).toUpperCase() + category.slice(1)}
+                            #{category}
                         </button>
                     ))}
                 </div>
@@ -100,8 +85,6 @@ const GridFormatBoardContent: React.FC = () => {
                 onPageChange={setCurrentPage}
                 selectedCategory={selectedCategory}
             />
-
-
         </div>
     );
 };
