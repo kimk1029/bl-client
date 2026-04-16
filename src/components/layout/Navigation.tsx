@@ -73,15 +73,23 @@ const Navigation = ({ isMobile = false }: NavigationProps) => {
                             onMouseEnter={() => setOpenDropdown(item.name)}
                             onMouseLeave={() => setOpenDropdown(null)}
                         >
-                            {['technology', 'science', 'health', 'business', 'entertainment'].map(topic => (
+                            {([
+                                { key: 'worship', label: '예배/설교' },
+                                { key: 'prayer',  label: '기도/QT' },
+                                { key: 'life',    label: '교회생활' },
+                                { key: 'faith',   label: '신앙고민' },
+                                { key: 'mission', label: '봉사/선교' },
+                                { key: 'youth',   label: '청년/셀' },
+                                { key: 'free',    label: '자유게시판' },
+                            ] as const).map(({ key, label }) => (
                                 <Link
-                                    key={topic}
-                                    href={`/posts?category=${topic}`}
+                                    key={key}
+                                    href={`/posts?category=${key}`}
                                     className={`block px-4 py-2 transition-colors duration-200 ${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'
                                         }`}
                                     onClick={() => setOpenDropdown(null)}
                                 >
-                                    {topic.charAt(0).toUpperCase() + topic.slice(1)}
+                                    {label}
                                 </Link>
                             ))}
                         </div>

@@ -1,4 +1,4 @@
-export type Topic = 'technology' | 'science' | 'health' | 'business' | 'entertainment';
+export type Topic = 'worship' | 'prayer' | 'life' | 'faith' | 'mission' | 'youth' | 'free';
 
 export interface Post {
     id: number;

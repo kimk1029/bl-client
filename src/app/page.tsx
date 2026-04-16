@@ -12,12 +12,13 @@ import { FaRegCommentDots } from "react-icons/fa";
 import { AiOutlineEye } from "react-icons/ai";
 
 const CATEGORIES = [
-  { key: "technology",    label: "테크" },
-  { key: "science",       label: "과학" },
-  { key: "health",        label: "건강" },
-  { key: "business",      label: "비즈니스" },
-  { key: "entertainment", label: "엔터테인먼트" },
-  { key: "news",          label: "뉴스" },
+  { key: "worship",  label: "예배/설교" },
+  { key: "prayer",   label: "기도/QT" },
+  { key: "life",     label: "교회생활" },
+  { key: "faith",    label: "신앙고민" },
+  { key: "mission",  label: "봉사/선교" },
+  { key: "youth",    label: "청년/셀" },
+  { key: "free",     label: "자유게시판" },
 ] as const;
 
 const POSTS_PER_SECTION = 3;

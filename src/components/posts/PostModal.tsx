@@ -21,10 +21,18 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSuccess, apiEn
     const { theme } = useTheme();
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
-    const [category, setCategory] = useState<Topic>('technology');
+    const [category, setCategory] = useState<Topic>('free');
     const [images, setImages] = useState<File[]>([]);
     const { data: session, status } = useSession();
-    const categories: Topic[] = ['technology', 'science', 'health', 'business', 'entertainment'];
+    const categories: { key: Topic; label: string }[] = [
+        { key: 'worship', label: '예배/설교' },
+        { key: 'prayer',  label: '기도/QT' },
+        { key: 'life',    label: '교회생활' },
+        { key: 'faith',   label: '신앙고민' },
+        { key: 'mission', label: '봉사/선교' },
+        { key: 'youth',   label: '청년/셀' },
+        { key: 'free',    label: '자유게시판' },
+    ];
 
     console.log('PostModal - Session status:', status);
     console.log('PostModal - Session data:', session);
@@ -35,7 +43,7 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSuccess, apiEn
         if (!isOpen) {
             setTitle('');
             setContent('');
-            setCategory('technology');
+            setCategory('free');
             setImages([]);
         }
     }, [isOpen]);
@@ -90,7 +98,7 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSuccess, apiEn
                 // 폼 초기화
                 setTitle('');
                 setContent('');
-                setCategory('technology');
+                setCategory('free');
                 setImages([]);
                 onSuccess();
                 onClose();
@@ -133,9 +141,9 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSuccess, apiEn
                                         : 'bg-white border-gray-300 text-gray-900'
                                         } focus:outline-none focus:ring-2 focus:ring-blue-500`}
                                 >
-                                    {categories.map((cat) => (
-                                        <option key={cat} value={cat}>
-                                            {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                                    {categories.map(({ key, label }) => (
+                                        <option key={key} value={key}>
+                                            {label}
                                         </option>
                                     ))}
                                 </select>

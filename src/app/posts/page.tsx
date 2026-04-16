@@ -10,7 +10,16 @@ import { apiFetcher } from "@/lib/fetcher";
 import { useTheme } from "@/context/ThemeContext";
 
 
-const categories: Topic[] = ['technology', 'science', 'health', 'business', 'entertainment'];
+const CATEGORY_LABELS: Record<Topic, string> = {
+  worship: '예배/설교',
+  prayer:  '기도/QT',
+  life:    '교회생활',
+  faith:   '신앙고민',
+  mission: '봉사/선교',
+  youth:   '청년/셀',
+  free:    '자유게시판',
+};
+const categories: Topic[] = ['worship', 'prayer', 'life', 'faith', 'mission', 'youth', 'free'];
 
 const GridFormatBoardContent: React.FC = () => {
     const searchParams = useSearchParams();
@@ -72,7 +81,7 @@ const GridFormatBoardContent: React.FC = () => {
                                 : (isDark ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200')
                                 }`}
                         >
-                            #{category}
+                            {CATEGORY_LABELS[category]}
                         </button>
                     ))}
                 </div>

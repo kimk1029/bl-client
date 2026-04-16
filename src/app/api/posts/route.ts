@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { requireUser } from '@/lib/apiAuth';
 import { saveUploadedFile, toImageUrl } from '@/lib/uploads';
 
-const VALID_TAGS = ['technology', 'science', 'health', 'business', 'entertainment', 'news'] as const;
+const VALID_TAGS = ['worship', 'prayer', 'life', 'faith', 'mission', 'youth', 'free'] as const;
 type Tag = typeof VALID_TAGS[number];
 
 export async function GET(request: NextRequest) {
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
 
     let title = '';
     let content = '';
-    let category: Tag = 'news';
+    let category: Tag = 'free';
     const images: string[] = [];
 
     const contentType = request.headers.get('content-type') || '';
@@ -61,8 +61,8 @@ export async function POST(request: NextRequest) {
       const fd = await request.formData();
       title = String(fd.get('title') ?? '');
       content = String(fd.get('content') ?? '');
-      const cat = String(fd.get('category') ?? 'news');
-      category = (VALID_TAGS as readonly string[]).includes(cat) ? (cat as Tag) : 'news';
+      const cat = String(fd.get('category') ?? 'free');
+      category = (VALID_TAGS as readonly string[]).includes(cat) ? (cat as Tag) : 'free';
       const file = fd.get('image');
       if (file && file instanceof File && file.size > 0) {
         const filename = await saveUploadedFile(file);
@@ -72,8 +72,8 @@ export async function POST(request: NextRequest) {
       const body = await request.json();
       title = String(body?.title ?? '');
       content = String(body?.content ?? '');
-      const cat = String(body?.category ?? body?.tag ?? 'news');
-      category = (VALID_TAGS as readonly string[]).includes(cat) ? (cat as Tag) : 'news';
+      const cat = String(body?.category ?? body?.tag ?? 'free');
+      category = (VALID_TAGS as readonly string[]).includes(cat) ? (cat as Tag) : 'free';
     }
 
     if (!title || !content) {

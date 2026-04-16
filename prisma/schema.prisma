@@ -11,12 +11,13 @@ datasource db {
 }
 
 enum PostTag {
-  technology
-  science
-  health
-  business
-  entertainment
-  news
+  worship
+  prayer
+  life
+  faith
+  mission
+  youth
+  free
 }
 
 model Church {
@@ -64,7 +65,7 @@ model Post {
   title      String
   content    String   @db.Text
   views      Int      @default(0)
-  tag        PostTag  @default(news)
+  tag        PostTag  @default(free)
   images     String[] @default([])
   created_at DateTime @default(now())
 
