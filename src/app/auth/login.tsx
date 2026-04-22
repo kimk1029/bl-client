@@ -105,41 +105,6 @@ export default function Login({ onToggle }: LoginProps) {
         <div className="blessing-notice blessing-notice-error">{serverError}</div>
       )}
 
-      {/* ── 소셜 로그인 ── */}
-      <div className="blessing-social-btns">
-        <button
-          type="button"
-          className="blessing-social-btn blessing-social-btn-kakao"
-          onClick={() => handleSocial("kakao")}
-          disabled={!!socialLoading}
-        >
-          <KakaoIcon />
-          {socialLoading === "kakao" ? "연결 중..." : "카카오로 로그인"}
-        </button>
-        <button
-          type="button"
-          className="blessing-social-btn blessing-social-btn-naver"
-          onClick={() => handleSocial("naver")}
-          disabled={!!socialLoading}
-        >
-          <NaverIcon />
-          {socialLoading === "naver" ? "연결 중..." : "네이버로 로그인"}
-        </button>
-        <button
-          type="button"
-          className="blessing-social-btn blessing-social-btn-google"
-          onClick={() => handleSocial("google")}
-          disabled={!!socialLoading}
-        >
-          <GoogleIcon />
-          {socialLoading === "google" ? "연결 중..." : "구글로 로그인"}
-        </button>
-      </div>
-
-      <div className="blessing-auth-divider">
-        <span>또는 이메일로 로그인</span>
-      </div>
-
       {/* ── 이메일/비밀번호 ── */}
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="blessing-field">
@@ -185,6 +150,41 @@ export default function Login({ onToggle }: LoginProps) {
           {isLoading ? "로그인 중..." : "로그인"}
         </button>
       </form>
+
+      <div className="blessing-auth-divider">
+        <span>또는 SNS 계정으로 로그인</span>
+      </div>
+
+      {/* ── 소셜 로그인 ── */}
+      <div className="blessing-social-btns">
+        <button
+          type="button"
+          className="blessing-social-btn blessing-social-btn-kakao"
+          onClick={() => handleSocial("kakao")}
+          disabled={!!socialLoading}
+        >
+          <KakaoIcon />
+          {socialLoading === "kakao" ? "연결 중..." : "카카오로 로그인"}
+        </button>
+        <button
+          type="button"
+          className="blessing-social-btn blessing-social-btn-naver"
+          onClick={() => handleSocial("naver")}
+          disabled={!!socialLoading}
+        >
+          <NaverIcon />
+          {socialLoading === "naver" ? "연결 중..." : "네이버로 로그인"}
+        </button>
+        <button
+          type="button"
+          className="blessing-social-btn blessing-social-btn-google"
+          onClick={() => handleSocial("google")}
+          disabled={!!socialLoading}
+        >
+          <GoogleIcon />
+          {socialLoading === "google" ? "연결 중..." : "구글로 로그인"}
+        </button>
+      </div>
 
       <div className="blessing-auth-switch">
         아직 계정이 없으신가요?

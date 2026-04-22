@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useSyncExternalStore } from "react";
 import { useTheme } from "@/context/ThemeContext";
+import { composeBus, composeServerSnapshot } from "@/lib/composeBus";
 import LogoMark from "./LogoMark";
 
 function IconSearch({ size = 20 }: { size?: number }) {
@@ -190,14 +192,6 @@ export default function Header() {
           >
             <IconEdit />
           </button>
-          <button
-            type="button"
-            className="blessing-icon-btn"
-            onClick={toggleTheme}
-            aria-label="테마 전환"
-          >
-            {isDark ? <IconSun /> : <IconMoon />}
-          </button>
         </div>
       </header>
     );
@@ -207,6 +201,7 @@ export default function Header() {
   const title = sub?.title ?? "blessing";
   const subtitle = sub?.subtitle;
   const isProfile = pathname.startsWith("/profile");
+  const isCompose = pathname === "/posts/new";
 
   return (
     <header className="blessing-topbar">
@@ -242,15 +237,26 @@ export default function Header() {
             <IconCog />
           </button>
         )}
-        <button
-          type="button"
-          className="blessing-icon-btn"
-          onClick={toggleTheme}
-          aria-label="테마 전환"
-        >
-          {isDark ? <IconSun /> : <IconMoon />}
-        </button>
+        {isCompose && <ComposeSubmitButton />}
       </div>
     </header>
+  );
+}
+
+function ComposeSubmitButton() {
+  const { canSubmit, onSubmit } = useSyncExternalStore(
+    composeBus.subscribe,
+    composeBus.get,
+    () => composeServerSnapshot,
+  );
+  return (
+    <button
+      type="button"
+      className="blessing-submit-btn"
+      disabled={!canSubmit}
+      onClick={() => onSubmit?.()}
+    >
+      등록
+    </button>
   );
 }

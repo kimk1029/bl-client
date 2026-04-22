@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { TOPICS, TOPIC_BY_ID, type TopicId } from "@/components/home/data/topics";
+import { composeBus } from "@/lib/composeBus";
 
 export default function ComposePage() {
   const router = useRouter();
@@ -15,9 +16,6 @@ export default function ComposePage() {
     }
   }, [status, router]);
 
-  if (status === "loading" || status === "unauthenticated") {
-    return null;
-  }
   const [topicId, setTopicId] = useState<TopicId>("free");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -27,24 +25,24 @@ export default function ComposePage() {
   const topic = TOPIC_BY_ID[topicId];
   const canPost = title.trim().length > 0 && body.trim().length > 0;
 
-  const onSubmit = () => {
-    if (!canPost) return;
-    // TODO: wire to POST /api/posts when backend supports the topic schema.
-    router.back();
-  };
+  useEffect(() => {
+    const submit = () => {
+      if (title.trim().length === 0 || body.trim().length === 0) return;
+      // TODO: wire to POST /api/posts when backend supports the topic schema.
+      router.back();
+    };
+    composeBus.set({ canSubmit: canPost, onSubmit: submit });
+    return () => {
+      composeBus.reset();
+    };
+  }, [canPost, title, body, router]);
+
+  if (status === "loading" || status === "unauthenticated") {
+    return null;
+  }
 
   return (
     <div className="blessing-compose">
-      <div className="blessing-compose-submit-bar">
-        <button
-          className="blessing-submit-btn"
-          disabled={!canPost}
-          onClick={onSubmit}
-        >
-          등록
-        </button>
-      </div>
-
       <div
         className="blessing-compose-topic-picker"
         onClick={() => setShowPicker((v) => !v)}
