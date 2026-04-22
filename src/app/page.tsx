@@ -45,6 +45,7 @@ export default function Home() {
     <div className="blessing-home">
       <HeroVerse />
       <PinnedNotice post={pinned} />
+      {loaded && <NoticeSection posts={list} excludeIds={hotIds} />}
       <TopicStrip />
 
       {!loaded ? (
@@ -54,7 +55,6 @@ export default function Home() {
       ) : (
         <>
           <HotSection posts={list} outputIds={hotIds} />
-          <NoticeSection posts={list} excludeIds={hotIds} />
           <PrayerStream />
 
           {SECTION_TOPIC_IDS.map((tid) => {
