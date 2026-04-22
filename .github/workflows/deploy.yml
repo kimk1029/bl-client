@@ -39,6 +39,7 @@ jobs:
           git reset --hard origin/main
           yarn install --immutable
           yarn prisma generate
+          yarn prisma db execute --schema prisma/schema.prisma --file prisma/pre-push.sql
           yarn prisma db push --accept-data-loss
           node prisma/seed-churches.mjs
           yarn build
