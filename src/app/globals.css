@@ -3188,6 +3188,525 @@ html.dark .blessing-chip-active {
 }
 
 /* =========================================================================
+   Messages inbox + thread — matches prototype MessagesScreen
+   ========================================================================= */
+.blessing-dm-search {
+  padding: 10px 14px;
+  background: var(--blessing-bg-0);
+  border-bottom: 1px solid var(--blessing-border);
+}
+.blessing-dm-list {
+  background: var(--blessing-bg-0);
+}
+.blessing-dm-row {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--blessing-border);
+  cursor: pointer;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.12s;
+}
+.blessing-dm-row:hover {
+  background: var(--blessing-bg-hover);
+}
+.blessing-dm-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+.blessing-dm-online {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  background: #3db05e;
+  border: 2px solid var(--blessing-bg-0);
+  border-radius: 50%;
+}
+.blessing-dm-official {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 18px;
+  height: 18px;
+  background: var(--blessing-accent);
+  color: #fff;
+  border: 2px solid var(--blessing-bg-0);
+  border-radius: 50%;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+.blessing-dm-body {
+  flex: 1;
+  min-width: 0;
+}
+.blessing-dm-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 3px;
+}
+.blessing-dm-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--blessing-fg-0);
+  letter-spacing: -0.3px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.blessing-dm-church {
+  font-size: 11px;
+  color: var(--blessing-fg-2);
+  font-weight: 400;
+}
+.blessing-dm-time {
+  font-size: 10.5px;
+  color: var(--blessing-fg-2);
+  font-family: var(--blessing-mono);
+  flex-shrink: 0;
+}
+.blessing-dm-preview-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.blessing-dm-preview {
+  flex: 1;
+  font-size: 12.5px;
+  color: var(--blessing-fg-1);
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+}
+.blessing-dm-unread {
+  background: var(--blessing-hot);
+  color: #fff;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  padding: 0 6px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--blessing-mono);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Thread (1:1 대화) */
+.blessing-detail-topbar-title-wrap {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  padding: 0 8px;
+  overflow: hidden;
+}
+.blessing-dm-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--blessing-fg-0);
+  letter-spacing: -0.3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.blessing-dm-subtitle {
+  font-family: var(--blessing-mono);
+  font-size: 10px;
+  color: var(--blessing-fg-2);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+.blessing-thread-area {
+  padding: 14px 12px;
+  background: var(--blessing-bg-2);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-height: 60vh;
+}
+.blessing-thread-date-divider {
+  text-align: center;
+  padding: 6px 0 10px;
+}
+.blessing-thread-date-divider span {
+  font-size: 10px;
+  color: var(--blessing-fg-2);
+  font-family: var(--blessing-mono);
+  background: var(--blessing-bg-3);
+  padding: 3px 10px;
+  border-radius: 100px;
+}
+.blessing-bubble-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  max-width: 85%;
+}
+.blessing-bubble-me {
+  flex-direction: row-reverse;
+  align-self: flex-end;
+}
+.blessing-bubble-them {
+  align-self: flex-start;
+}
+.blessing-bubble {
+  font-size: 13.5px;
+  line-height: 1.45;
+  padding: 9px 13px;
+  letter-spacing: -0.3px;
+  word-break: keep-all;
+  white-space: pre-wrap;
+}
+.blessing-bubble-them-body {
+  background: var(--blessing-bg-1);
+  color: var(--blessing-fg-0);
+  border-radius: 16px 16px 16px 4px;
+  border: 1px solid var(--blessing-border);
+}
+.blessing-bubble-me-body {
+  background: var(--blessing-accent);
+  color: #fff;
+  border-radius: 16px 16px 4px 16px;
+}
+.blessing-bubble-time {
+  font-size: 9.5px;
+  color: var(--blessing-fg-2);
+  font-family: var(--blessing-mono);
+  flex-shrink: 0;
+}
+
+/* =========================================================================
+   Church verify wizard
+   ========================================================================= */
+.blessing-verify {
+  min-height: calc(100vh - 60px - env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+}
+.blessing-verify-steps {
+  display: flex;
+  padding: 16px 24px;
+  gap: 4px;
+  background: var(--blessing-bg-0);
+  border-bottom: 1px solid var(--blessing-border);
+}
+.blessing-verify-step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  opacity: 0.4;
+}
+.blessing-verify-step-active {
+  opacity: 1;
+}
+.blessing-verify-step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 11px;
+  left: calc(50% + 18px);
+  right: calc(-50% + 18px);
+  height: 1.5px;
+  background: var(--blessing-border-strong);
+}
+.blessing-verify-step-active:not(:last-child)::after {
+  background: var(--blessing-accent);
+}
+.blessing-verify-step-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--blessing-bg-3);
+  color: var(--blessing-fg-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--blessing-mono);
+}
+.blessing-verify-step-active .blessing-verify-step-num {
+  background: var(--blessing-accent);
+  color: #fff;
+}
+.blessing-verify-step-label {
+  font-size: 10.5px;
+  color: var(--blessing-fg-1);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.blessing-verify-body {
+  padding: 16px;
+  flex: 1;
+}
+.blessing-verify-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--blessing-fg-0);
+  letter-spacing: -0.7px;
+  line-height: 1.25;
+  margin-bottom: 8px;
+}
+.blessing-verify-sub {
+  font-size: 12.5px;
+  color: var(--blessing-fg-1);
+  line-height: 1.55;
+  margin-bottom: 18px;
+}
+.blessing-church-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--blessing-border);
+  border-radius: 10px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  background: var(--blessing-bg-1);
+  font-family: inherit;
+  text-align: left;
+  color: inherit;
+  transition: border-color 0.12s, background 0.12s, box-shadow 0.12s;
+}
+.blessing-church-row:hover {
+  border-color: var(--blessing-border-strong);
+}
+.blessing-church-row-selected {
+  border-color: var(--blessing-accent);
+  background: var(--blessing-accent-soft);
+  box-shadow: 0 0 0 1px var(--blessing-accent);
+}
+.blessing-church-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--blessing-bg-2);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--blessing-accent);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.blessing-church-row-selected .blessing-church-icon {
+  background: var(--blessing-accent);
+  color: #fff;
+}
+.blessing-church-info {
+  flex: 1;
+  min-width: 0;
+}
+.blessing-church-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--blessing-fg-0);
+  letter-spacing: -0.3px;
+}
+.blessing-church-meta {
+  font-size: 11px;
+  color: var(--blessing-fg-2);
+  margin-top: 2px;
+}
+.blessing-check {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--blessing-border-strong);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.blessing-check-on {
+  background: var(--blessing-accent);
+  border-color: var(--blessing-accent);
+}
+.blessing-check-small {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid var(--blessing-border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: transparent;
+}
+.blessing-check-small-on {
+  background: var(--blessing-accent);
+  border-color: var(--blessing-accent);
+  color: #fff;
+}
+.blessing-church-add {
+  padding: 12px;
+  border: 1.5px dashed var(--blessing-border-strong);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12.5px;
+  color: var(--blessing-fg-2);
+  margin-top: 8px;
+}
+.blessing-church-add button {
+  color: var(--blessing-accent);
+  font-weight: 600;
+  font-size: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+.blessing-role-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+.blessing-role-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--blessing-bg-1);
+  border: 1px solid var(--blessing-border);
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--blessing-fg-0);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: border-color 0.12s, background 0.12s;
+}
+.blessing-role-row-selected {
+  border-color: var(--blessing-accent);
+  background: var(--blessing-accent-soft);
+  color: var(--blessing-accent-strong);
+  font-weight: 600;
+}
+.blessing-verify-method-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.blessing-verify-method {
+  padding: 14px 12px;
+  background: var(--blessing-bg-1);
+  border: 1px solid var(--blessing-border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  text-align: left;
+  font-family: inherit;
+  color: inherit;
+}
+.blessing-verify-method:hover {
+  border-color: var(--blessing-accent);
+  background: var(--blessing-accent-soft);
+}
+.blessing-verify-method-on {
+  border-color: var(--blessing-accent);
+  background: var(--blessing-accent-soft);
+  box-shadow: 0 0 0 1px var(--blessing-accent);
+}
+.blessing-verify-method-icon {
+  font-size: 22px;
+  margin-bottom: 6px;
+}
+.blessing-verify-method-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--blessing-fg-0);
+  letter-spacing: -0.3px;
+  line-height: 1.3;
+  margin-bottom: 3px;
+}
+.blessing-verify-method-desc {
+  font-size: 10.5px;
+  color: var(--blessing-fg-2);
+  line-height: 1.4;
+}
+.blessing-verify-summary {
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  gap: 8px 16px;
+  padding: 14px 16px;
+  background: var(--blessing-bg-2);
+  border-radius: 10px;
+  font-size: 12.5px;
+}
+.blessing-verify-summary div {
+  color: var(--blessing-fg-2);
+}
+.blessing-verify-summary strong {
+  color: var(--blessing-fg-0);
+  font-weight: 700;
+}
+.blessing-verify-footer {
+  flex-shrink: 0;
+  display: flex;
+  gap: 8px;
+  padding: 12px 14px 18px;
+  background: var(--blessing-bg-1);
+  border-top: 1px solid var(--blessing-border);
+  position: sticky;
+  bottom: calc(60px + env(safe-area-inset-bottom));
+  z-index: 20;
+}
+.blessing-verify-footer .blessing-btn-secondary {
+  min-height: 40px;
+  padding: 0 18px;
+}
+.blessing-verify-footer .blessing-btn-primary {
+  flex: 1;
+}
+
+/* Complete-profile → verify-church jump link */
+.blessing-complete-verify-link {
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: var(--blessing-accent-soft);
+  color: var(--blessing-accent-strong);
+  border: 1px solid var(--blessing-accent);
+  border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: -0.2px;
+  transition: background 0.12s;
+}
+.blessing-complete-verify-link:hover {
+  background: var(--blessing-accent);
+  color: #fff;
+}
+
+/* =========================================================================
    Notifications screen — matches prototype NotificationsScreen
    ========================================================================= */
 .blessing-notif-list {

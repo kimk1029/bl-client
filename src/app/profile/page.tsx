@@ -149,23 +149,21 @@ export default function ProfilePage() {
 
       <div className="blessing-profile-menu-group">
         <div className="blessing-profile-menu-title">알림 & 메시지</div>
-        <button className="blessing-profile-menu-row" type="button">
+        <Link href="/notifications" className="blessing-profile-menu-row">
           <span className="blessing-menu-emoji">🔔</span>
           <span className="blessing-menu-label">알림</span>
-          <span className="blessing-menu-badge-hot">0</span>
           <MenuChevron />
-        </button>
-        <button className="blessing-profile-menu-row" type="button">
+        </Link>
+        <Link href="/messages" className="blessing-profile-menu-row">
           <span className="blessing-menu-emoji">✉️</span>
           <span className="blessing-menu-label">쪽지함</span>
-          <span className="blessing-menu-badge-hot">0</span>
           <MenuChevron />
-        </button>
+        </Link>
       </div>
 
       <div className="blessing-profile-menu-group">
         <div className="blessing-profile-menu-title">교회 & 인증</div>
-        <Link href="/church" className="blessing-profile-menu-row">
+        <Link href="/verify-church?return=/profile" className="blessing-profile-menu-row">
           <span className="blessing-menu-emoji">🏛️</span>
           <span className="blessing-menu-label">교회 인증</span>
           <span

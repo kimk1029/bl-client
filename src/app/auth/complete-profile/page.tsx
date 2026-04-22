@@ -131,6 +131,15 @@ export default function CompleteProfilePage() {
             <span className="blessing-complete-help">
               목록에서 선택하면 교회 인증 피드를 이용할 수 있어요.
             </span>
+            <button
+              type="button"
+              className="blessing-complete-verify-link"
+              onClick={() =>
+                router.push("/verify-church?return=/auth/complete-profile")
+              }
+            >
+              🏛 정식 교회 인증으로 진행하기 →
+            </button>
           </label>
 
           <div className="blessing-complete-actions">

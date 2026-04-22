@@ -112,6 +112,8 @@ const SUB_HEADERS: Record<string, SubHeader> = {
   "/church": { title: "교회", subtitle: "Churches" },
   "/my-articles": { title: "내 글", subtitle: "My Articles" },
   "/notifications": { title: "알림", subtitle: "Notifications" },
+  "/messages": { title: "쪽지", subtitle: "Messages" },
+  "/verify-church": { title: "교회 인증", subtitle: "Church Verification" },
   "/auth": { title: "로그인", subtitle: "Sign In" },
   "/about": { title: "소개", subtitle: "About" },
 };
@@ -139,6 +141,10 @@ export default function Header() {
   if (/^\/posts\/\d+(\/|$)/.test(pathname)) return null;
   // Search owns its own top bar with the live input field.
   if (pathname === "/search") return null;
+  // Message thread has a custom header (peer name + subtitle + ⋯).
+  if (/^\/messages\/\d+(\/|$)/.test(pathname)) return null;
+  // Church verify 3-step wizard has its own header with dynamic step subtitle.
+  if (pathname === "/verify-church") return null;
 
   if (pathname === "/") {
     return (
