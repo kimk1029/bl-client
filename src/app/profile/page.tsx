@@ -177,11 +177,11 @@ export default function ProfilePage() {
           </span>
           <MenuChevron />
         </Link>
-        <button className="blessing-profile-menu-row" type="button">
+        <Link href="/cell" className="blessing-profile-menu-row">
           <span className="blessing-menu-emoji">🫂</span>
           <span className="blessing-menu-label">나의 셀·목장</span>
           <MenuChevron />
-        </button>
+        </Link>
       </div>
 
       <div className="blessing-profile-menu-group">

@@ -161,6 +161,12 @@ export default function Header() {
   if (pathname === "/verify-church") return null;
   // Public user profile has its own header (back + more menu).
   if (/^\/users\/\d+(\/|$)/.test(pathname)) return null;
+  // Cell screen has its own header with invite/more buttons + hub tabs.
+  if (pathname === "/cell") return null;
+  // Meetup detail + create own their headers.
+  if (/^\/events\/meetups(\/|$)/.test(pathname)) return null;
+  // Onboarding owns its own header (logo + brand centered).
+  if (pathname === "/auth/complete-profile") return null;
 
   if (pathname === "/") {
     return (
