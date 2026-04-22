@@ -795,17 +795,18 @@ html.dark .blessing-prayer-stream {
   font-weight: 700;
 }
 .blessing-fab {
-  width: 46px;
-  height: 46px;
+  width: 52px;
+  height: 52px;
   background: var(--blessing-accent);
   color: #fff;
-  border-radius: 15px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: -18px;
+  margin-top: -34px;
   flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(91, 122, 94, 0.35);
+  box-shadow: 0 6px 18px rgba(91, 122, 94, 0.4),
+    0 0 0 4px var(--blessing-bg-0);
   transition: transform 0.15s, box-shadow 0.15s;
   text-decoration: none;
 }
@@ -1327,6 +1328,118 @@ html.dark .blessing-prayer-stream {
 .blessing-mychurch-privacy strong {
   font-weight: 700;
 }
+.blessing-mychurch-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 56px 24px 48px;
+  text-align: center;
+  background: var(--blessing-bg-0);
+  border-bottom: 1px solid var(--blessing-border);
+}
+.blessing-mychurch-empty-icon {
+  color: var(--blessing-accent);
+  display: inline-flex;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--blessing-accent-soft);
+  align-items: center;
+  justify-content: center;
+}
+.blessing-mychurch-empty-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--blessing-fg-0);
+  letter-spacing: -0.4px;
+}
+.blessing-mychurch-empty-msg {
+  font-size: 13px;
+  color: var(--blessing-fg-2);
+  line-height: 1.5;
+  letter-spacing: -0.2px;
+  max-width: 320px;
+}
+.blessing-mychurch-empty .blessing-btn-primary {
+  margin-top: 6px;
+  min-width: 160px;
+  padding: 0 20px;
+  text-decoration: none;
+}
+
+/* ---------- Complete profile (post-SNS) ---------- */
+.blessing-complete-wrap {
+  padding: 28px 16px 48px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.blessing-complete-head {
+  margin-bottom: 22px;
+}
+.blessing-complete-title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  color: var(--blessing-fg-0);
+}
+.blessing-complete-sub {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--blessing-fg-2);
+  line-height: 1.5;
+  letter-spacing: -0.2px;
+}
+.blessing-complete-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.blessing-complete-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.blessing-complete-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--blessing-fg-1);
+  letter-spacing: -0.2px;
+}
+.blessing-complete-input {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--blessing-border);
+  border-radius: 10px;
+  background: var(--blessing-bg-1);
+  color: var(--blessing-fg-0);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+}
+.blessing-complete-input:focus {
+  border-color: var(--blessing-accent);
+  box-shadow: 0 0 0 3px var(--blessing-accent-soft);
+}
+.blessing-complete-help {
+  font-size: 11.5px;
+  color: var(--blessing-fg-2);
+  letter-spacing: -0.1px;
+}
+.blessing-complete-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+.blessing-complete-actions .blessing-btn-primary {
+  flex: 1;
+  min-height: 42px;
+}
+.blessing-complete-actions .blessing-btn-secondary {
+  min-height: 42px;
+  padding: 0 18px;
+}
 .blessing-sort-bar {
   display: flex;
   align-items: center;
@@ -1556,7 +1669,7 @@ html.dark .blessing-prayer-stream {
 .blessing-chip-row {
   display: flex;
   gap: 6px;
-  padding: 10px 2px;
+  padding: 10px 16px;
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -1688,6 +1801,7 @@ html.dark .blessing-chip-active {
 .blessing-btn-primary {
   flex: 1;
   height: 40px;
+  padding: 0 16px;
   background: var(--blessing-accent);
   color: #fff;
   border: none;
@@ -1697,7 +1811,16 @@ html.dark .blessing-chip-active {
   letter-spacing: -0.3px;
   cursor: pointer;
   font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  white-space: nowrap;
   transition: background 0.15s, transform 0.1s;
+}
+.blessing-btn-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 .blessing-btn-primary:hover {
   background: var(--blessing-accent-strong);
@@ -2053,6 +2176,9 @@ html.dark .blessing-chip-active {
 }
 .blessing-calendar-cell-blank {
   pointer-events: none;
+}
+.blessing-calendar-cell-empty .blessing-calendar-cell-num {
+  color: var(--blessing-fg-3);
 }
 .blessing-calendar-cell:not(:disabled):hover {
   background: var(--blessing-bg-2);

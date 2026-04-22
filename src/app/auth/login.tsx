@@ -96,7 +96,9 @@ export default function Login({ onToggle }: LoginProps) {
 
   const handleSocial = async (provider: "kakao" | "naver" | "google") => {
     setSocialLoading(provider);
-    await signIn(provider, { callbackUrl: "/" });
+    // New OAuth users won't have affiliation set — route them to profile completion.
+    // Existing users with a church already set can skip and go home from there.
+    await signIn(provider, { callbackUrl: "/auth/complete-profile" });
   };
 
   return (

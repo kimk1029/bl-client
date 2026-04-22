@@ -20,7 +20,10 @@ export default function TopicBrowser({ posts }: { posts: Post[] }) {
     : enriched;
 
   const total = posts.length;
-  const totalNew = enriched.reduce((s, t) => s + t.newCount, 0);
+  const dayMs = 24 * 60 * 60 * 1000;
+  const totalNew = posts.filter(
+    (p) => Date.now() - new Date(p.created_at).getTime() < dayMs,
+  ).length;
   const picks = enriched.filter((t) => t.hot).slice(0, 4);
 
   return (

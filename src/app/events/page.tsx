@@ -8,6 +8,7 @@ import type { EventItem } from "@/types/type";
 import {
   eventBookmarks,
   useEventBookmarked,
+  useEventBookmarks,
 } from "@/lib/eventBookmarks";
 import { shareOrCopy } from "@/lib/share";
 
@@ -110,13 +111,12 @@ export default function EventsPage() {
   const loaded = !!data || !!error;
   const all = Array.isArray(data) ? data : [];
 
-  const bookmarks = useEventBookmarked; // satisfy eslint; used below per-item
-  void bookmarks;
+  const bookmarkedIds = useEventBookmarks();
 
   const byTag = all.filter((e) => matchesTag(e.tag, filter));
   const visible =
     filter === "bookmarked"
-      ? byTag.filter((e) => eventBookmarks.has(e.id))
+      ? byTag.filter((e) => bookmarkedIds.has(e.id))
       : byTag;
   const featured = visible.find((e) => e.featured);
   const rest = visible.filter((e) => !e.featured);

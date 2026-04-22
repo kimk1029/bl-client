@@ -130,11 +130,9 @@ export default function EventsCalendarPage() {
               <button
                 key={c.k}
                 type="button"
-                className={`blessing-calendar-cell${isToday ? " blessing-calendar-cell-today" : ""}${isSelected ? " blessing-calendar-cell-selected" : ""}${dow === 0 ? " blessing-calendar-cell-sun" : ""}${dow === 6 ? " blessing-calendar-cell-sat" : ""}`}
-                onClick={() =>
-                  setSelectedKey(count > 0 ? (isSelected ? null : c.k) : null)
-                }
-                disabled={count === 0}
+                className={`blessing-calendar-cell${isToday ? " blessing-calendar-cell-today" : ""}${isSelected ? " blessing-calendar-cell-selected" : ""}${dow === 0 ? " blessing-calendar-cell-sun" : ""}${dow === 6 ? " blessing-calendar-cell-sat" : ""}${count === 0 ? " blessing-calendar-cell-empty" : ""}`}
+                onClick={() => setSelectedKey(isSelected ? null : c.k)}
+                aria-label={`${c.day}일 ${count}건`}
               >
                 <span className="blessing-calendar-cell-num">{c.day}</span>
                 {count > 0 && (
@@ -170,7 +168,11 @@ export default function EventsCalendarPage() {
       <div className="blessing-event-list">
         {dayList.length === 0 ? (
           <div className="blessing-event-detail-missing" style={{ minHeight: 120 }}>
-            <div>표시할 이벤트가 없어요.</div>
+            <div>
+              {selectedKey
+                ? "이 날짜엔 열리는 이벤트가 없어요."
+                : "이 달에 표시할 이벤트가 없어요."}
+            </div>
           </div>
         ) : (
           dayList.map((e) => {

@@ -96,6 +96,15 @@ export async function PATCH(
       const a = typeof body.affiliation === 'string' ? body.affiliation.trim() : '';
       data.affiliation = a ? a : null;
     }
+    if ('church_id' in (body ?? {})) {
+      const raw = body.church_id;
+      if (raw === null || raw === undefined || raw === '') {
+        data.church_id = null;
+      } else {
+        const n = Number(raw);
+        data.church_id = Number.isFinite(n) && n > 0 ? n : null;
+      }
+    }
 
     const updated = await prisma.user.update({
       where: { id },

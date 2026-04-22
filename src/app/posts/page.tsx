@@ -57,7 +57,7 @@ function PostsContent() {
   }
 
   return (
-    <div className="px-4">
+    <div className="blessing-home">
       <div className="blessing-chip-row">
         <button
           onClick={() => {

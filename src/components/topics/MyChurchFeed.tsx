@@ -1,29 +1,106 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
 import type { Post } from "@/types/type";
 import PostRow from "@/components/home/PostRow";
 import { countComments, pickHot } from "@/components/home/lib/postAdapters";
 
-const MY_CHURCH_NAME = "은혜교회";
-const MY_CHURCH_AREA = "서울 강남구";
-const MY_CHURCH_VERIFIED = 312;
-const MY_CHURCH_MEMBERS = 2400;
-
 type SortKey = "latest" | "hot" | "comments";
 
+function ChurchIcon({ size = 22 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 40 40" fill="none" aria-hidden>
+      <circle cx="20" cy="20" r="18.5" stroke="currentColor" strokeWidth="1.6" opacity="0.6" />
+      <rect x="12" y="18" width="16" height="14" rx="1.5" fill="currentColor" opacity="0.2" />
+      <polygon points="20,8 10,18 30,18" fill="currentColor" opacity="0.5" />
+      <rect x="17" y="24" width="6" height="8" rx="1" fill="currentColor" opacity="0.7" />
+    </svg>
+  );
+}
+
+function ChurchCtaCard({
+  title,
+  message,
+  actionLabel,
+  actionHref,
+}: {
+  title: string;
+  message: string;
+  actionLabel: string;
+  actionHref: string;
+}) {
+  return (
+    <div className="blessing-mychurch-empty">
+      <div className="blessing-mychurch-empty-icon">
+        <ChurchIcon size={44} />
+      </div>
+      <div className="blessing-mychurch-empty-title">{title}</div>
+      <div className="blessing-mychurch-empty-msg">{message}</div>
+      <Link href={actionHref} className="blessing-btn-primary">
+        {actionLabel}
+      </Link>
+    </div>
+  );
+}
+
 export default function MyChurchFeed({ posts }: { posts: Post[] }) {
+  const { data: session, status } = useSession();
   const [sort, setSort] = useState<SortKey>("latest");
 
-  let sorted = [...posts];
-  if (sort === "latest") {
-    sorted.sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  const church = (session?.user as { affiliation?: string | null } | undefined)
+    ?.affiliation ?? null;
+
+  const sorted = useMemo(() => {
+    if (!church) return [] as Post[];
+    const churchPosts = posts; // Backend filter by church not yet available — show all for enrolled users
+    const copy = [...churchPosts];
+    if (sort === "latest") {
+      copy.sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      );
+    } else if (sort === "hot") {
+      return pickHot(copy, copy.length);
+    } else {
+      copy.sort((a, b) => countComments(b) - countComments(a));
+    }
+    return copy;
+  }, [posts, sort, church]);
+
+  if (status === "loading") {
+    return (
+      <div className="blessing-loading">
+        <div className="blessing-spinner" aria-label="Loading" />
+      </div>
     );
-  } else if (sort === "hot") {
-    sorted = pickHot(sorted, sorted.length);
-  } else {
-    sorted.sort((a, b) => countComments(b) - countComments(a));
+  }
+
+  if (!session) {
+    return (
+      <div className="blessing-hub-area">
+        <ChurchCtaCard
+          title="로그인하고 내 교회 피드 보기"
+          message="같은 교회 성도들의 기도제목·소식을 모아볼 수 있어요."
+          actionLabel="로그인"
+          actionHref="/auth"
+        />
+      </div>
+    );
+  }
+
+  if (!church) {
+    return (
+      <div className="blessing-hub-area">
+        <ChurchCtaCard
+          title="교회를 등록해 주세요"
+          message="출석 교회를 등록하면 같은 교회 성도들만 보는 피드가 열립니다."
+          actionLabel="교회 등록하기"
+          actionHref="/auth/complete-profile"
+        />
+      </div>
+    );
   }
 
   const dayMs = 24 * 60 * 60 * 1000;
@@ -39,40 +116,12 @@ export default function MyChurchFeed({ posts }: { posts: Post[] }) {
       <div className="blessing-feed-church-strip">
         <div className="blessing-feed-church-left">
           <div className="blessing-feed-church-icon">
-            <svg width="22" height="22" viewBox="0 0 40 40" fill="none" aria-hidden>
-              <circle
-                cx="20"
-                cy="20"
-                r="18.5"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                opacity="0.6"
-              />
-              <rect
-                x="12"
-                y="18"
-                width="16"
-                height="14"
-                rx="1.5"
-                fill="currentColor"
-                opacity="0.2"
-              />
-              <polygon points="20,8 10,18 30,18" fill="currentColor" opacity="0.5" />
-              <rect
-                x="17"
-                y="24"
-                width="6"
-                height="8"
-                rx="1"
-                fill="currentColor"
-                opacity="0.7"
-              />
-            </svg>
+            <ChurchIcon />
           </div>
           <div>
-            <div className="blessing-feed-church-name">{MY_CHURCH_NAME}</div>
+            <div className="blessing-feed-church-name">{church}</div>
             <div className="blessing-feed-church-meta">
-              {MY_CHURCH_AREA} · {MY_CHURCH_VERIFIED}명 인증
+              인증 성도 전용 피드
             </div>
           </div>
         </div>
@@ -99,11 +148,6 @@ export default function MyChurchFeed({ posts }: { posts: Post[] }) {
           <strong>{activeAuthors}</strong>
           <span>활동 성도</span>
         </div>
-        <div className="blessing-feed-stat-divider" />
-        <div className="blessing-feed-stat">
-          <strong>{MY_CHURCH_MEMBERS.toLocaleString()}</strong>
-          <span>총 성도</span>
-        </div>
       </div>
 
       <div className="blessing-mychurch-privacy">
@@ -116,7 +160,7 @@ export default function MyChurchFeed({ posts }: { posts: Post[] }) {
           />
         </svg>
         <span>
-          <strong>{MY_CHURCH_NAME} 인증 성도</strong>만 보고 쓸 수 있는 공간입니다
+          <strong>{church} 인증 성도</strong>만 보고 쓸 수 있는 공간입니다
         </span>
       </div>
 
@@ -150,12 +194,12 @@ export default function MyChurchFeed({ posts }: { posts: Post[] }) {
         {sorted.length === 0 && (
           <div className="blessing-hub-empty">
             <div className="blessing-hub-empty-big">—</div>
-            <div>아직 {MY_CHURCH_NAME}에서 올라온 글이 없어요</div>
+            <div>아직 {church}에서 올라온 글이 없어요</div>
           </div>
         )}
       </div>
 
-      <div className="blessing-end">· END OF {MY_CHURCH_NAME} FEED ·</div>
+      <div className="blessing-end">· END OF FEED ·</div>
     </div>
   );
 }
