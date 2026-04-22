@@ -32,7 +32,7 @@ function RootLayoutContent({ children }: { children: React.ReactNode }) {
           className={`flex flex-col min-h-screen w-full max-w-[800px] transition-colors duration-200 ${isDark ? 'bg-gray-900' : 'bg-white'} md:shadow-[0_0_40px_rgba(0,0,0,0.06)]`}
         >
           <Header />
-          <main className={mainClass}>
+          <main className={mainClass} style={{ paddingBottom: "calc(60px + env(safe-area-inset-bottom))" }}>
             {children}
           </main>
           <BottomNav />

@@ -40,35 +40,33 @@ export default function Home() {
       <PinnedNotice post={pinned} />
       <TopicStrip />
 
-      <div className="px-4">
-        {!loaded ? (
-          <div className="blessing-loading">
-            <div className="blessing-spinner" aria-label="Loading" />
-          </div>
-        ) : (
-          <>
-            <HotSection posts={list} outputIds={hotIds} />
-            <PrayerStream />
+      {!loaded ? (
+        <div className="blessing-loading">
+          <div className="blessing-spinner" aria-label="Loading" />
+        </div>
+      ) : (
+        <>
+          <HotSection posts={list} outputIds={hotIds} />
+          <PrayerStream />
 
-            {SECTION_TOPIC_IDS.map((tid) => {
-              const topic = TOPIC_BY_ID[tid];
-              if (!topic) return null;
-              return (
-                <TopicLatestSection
-                  key={tid}
-                  topic={topic}
-                  posts={list}
-                  excludeIds={hotIds}
-                />
-              );
-            })}
+          {SECTION_TOPIC_IDS.map((tid) => {
+            const topic = TOPIC_BY_ID[tid];
+            if (!topic) return null;
+            return (
+              <TopicLatestSection
+                key={tid}
+                topic={topic}
+                posts={list}
+                excludeIds={hotIds}
+              />
+            );
+          })}
 
-            <EventsRail />
-          </>
-        )}
+          <EventsRail />
+        </>
+      )}
 
-        <div className="blessing-end">· · · END · · ·</div>
-      </div>
+      <div className="blessing-end">· · · END · · ·</div>
     </div>
   );
 }

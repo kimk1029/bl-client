@@ -89,10 +89,7 @@ export default function BottomNav() {
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
-    <nav
-      className="blessing-bottom-nav"
-      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
-    >
+    <nav className="blessing-bottom-nav">
       <div className="blessing-bottom-tabs">
         {TABS.slice(0, 2).map(({ href, label, Icon }) => {
           const active = isActive(href);

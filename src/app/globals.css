@@ -75,6 +75,9 @@ html.dark {
   }
 }
 
+html {
+  scrollbar-gutter: stable;
+}
 body {
   background: var(--background);
   color: var(--foreground);
@@ -171,11 +174,12 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 14px;
-  margin: 0 0 12px;
+  padding: 10px 16px;
+  margin: 0;
   background: var(--blessing-pin-soft);
   color: var(--blessing-pin);
-  border-radius: 10px;
+  border-bottom: 1px solid var(--blessing-border);
+  border-radius: 0;
   font-size: 13px;
   text-decoration: none;
 }
@@ -206,9 +210,9 @@ body {
   flex-wrap: nowrap;
   overflow-x: auto;
   gap: 2px;
-  padding: 10px 0;
-  margin: 0 -4px 6px;
-  border-top: 1px solid var(--blessing-border);
+  padding: 8px 8px 10px;
+  margin: 0;
+  background: var(--blessing-bg-0);
   border-bottom: 1px solid var(--blessing-border);
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -263,13 +267,14 @@ body {
 
 /* ---------- Section header ---------- */
 .blessing-section {
-  margin: 4px 0 4px;
+  margin: 0;
 }
 .blessing-section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 2px 6px;
+  padding: 16px 16px 6px;
+  background: var(--blessing-bg-0);
 }
 .blessing-section-title-wrap {
   display: flex;
@@ -323,12 +328,12 @@ body {
 
 /* ---------- Post row (dense, blind-style) ---------- */
 .blessing-hot-list {
-  background: transparent;
+  background: var(--blessing-bg-0);
 }
 .blessing-post-row {
   display: flex;
   gap: 10px;
-  padding: 10px 2px;
+  padding: 10px 16px;
   cursor: pointer;
   transition: background 0.1s;
   border-bottom: 1px solid var(--blessing-border);
@@ -461,10 +466,11 @@ body {
 
 /* ---------- Prayer stream ---------- */
 .blessing-prayer-stream {
-  padding: 10px 12px 12px;
+  padding: 10px 16px 14px;
   background: var(--blessing-accent-soft);
-  border-radius: 12px;
-  margin-top: 2px;
+  border-bottom: 1px solid var(--blessing-border);
+  border-radius: 0;
+  margin: 0;
 }
 html.dark .blessing-prayer-stream {
   background: var(--blessing-bg-2);
@@ -511,13 +517,15 @@ html.dark .blessing-prayer-stream {
 
 /* ---------- Magazine per-topic row ---------- */
 .blessing-mag-wrap {
-  padding: 2px 0 4px;
+  padding: 4px 16px 12px;
+  background: var(--blessing-bg-0);
+  border-bottom: 1px solid var(--blessing-border);
 }
 .blessing-mag-row {
   display: grid;
   grid-template-columns: 1fr 80px;
   gap: 12px;
-  padding: 12px 0;
+  padding: 14px 0;
   border-bottom: 1px solid var(--blessing-border);
   text-decoration: none;
   color: inherit;
@@ -566,8 +574,10 @@ html.dark .blessing-prayer-stream {
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  padding: 4px 0 8px;
-  margin: 0 -4px;
+  padding: 8px 16px 14px;
+  margin: 0;
+  background: var(--blessing-bg-0);
+  border-bottom: 1px solid var(--blessing-border);
   scrollbar-width: none;
 }
 .blessing-event-rail::-webkit-scrollbar {
@@ -581,6 +591,9 @@ html.dark .blessing-prayer-stream {
   border: 1px solid var(--blessing-border);
   border-radius: 12px;
   transition: border-color 0.15s;
+  text-decoration: none;
+  color: inherit;
+  display: block;
 }
 .blessing-event-card:hover {
   border-color: var(--blessing-accent);
@@ -625,11 +638,20 @@ html.dark .blessing-prayer-stream {
 /* ---------- End spacer ---------- */
 .blessing-end {
   text-align: center;
-  padding: 24px 0 12px;
+  padding: 24px 16px 16px;
   font-family: var(--blessing-mono);
   font-size: 11px;
   color: var(--blessing-fg-3);
   letter-spacing: 0.2em;
+  background: var(--blessing-bg-0);
+}
+
+/* ---------- Home page container ---------- */
+.blessing-home {
+  background: var(--blessing-bg-0);
+}
+.blessing-home > * {
+  max-width: 100%;
 }
 
 /* ---------- Loading / empty states ---------- */
@@ -665,6 +687,7 @@ html.dark .blessing-prayer-stream {
   max-width: 800px;
   background: var(--blessing-bg-0);
   border-top: 1px solid var(--blessing-border);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 .blessing-bottom-tabs {
   display: flex;
