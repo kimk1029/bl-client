@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { MOCK_EVENTS } from "@/components/home/data/mockEvents";
+import useSWR from "swr";
+import { apiFetcher } from "@/lib/fetcher";
+import type { EventItem } from "@/types/type";
 
 const FILTERS = [
   { id: "all", label: "전체" },
@@ -14,8 +16,9 @@ const FILTERS = [
 
 type FilterId = (typeof FILTERS)[number]["id"];
 
-function matchesFilter(tag: string, filter: FilterId): boolean {
+function matchesFilter(tag: string | null, filter: FilterId): boolean {
   if (filter === "all") return true;
+  if (!tag) return false;
   if (filter === "official") return tag === "공식 주최";
   if (filter === "mission") return tag === "선교";
   if (filter === "worship") return tag === "찬양";
@@ -26,7 +29,10 @@ function matchesFilter(tag: string, filter: FilterId): boolean {
 
 export default function EventsPage() {
   const [filter, setFilter] = useState<FilterId>("all");
-  const visible = MOCK_EVENTS.filter((e) => matchesFilter(e.tag, filter));
+  const { data, error } = useSWR<EventItem[]>("/api/events", apiFetcher);
+  const loaded = !!data || !!error;
+  const all = Array.isArray(data) ? data : [];
+  const visible = all.filter((e) => matchesFilter(e.tag, filter));
   const featured = visible.find((e) => e.featured);
   const rest = visible.filter((e) => !e.featured);
 
@@ -45,26 +51,34 @@ export default function EventsPage() {
       </div>
 
       <div className="px-4">
+      {!loaded ? (
+        <div className="blessing-loading">
+          <div className="blessing-spinner" aria-label="Loading" />
+        </div>
+      ) : (
+        <>
       {featured && (
         <div className="blessing-event-featured">
           <div className="blessing-event-featured-cover">
-            <span className="blessing-event-featured-emoji">{featured.cover}</span>
-            <span
-              className={`blessing-event-featured-tag blessing-tag-${featured.tagColor}`}
-            >
-              ● {featured.tag}
-            </span>
+            <span className="blessing-event-featured-emoji">{featured.cover ?? "📅"}</span>
+            {featured.tag && (
+              <span
+                className={`blessing-event-featured-tag blessing-tag-${featured.tag_color ?? "accent"}`}
+              >
+                ● {featured.tag}
+              </span>
+            )}
           </div>
           <div className="blessing-event-featured-body">
-            <div className="blessing-event-featured-date">{featured.date}</div>
+            <div className="blessing-event-featured-date">{featured.date_text}</div>
             <div className="blessing-event-featured-title">{featured.title}</div>
-            <div className="blessing-event-featured-desc">{featured.desc}</div>
+            <div className="blessing-event-featured-desc">{featured.description}</div>
             <div className="blessing-event-featured-meta">
-              <span>📍 {featured.where}</span>
+              <span>📍 {featured.location ?? "-"}</span>
               <span className="blessing-dot">·</span>
               <span>👥 {featured.ppl.toLocaleString()}명</span>
               <span className="blessing-dot">·</span>
-              <span>💰 {featured.price}</span>
+              <span>💰 {featured.price ?? "-"}</span>
             </div>
             <div className="blessing-event-featured-actions">
               <button className="blessing-btn-primary">참가 신청</button>
@@ -106,32 +120,40 @@ export default function EventsPage() {
       <div className="blessing-event-list">
         {rest.map((e) => (
           <div key={e.id} className="blessing-event-list-row">
-            <div className="blessing-event-list-cover">{e.cover}</div>
+            <div className="blessing-event-list-cover">{e.cover ?? "📅"}</div>
             <div className="blessing-event-list-body">
               <div className="blessing-event-list-tag-line">
-                <span
-                  className={`blessing-event-list-tag blessing-tag-${e.tagColor}`}
-                >
-                  {e.tag}
-                </span>
-                <span className="blessing-event-list-date">{e.date}</span>
+                {e.tag && (
+                  <span
+                    className={`blessing-event-list-tag blessing-tag-${e.tag_color ?? "accent"}`}
+                  >
+                    {e.tag}
+                  </span>
+                )}
+                <span className="blessing-event-list-date">{e.date_text}</span>
               </div>
               <div className="blessing-event-list-title">{e.title}</div>
               <div className="blessing-event-list-meta">
-                <span>📍 {e.where}</span>
+                <span>📍 {e.location ?? "-"}</span>
                 {e.ppl > 0 && (
                   <>
                     <span className="blessing-dot">·</span>
                     <span>{e.ppl.toLocaleString()}명</span>
                   </>
                 )}
-                <span className="blessing-dot">·</span>
-                <span>{e.price}</span>
+                {e.price && (
+                  <>
+                    <span className="blessing-dot">·</span>
+                    <span>{e.price}</span>
+                  </>
+                )}
               </div>
             </div>
           </div>
         ))}
       </div>
+        </>
+      )}
 
       <div className="blessing-end">· · · END · · ·</div>
       </div>

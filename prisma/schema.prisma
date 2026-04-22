@@ -56,18 +56,20 @@ model User {
   comments          Comment[]
   likes             Like[]
   affiliation_posts AffiliationPost[]
+  events            Event[]
 
   @@index([church_id])
 }
 
 model Post {
-  id         Int      @id @default(autoincrement())
-  title      String
-  content    String   @db.Text
-  views      Int      @default(0)
-  tag        PostTag  @default(free)
-  images     String[] @default([])
-  created_at DateTime @default(now())
+  id           Int      @id @default(autoincrement())
+  title        String
+  content      String   @db.Text
+  views        Int      @default(0)
+  tag          PostTag  @default(free)
+  images       String[] @default([])
+  is_anonymous Boolean  @default(false)
+  created_at   DateTime @default(now())
 
   author_id Int
   author    User @relation(fields: [author_id], references: [id], onDelete: Cascade)
@@ -77,6 +79,33 @@ model Post {
 
   @@index([author_id])
   @@index([tag])
+  @@index([is_anonymous])
+  @@index([created_at])
+}
+
+model Event {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String   @db.Text
+  cover       String?
+  date_text   String
+  location    String?
+  host        String?
+  ppl         Int      @default(0)
+  price       String?
+  tag         String?
+  tag_color   String?
+  featured    Boolean  @default(false)
+  start_at    DateTime?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  author_id Int
+  author    User @relation(fields: [author_id], references: [id], onDelete: Cascade)
+
+  @@index([author_id])
+  @@index([featured])
+  @@index([start_at])
   @@index([created_at])
 }
 

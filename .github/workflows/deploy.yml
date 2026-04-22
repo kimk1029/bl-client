@@ -42,6 +42,7 @@ jobs:
           yarn prisma db execute --schema prisma/schema.prisma --file prisma/pre-push.sql
           yarn prisma db push --accept-data-loss
           node prisma/seed-churches.mjs
+          node prisma/seed-events.mjs
           yarn build
           pm2 restart "$PM2_NAME" --update-env || pm2 start yarn --name "$PM2_NAME" -- start
           pm2 save

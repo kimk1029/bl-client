@@ -10,21 +10,29 @@ export async function GET(request: NextRequest) {
   try {
     const url = new URL(request.url);
     const category = url.searchParams.get('category');
+    const anonymous = url.searchParams.get('anonymous');
+    const limitParam = url.searchParams.get('limit');
+
     const where: any = {};
     if (category && (VALID_TAGS as readonly string[]).includes(category)) {
       where.tag = category;
     }
+    if (anonymous === 'true') where.is_anonymous = true;
+    else if (anonymous === 'false') where.is_anonymous = false;
+
+    const take = limitParam ? Math.min(Math.max(parseInt(limitParam, 10) || 0, 1), 100) : undefined;
 
     const posts = await prisma.post.findMany({
       where,
       orderBy: { created_at: 'desc' },
+      take,
       include: {
         author: { select: { id: true, username: true } },
         _count: { select: { comments: true, likes: true } },
       },
     });
 
-    const data = posts.map((p) => ({
+    const data = posts.map((p: any) => ({
       id: p.id,
       title: p.title,
       content: p.content,
@@ -32,7 +40,8 @@ export async function GET(request: NextRequest) {
       views: p.views,
       tag: p.tag,
       category: p.tag,
-      author: p.author,
+      is_anonymous: p.is_anonymous,
+      author: p.is_anonymous ? null : p.author,
       commentCount: p._count.comments,
       likeCount: p._count.likes,
       imageUrls: (p.images ?? []).map(toImageUrl),
@@ -54,6 +63,7 @@ export async function POST(request: NextRequest) {
     let title = '';
     let content = '';
     let category: Tag = 'free';
+    let isAnonymous = false;
     const images: string[] = [];
 
     const contentType = request.headers.get('content-type') || '';
@@ -63,6 +73,7 @@ export async function POST(request: NextRequest) {
       content = String(fd.get('content') ?? '');
       const cat = String(fd.get('category') ?? 'free');
       category = (VALID_TAGS as readonly string[]).includes(cat) ? (cat as Tag) : 'free';
+      isAnonymous = String(fd.get('is_anonymous') ?? fd.get('anonymous') ?? '') === 'true';
       const file = fd.get('image');
       if (file && file instanceof File && file.size > 0) {
         const filename = await saveUploadedFile(file);
@@ -74,6 +85,7 @@ export async function POST(request: NextRequest) {
       content = String(body?.content ?? '');
       const cat = String(body?.category ?? body?.tag ?? 'free');
       category = (VALID_TAGS as readonly string[]).includes(cat) ? (cat as Tag) : 'free';
+      isAnonymous = !!(body?.is_anonymous ?? body?.anonymous);
     }
 
     if (!title || !content) {
@@ -87,6 +99,7 @@ export async function POST(request: NextRequest) {
           content,
           tag: category,
           images,
+          is_anonymous: isAnonymous,
           author: { connect: { id: user.id } },
         },
       }),

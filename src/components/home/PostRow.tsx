@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { Post } from "@/types/type";
 import { topicByCategory } from "./data/topics";
-import { countComments, formatTimeAgo, formatViews } from "./lib/postAdapters";
+import { countComments, countLikes, formatTimeAgo, formatViews } from "./lib/postAdapters";
 
 interface Props {
   post: Post;
@@ -72,7 +72,7 @@ export default function PostRow({ post, rank, showTopic = true, hot, pinned }: P
                 strokeLinejoin="round"
               />
             </svg>
-            {post.likes ?? 0}
+            {countLikes(post)}
           </span>
         </div>
       </div>

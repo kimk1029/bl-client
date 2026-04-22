@@ -96,7 +96,7 @@ const SearchContent = () => {
                                             <div className={`mt-3 text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                                                 <span>{new Date(post.created_at).toLocaleDateString()}</span>
                                                 <span className="mx-2">•</span>
-                                                <span>작성자: {post.author.username}</span>
+                                                <span>작성자: {post.author?.username ?? '익명'}</span>
                                             </div>
                                         </div>
                                     ))}

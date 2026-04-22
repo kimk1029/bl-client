@@ -20,7 +20,7 @@ export default function TopicLatestSection({
   excludeIds,
 }: Props) {
   if (!topic.mapsTo) return null;
-  const all = postsByCategory(posts, topic.mapsTo);
+  const all = postsByCategory(posts, topic.mapsTo, { anonymous: topic.anon });
   const filtered = (excludeIds
     ? all.filter((p) => !excludeIds.has(p.id))
     : all

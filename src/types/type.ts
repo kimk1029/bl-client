@@ -9,10 +9,34 @@ export interface Post {
     author: {
         id: number;
         username: string;
-    };
+    } | null;
     comments: number;
     likes: number;
+    commentCount?: number;
+    likeCount?: number;
     category: Topic;
+    tag?: Topic;
+    is_anonymous?: boolean;
+    imageUrls?: string[];
+    images?: string[];
+}
+
+export interface EventItem {
+    id: number;
+    title: string;
+    description: string;
+    cover: string | null;
+    date_text: string;
+    location: string | null;
+    host: string | null;
+    ppl: number;
+    price: string | null;
+    tag: string | null;
+    tag_color: 'hot' | 'accent' | 'pin' | null;
+    featured: boolean;
+    start_at: string | null;
+    created_at: string;
+    author: { id: number; username: string } | null;
 }
 
 export interface PostContentProps {
