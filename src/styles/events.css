@@ -1,0 +1,528 @@
+/* =========================================================================
+   Events page
+   ========================================================================= */
+.blessing-event-featured {
+  border: 1px solid var(--blessing-border);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--blessing-bg-1);
+  margin: 8px 0 12px;
+}
+.blessing-event-featured-cover {
+  position: relative;
+  height: 140px;
+  background: linear-gradient(135deg, var(--blessing-accent-soft), var(--blessing-bg-3));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.blessing-event-featured-emoji {
+  font-size: 64px;
+  line-height: 1;
+}
+.blessing-event-featured-tag {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 10.5px;
+  font-weight: 700;
+  font-family: var(--blessing-mono);
+  letter-spacing: 0.03em;
+}
+.blessing-tag-hot {
+  background: var(--blessing-hot);
+  color: #fff;
+}
+.blessing-tag-accent {
+  background: var(--blessing-accent);
+  color: #fff;
+}
+.blessing-tag-pin {
+  background: var(--blessing-pin);
+  color: #fff;
+}
+.blessing-event-featured-body {
+  padding: 16px 16px 18px;
+}
+.blessing-event-featured-date {
+  font-family: var(--blessing-mono);
+  font-size: 11px;
+  color: var(--blessing-accent-strong);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.blessing-event-featured-title {
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--blessing-fg-0);
+  letter-spacing: -0.6px;
+  line-height: 1.25;
+  margin-top: 6px;
+}
+.blessing-event-featured-desc {
+  font-size: 13px;
+  color: var(--blessing-fg-1);
+  line-height: 1.55;
+  margin-top: 10px;
+  letter-spacing: -0.2px;
+}
+.blessing-event-featured-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  color: var(--blessing-fg-2);
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+.blessing-event-featured-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+.blessing-btn-primary {
+  flex: 1;
+  height: 40px;
+  padding: 0 16px;
+  background: var(--blessing-accent);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  cursor: pointer;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s, transform 0.1s;
+}
+.blessing-btn-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.blessing-btn-primary:hover {
+  background: var(--blessing-accent-strong);
+}
+.blessing-btn-primary:active {
+  transform: scale(0.98);
+}
+.blessing-btn-secondary {
+  width: 40px;
+  height: 40px;
+  background: var(--blessing-bg-2);
+  border: 1px solid var(--blessing-border);
+  border-radius: 10px;
+  color: var(--blessing-fg-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.blessing-btn-secondary:hover {
+  background: var(--blessing-bg-3);
+}
+
+.blessing-event-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: var(--blessing-bg-1);
+  border: 1px solid var(--blessing-border);
+  border-radius: 14px;
+  overflow: hidden;
+  margin: 6px 0;
+}
+.blessing-event-list-row {
+  display: flex;
+  gap: 12px;
+  padding: 14px;
+  border-bottom: 1px solid var(--blessing-border);
+  align-items: flex-start;
+}
+.blessing-event-list-row:last-child {
+  border-bottom: none;
+}
+.blessing-event-list-cover {
+  width: 52px;
+  height: 52px;
+  background: var(--blessing-bg-2);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  flex-shrink: 0;
+}
+.blessing-event-list-body {
+  flex: 1;
+  min-width: 0;
+}
+.blessing-event-list-tag-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10.5px;
+  margin-bottom: 4px;
+}
+.blessing-event-list-tag {
+  padding: 1px 7px;
+  border-radius: 100px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.03em;
+  font-family: var(--blessing-mono);
+}
+.blessing-event-list-date {
+  color: var(--blessing-fg-2);
+  font-family: var(--blessing-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+}
+.blessing-event-list-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--blessing-fg-0);
+  letter-spacing: -0.3px;
+  line-height: 1.35;
+  margin-bottom: 5px;
+}
+.blessing-event-list-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--blessing-fg-2);
+  flex-wrap: wrap;
+}
+
+/* Override the old event-card now that shape changed */
+.blessing-event-emoji {
+  font-size: 28px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.blessing-event-when {
+  font-size: 10.5px;
+  color: var(--blessing-fg-2);
+  font-family: var(--blessing-mono);
+  margin-top: 4px;
+}
+
+/* Buttons with icon + text (detail page) */
+.blessing-btn-secondary {
+  gap: 6px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0 12px;
+  width: auto;
+  min-width: 40px;
+  color: var(--blessing-fg-0);
+}
+.blessing-btn-secondary:focus-visible {
+  outline: 2px solid var(--blessing-accent);
+  outline-offset: 2px;
+}
+.blessing-btn-secondary-on {
+  background: var(--blessing-accent-soft);
+  border-color: var(--blessing-accent);
+  color: var(--blessing-accent-strong);
+}
+.blessing-btn-secondary-on:hover {
+  background: var(--blessing-accent-soft);
+  border-color: var(--blessing-accent-strong);
+}
+
+/* Event list row — link anchors + actions column */
+.blessing-event-list-row > a.blessing-event-list-cover,
+.blessing-event-list-row > a.blessing-event-list-body {
+  text-decoration: none;
+  color: inherit;
+}
+.blessing-event-list-row > a.blessing-event-list-cover:hover,
+.blessing-event-list-row > a.blessing-event-list-body:hover {
+  opacity: 0.9;
+}
+.blessing-event-list-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+  align-self: center;
+}
+.blessing-event-list-actions .blessing-btn-secondary {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  min-width: 36px;
+}
+.blessing-event-featured-title {
+  text-decoration: none;
+  color: var(--blessing-fg-0);
+}
+.blessing-event-featured-cover {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Event detail page */
+.blessing-event-detail {
+  background: var(--blessing-bg-0);
+}
+.blessing-event-detail-cover {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    135deg,
+    var(--blessing-accent-soft) 0%,
+    var(--blessing-bg-2) 100%
+  );
+  border-bottom: 1px solid var(--blessing-border);
+}
+.blessing-event-detail-cover-emoji {
+  font-size: 96px;
+  line-height: 1;
+  opacity: 0.85;
+}
+.blessing-event-detail-body {
+  padding: 18px 16px 32px;
+}
+.blessing-event-detail-date {
+  font-family: var(--blessing-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--blessing-accent-strong);
+  text-transform: uppercase;
+}
+.blessing-event-detail-title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  color: var(--blessing-fg-0);
+  line-height: 1.25;
+  margin: 6px 0 10px;
+}
+.blessing-event-detail-desc {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--blessing-fg-1);
+  letter-spacing: -0.2px;
+  white-space: pre-wrap;
+  word-break: keep-all;
+}
+.blessing-event-detail-meta {
+  margin: 22px 0 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 16px;
+  background: var(--blessing-bg-1);
+  border: 1px solid var(--blessing-border);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.blessing-event-detail-meta > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.blessing-event-detail-meta dt {
+  font-size: 10.5px;
+  font-family: var(--blessing-mono);
+  color: var(--blessing-fg-2);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.blessing-event-detail-meta dd {
+  font-size: 13.5px;
+  color: var(--blessing-fg-0);
+  font-weight: 500;
+  letter-spacing: -0.3px;
+  margin: 0;
+}
+.blessing-event-detail-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+  align-items: stretch;
+}
+.blessing-event-detail-actions .blessing-btn-primary {
+  flex: 1;
+}
+.blessing-event-detail-missing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 240px;
+  color: var(--blessing-fg-2);
+  font-size: 14px;
+}
+
+/* Event calendar */
+.blessing-calendar {
+  padding: 10px 16px 16px;
+  background: var(--blessing-bg-0);
+  border-bottom: 1px solid var(--blessing-border);
+}
+.blessing-calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 4px 0 12px;
+}
+.blessing-calendar-month {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  color: var(--blessing-fg-0);
+  min-width: 120px;
+  text-align: center;
+}
+.blessing-calendar-nav {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid var(--blessing-border);
+  background: var(--blessing-bg-1);
+  color: var(--blessing-fg-1);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  transition: background 0.12s, border-color 0.12s;
+}
+.blessing-calendar-nav:hover {
+  background: var(--blessing-bg-2);
+  border-color: var(--blessing-border-strong);
+}
+.blessing-calendar-grid-head,
+.blessing-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+.blessing-calendar-grid-head {
+  margin-bottom: 4px;
+}
+.blessing-calendar-dow {
+  padding: 6px 0;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--blessing-fg-2);
+  letter-spacing: 0.1em;
+  font-family: var(--blessing-mono);
+}
+.blessing-calendar-dow-sun {
+  color: var(--blessing-hot);
+}
+.blessing-calendar-dow-sat {
+  color: #2b6da6;
+}
+.blessing-calendar-grid {
+  gap: 4px;
+}
+.blessing-calendar-cell {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--blessing-fg-0);
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s, border-color 0.12s;
+}
+.blessing-calendar-cell:disabled {
+  cursor: default;
+  color: var(--blessing-fg-2);
+}
+.blessing-calendar-cell-blank {
+  pointer-events: none;
+}
+.blessing-calendar-cell-empty .blessing-calendar-cell-num {
+  color: var(--blessing-fg-3);
+}
+.blessing-calendar-cell:not(:disabled):hover {
+  background: var(--blessing-bg-2);
+}
+.blessing-calendar-cell-num {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+.blessing-calendar-cell-sun .blessing-calendar-cell-num {
+  color: var(--blessing-hot);
+}
+.blessing-calendar-cell-sat .blessing-calendar-cell-num {
+  color: #2b6da6;
+}
+.blessing-calendar-cell-today {
+  background: var(--blessing-accent-soft);
+}
+.blessing-calendar-cell-today .blessing-calendar-cell-num {
+  color: var(--blessing-accent-strong);
+  font-weight: 800;
+}
+.blessing-calendar-cell-selected {
+  background: var(--blessing-accent) !important;
+  border-color: var(--blessing-accent-strong);
+}
+.blessing-calendar-cell-selected .blessing-calendar-cell-num {
+  color: #fff !important;
+}
+.blessing-calendar-cell-dot {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 6px;
+  height: 6px;
+  border-radius: 100px;
+  background: var(--blessing-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.blessing-calendar-cell-dot span {
+  padding: 0 5px;
+  font-size: 9px;
+  line-height: 1;
+  color: #fff;
+  font-weight: 700;
+  font-family: var(--blessing-mono);
+  height: 12px;
+  min-width: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 100px;
+  background: var(--blessing-accent);
+}
+.blessing-calendar-cell-selected .blessing-calendar-cell-dot,
+.blessing-calendar-cell-selected .blessing-calendar-cell-dot span {
+  background: #fff;
+  color: var(--blessing-accent-strong);
+}
+

@@ -1,0 +1,205 @@
+/* =========================================================================
+   Onboarding
+   ========================================================================= */
+.blessing-onboard-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 16px;
+  background: var(--blessing-bg-0);
+  border-bottom: 1px solid var(--blessing-border);
+  color: var(--blessing-accent);
+  backdrop-filter: blur(8px);
+}
+.blessing-onboard-brand {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--blessing-fg-0);
+}
+.blessing-onboard-body {
+  padding: 32px 22px 60px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.blessing-onboard-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.blessing-onboard-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--blessing-bg-3);
+}
+.blessing-onboard-dot-active {
+  background: var(--blessing-accent);
+}
+.blessing-onboard-title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  color: var(--blessing-fg-0);
+  line-height: 1.25;
+}
+.blessing-onboard-sub {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--blessing-fg-1);
+  line-height: 1.55;
+  letter-spacing: -0.2px;
+}
+.blessing-onboard-nick-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 22px 16px;
+  background: var(--blessing-accent-soft);
+  border-radius: 12px;
+  margin: 22px 0 18px;
+}
+.blessing-onboard-nick-display {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  color: var(--blessing-fg-0);
+}
+.blessing-onboard-nick-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.blessing-onboard-nick-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 2px;
+  font-size: 11.5px;
+  min-height: 16px;
+}
+.blessing-onboard-nick-ok {
+  color: var(--blessing-accent-strong);
+  font-weight: 600;
+}
+.blessing-onboard-nick-err {
+  color: var(--blessing-hot);
+  font-weight: 600;
+}
+.blessing-onboard-nick-checking {
+  color: var(--blessing-fg-2);
+}
+.blessing-onboard-nick-count {
+  color: var(--blessing-fg-3);
+  font-family: var(--blessing-mono);
+}
+.blessing-onboard-tips {
+  margin-top: 20px;
+  padding: 14px 16px;
+  background: var(--blessing-bg-2);
+  border-radius: 12px;
+}
+.blessing-onboard-tip-title {
+  font-size: 11.5px;
+  font-family: var(--blessing-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--blessing-fg-2);
+  margin-bottom: 6px;
+}
+.blessing-onboard-tip {
+  font-size: 12.5px;
+  color: var(--blessing-fg-1);
+  line-height: 1.5;
+  display: flex;
+  gap: 6px;
+  letter-spacing: -0.2px;
+}
+.blessing-onboard-tip span {
+  color: var(--blessing-accent);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.blessing-onboard-benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 18px;
+}
+.blessing-onboard-benefit {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  background: var(--blessing-bg-1);
+  border: 1px solid var(--blessing-border);
+  border-radius: 12px;
+}
+.blessing-onboard-benefit-icon {
+  font-size: 22px;
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--blessing-accent-soft);
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+.blessing-onboard-benefit-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--blessing-fg-0);
+  letter-spacing: -0.3px;
+}
+.blessing-onboard-benefit-desc {
+  font-size: 11.5px;
+  color: var(--blessing-fg-2);
+  margin-top: 2px;
+}
+.blessing-onboard-skip {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--blessing-fg-2);
+  background: transparent;
+  border: none;
+  margin-top: 10px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.blessing-onboard-skip:hover {
+  color: var(--blessing-fg-0);
+}
+
+/* Complete-profile → verify-church jump link */
+.blessing-complete-verify-link {
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: var(--blessing-accent-soft);
+  color: var(--blessing-accent-strong);
+  border: 1px solid var(--blessing-accent);
+  border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: -0.2px;
+  transition: background 0.12s;
+}
+.blessing-complete-verify-link:hover {
+  background: var(--blessing-accent);
+  color: #fff;
+}
+

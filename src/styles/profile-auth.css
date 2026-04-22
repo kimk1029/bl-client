@@ -1,0 +1,405 @@
+/* =========================================================================
+   Profile page
+   ========================================================================= */
+.blessing-profile-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px 20px;
+  background: linear-gradient(180deg, var(--blessing-accent-soft) 0%, transparent 100%);
+  border-bottom: 1px solid var(--blessing-border);
+  margin: 0 -4px;
+}
+.blessing-profile-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  box-shadow: 0 2px 10px rgba(30, 28, 20, 0.08);
+}
+.blessing-profile-name-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+}
+.blessing-profile-name {
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--blessing-fg-0);
+  letter-spacing: -0.5px;
+}
+.blessing-verify-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  background: var(--blessing-accent);
+  color: #fff;
+  border-radius: 100px;
+  font-family: var(--blessing-mono);
+  letter-spacing: 0.03em;
+}
+.blessing-profile-church {
+  font-size: 13px;
+  color: var(--blessing-fg-1);
+  margin-top: 4px;
+  letter-spacing: -0.2px;
+}
+.blessing-profile-joined {
+  font-family: var(--blessing-mono);
+  font-size: 10.5px;
+  color: var(--blessing-fg-2);
+  margin-top: 6px;
+  letter-spacing: 0.04em;
+}
+.blessing-profile-edit-btn {
+  margin-top: 14px;
+  padding: 8px 18px;
+  background: var(--blessing-bg-1);
+  border: 1px solid var(--blessing-border);
+  border-radius: 100px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--blessing-fg-0);
+  cursor: pointer;
+  letter-spacing: -0.3px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+.blessing-profile-edit-btn:hover {
+  background: var(--blessing-bg-2);
+}
+
+.blessing-profile-stats {
+  display: flex;
+  align-items: center;
+  padding: 16px 8px;
+  background: var(--blessing-bg-1);
+  border-bottom: 1px solid var(--blessing-border);
+  margin: 0 -4px;
+}
+.blessing-profile-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  border-right: 1px solid var(--blessing-border);
+}
+.blessing-profile-stat:last-child {
+  border-right: none;
+}
+.blessing-stat-num {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--blessing-fg-0);
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+.blessing-stat-label {
+  font-size: 10.5px;
+  color: var(--blessing-fg-2);
+  font-family: var(--blessing-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.blessing-profile-menu-group {
+  margin: 12px 0 0;
+  background: var(--blessing-bg-1);
+  border-top: 1px solid var(--blessing-border);
+  border-bottom: 1px solid var(--blessing-border);
+  margin-left: -4px;
+  margin-right: -4px;
+}
+.blessing-profile-menu-title {
+  padding: 12px 16px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--blessing-fg-2);
+  font-family: var(--blessing-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--blessing-border);
+}
+.blessing-profile-menu-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--blessing-border);
+  background: transparent;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  text-decoration: none;
+  color: var(--blessing-fg-0);
+}
+.blessing-profile-menu-row:last-child {
+  border-bottom: none;
+}
+.blessing-profile-menu-row:hover {
+  background: var(--blessing-bg-hover);
+}
+.blessing-menu-emoji {
+  font-size: 17px;
+  width: 22px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.blessing-menu-label {
+  flex: 1;
+  font-size: 14px;
+  color: var(--blessing-fg-0);
+  font-weight: 500;
+  letter-spacing: -0.3px;
+}
+.blessing-menu-badge {
+  font-size: 11px;
+  color: var(--blessing-fg-2);
+  font-family: var(--blessing-mono);
+  padding: 2px 8px;
+  background: var(--blessing-bg-2);
+  border-radius: 100px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.blessing-menu-badge-hot {
+  font-size: 11px;
+  color: #fff;
+  background: var(--blessing-hot);
+  padding: 2px 8px;
+  border-radius: 100px;
+  font-weight: 700;
+  font-family: var(--blessing-mono);
+  flex-shrink: 0;
+}
+.blessing-profile-footer {
+  padding: 28px 16px 40px;
+  text-align: center;
+  font-size: 10px;
+  color: var(--blessing-fg-3);
+  font-family: var(--blessing-mono);
+  line-height: 1.8;
+}
+
+/* ---------- Auth card ---------- */
+.blessing-auth-wrap {
+  padding: 24px 16px 40px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.blessing-auth-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.blessing-auth-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--blessing-fg-0);
+  letter-spacing: -0.5px;
+}
+.blessing-auth-subtitle {
+  margin-top: 6px;
+  font-size: 12.5px;
+  color: var(--blessing-fg-2);
+}
+.blessing-auth-card {
+  background: var(--blessing-bg-1);
+  border: 1px solid var(--blessing-border);
+  border-radius: 14px;
+  padding: 20px 18px 22px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+.blessing-auth-switch {
+  margin-top: 14px;
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--blessing-fg-2);
+}
+.blessing-auth-switch-btn {
+  background: none;
+  border: none;
+  color: var(--blessing-accent-strong);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0 4px;
+  text-decoration: underline;
+}
+
+/* ---------- Social login buttons ---------- */
+.blessing-social-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-bottom: 4px;
+}
+.blessing-social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s, filter 0.15s;
+  letter-spacing: -0.2px;
+}
+.blessing-social-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.blessing-social-btn:not(:disabled):hover {
+  filter: brightness(0.94);
+}
+.blessing-social-btn-kakao {
+  background: #FEE500;
+  color: #191919;
+}
+.blessing-social-btn-naver {
+  background: #03C75A;
+  color: #fff;
+}
+.blessing-social-btn-google {
+  background: #fff;
+  color: #3c4043;
+  border: 1px solid var(--blessing-border);
+}
+
+/* ---------- Auth divider ---------- */
+.blessing-auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 16px 0 14px;
+  color: var(--blessing-fg-3);
+  font-size: 11.5px;
+}
+.blessing-auth-divider::before,
+.blessing-auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--blessing-border);
+}
+
+/* ---------- Shared form fields ---------- */
+.blessing-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.blessing-field-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--blessing-fg-1);
+  letter-spacing: -0.2px;
+}
+.blessing-field-label-sub {
+  font-size: 10.5px;
+  font-weight: 400;
+  color: var(--blessing-fg-3);
+  margin-left: 4px;
+}
+.blessing-field-input {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--blessing-border);
+  background: var(--blessing-bg-0);
+  border-radius: 10px;
+  font-size: 14px;
+  color: var(--blessing-fg-0);
+  transition: border-color 0.15s, background 0.15s;
+  outline: none;
+  box-sizing: border-box;
+}
+.blessing-field-input:focus {
+  border-color: var(--blessing-accent);
+  background: var(--blessing-bg-1);
+}
+.blessing-field-input:disabled {
+  background: var(--blessing-bg-2);
+  color: var(--blessing-fg-2);
+  cursor: not-allowed;
+}
+.blessing-field-input-row {
+  position: relative;
+}
+.blessing-field-input-row .blessing-field-input {
+  padding-right: 80px;
+}
+.blessing-field-suffix-btn {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: none;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--blessing-accent);
+  color: #fff;
+}
+.blessing-field-suffix-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.blessing-field-suffix-btn-ok {
+  background: #10b981;
+}
+.blessing-field-suffix-btn-bad {
+  background: #ef4444;
+}
+.blessing-field-error {
+  font-size: 11px;
+  color: #ef4444;
+  margin-top: 2px;
+}
+.blessing-field-hint {
+  font-size: 11px;
+  color: var(--blessing-fg-3);
+  margin-top: 2px;
+}
+.blessing-field-hint-ok {
+  color: #10b981;
+}
+
+/* ---------- Inline notices (error / success banners) ---------- */
+.blessing-notice {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.blessing-notice-error {
+  background: color-mix(in oklab, #ef4444 12%, transparent);
+  color: #b91c1c;
+  border: 1px solid color-mix(in oklab, #ef4444 30%, transparent);
+}
+.blessing-notice-success {
+  background: color-mix(in oklab, #10b981 12%, transparent);
+  color: #047857;
+  border: 1px solid color-mix(in oklab, #10b981 30%, transparent);
+}
+

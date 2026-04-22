@@ -1,0 +1,316 @@
+/* =========================================================================
+   Events + Meetups (integrated)
+   ========================================================================= */
+.blessing-hub-tab-count {
+  margin-left: 4px;
+  padding: 1px 6px;
+  background: var(--blessing-bg-2);
+  border-radius: 100px;
+  font-size: 10px;
+  font-family: var(--blessing-mono);
+  font-weight: 600;
+  color: var(--blessing-fg-2);
+}
+.blessing-hub-tab-active .blessing-hub-tab-count {
+  background: var(--blessing-fg-0);
+  color: var(--blessing-bg-0);
+}
+
+.blessing-meetup-create-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  margin: 10px 16px;
+  background: var(--blessing-accent-soft);
+  border: 1px dashed var(--blessing-accent);
+  border-radius: 12px;
+  color: var(--blessing-accent-strong);
+  text-decoration: none;
+  transition: background 0.12s;
+}
+.blessing-meetup-create-card:hover {
+  background: color-mix(in srgb, var(--blessing-accent-soft) 85%, var(--blessing-accent));
+}
+.blessing-meetup-create-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--blessing-accent);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.blessing-meetup-create-body {
+  flex: 1;
+}
+.blessing-meetup-create-title {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+.blessing-meetup-create-sub {
+  font-size: 11.5px;
+  margin-top: 2px;
+  opacity: 0.9;
+}
+.blessing-meetup-create-arrow {
+  font-size: 20px;
+  color: var(--blessing-accent-strong);
+  flex-shrink: 0;
+}
+
+.blessing-meetup-list {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 16px 24px;
+  gap: 10px;
+}
+.blessing-meetup-card {
+  display: block;
+  padding: 14px;
+  background: var(--blessing-bg-1);
+  border: 1px solid var(--blessing-border);
+  border-radius: 12px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+.blessing-meetup-card:hover {
+  border-color: var(--blessing-accent);
+  box-shadow: 0 2px 10px rgba(91, 122, 94, 0.12);
+}
+.blessing-meetup-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.blessing-meetup-card-title {
+  flex: 1;
+  font-size: 14.5px;
+  font-weight: 800;
+  color: var(--blessing-fg-0);
+  letter-spacing: -0.4px;
+  line-height: 1.3;
+  min-width: 0;
+}
+.blessing-meetup-open-badge {
+  padding: 2px 8px;
+  background: var(--blessing-accent-soft);
+  color: var(--blessing-accent-strong);
+  border-radius: 100px;
+  font-size: 10.5px;
+  font-weight: 700;
+  font-family: var(--blessing-mono);
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+.blessing-meetup-full-badge {
+  padding: 2px 8px;
+  background: var(--blessing-hot-soft);
+  color: var(--blessing-hot);
+  border-radius: 100px;
+  font-size: 10.5px;
+  font-weight: 700;
+  font-family: var(--blessing-mono);
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+.blessing-meetup-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--blessing-fg-1);
+  flex-wrap: wrap;
+  letter-spacing: -0.2px;
+}
+.blessing-meetup-card-tags {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.blessing-meetup-tag {
+  padding: 2px 8px;
+  background: var(--blessing-bg-2);
+  border-radius: 100px;
+  font-size: 10.5px;
+  color: var(--blessing-fg-1);
+  font-family: var(--blessing-mono);
+}
+.blessing-meetup-card-attend {
+  margin-top: 10px;
+}
+.blessing-meetup-detail-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.blessing-meetup-progress {
+  margin-top: 18px;
+}
+.blessing-meetup-progress-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 12px;
+  color: var(--blessing-fg-1);
+  margin-bottom: 6px;
+  font-family: var(--blessing-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.blessing-meetup-progress-count {
+  font-family: var(--blessing-sans);
+  font-size: 13px;
+  text-transform: none;
+  letter-spacing: -0.2px;
+}
+
+/* Create-meetup form */
+.blessing-meetup-form {
+  padding: 12px 16px 120px;
+  background: var(--blessing-bg-2);
+  min-height: calc(100vh - 120px);
+}
+.blessing-settings-group-label {
+  font-size: 10.5px;
+  font-family: var(--blessing-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--blessing-fg-2);
+  padding: 14px 4px 8px;
+}
+.blessing-settings-card {
+  background: var(--blessing-bg-1);
+  border: 1px solid var(--blessing-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.blessing-reg-field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--blessing-border);
+}
+.blessing-reg-label {
+  width: 76px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--blessing-fg-1);
+  letter-spacing: -0.2px;
+  flex-shrink: 0;
+}
+.blessing-reg-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 13.5px;
+  color: var(--blessing-fg-0);
+  outline: none;
+  font-family: inherit;
+  min-width: 0;
+  padding: 4px 0;
+}
+.blessing-reg-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--blessing-border);
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  width: 100%;
+  cursor: pointer;
+  color: var(--blessing-fg-0);
+  font-family: inherit;
+  text-align: left;
+}
+.blessing-reg-option-active {
+  background: var(--blessing-accent-soft);
+}
+.blessing-meetup-form-footer {
+  position: sticky;
+  bottom: calc(60px + env(safe-area-inset-bottom));
+  left: 0;
+  right: 0;
+  margin: 16px -16px -120px;
+  padding: 14px 16px calc(18px + env(safe-area-inset-bottom));
+  background: var(--blessing-bg-1);
+  border-top: 1px solid var(--blessing-border);
+  display: flex;
+  gap: 8px;
+  z-index: 20;
+}
+.blessing-meetup-form-footer .blessing-btn-primary {
+  flex: 1;
+}
+.blessing-meetup-form-footer .blessing-btn-secondary {
+  min-width: 92px;
+  min-height: 42px;
+  padding: 0 18px;
+}
+
+.blessing-meetup-done {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px 48px;
+  text-align: center;
+  background: var(--blessing-bg-0);
+}
+.blessing-meetup-done-icon {
+  animation: blessing-done-pop 0.4s ease-out;
+  margin-bottom: 20px;
+}
+@keyframes blessing-done-pop {
+  from { transform: scale(0.4); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.blessing-meetup-done-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--blessing-fg-0);
+  letter-spacing: -0.6px;
+  margin-bottom: 6px;
+}
+.blessing-meetup-done-event {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--blessing-accent-strong);
+  letter-spacing: -0.3px;
+}
+.blessing-meetup-done-meta {
+  font-size: 12px;
+  color: var(--blessing-fg-2);
+  font-family: var(--blessing-mono);
+  margin-top: 4px;
+}
+.blessing-meetup-done-notice {
+  font-size: 12.5px;
+  color: var(--blessing-fg-1);
+  line-height: 1.55;
+  letter-spacing: -0.2px;
+  margin-top: 18px;
+  max-width: 320px;
+}
+.blessing-meetup-done-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 360px;
+  margin-top: 28px;
+}
+

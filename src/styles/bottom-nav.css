@@ -1,0 +1,79 @@
+/* =========================================================================
+   Bottom Navigation (blessing prototype style)
+   ========================================================================= */
+.blessing-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+  width: 100%;
+  max-width: 800px;
+  background: var(--blessing-bg-0);
+  border-top: 1px solid var(--blessing-border);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.blessing-bottom-tabs {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 8px;
+  gap: 4px;
+  height: 60px;
+}
+.blessing-tab {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: var(--blessing-fg-2);
+  text-decoration: none;
+  transition: color 0.1s;
+  min-width: 0;
+}
+.blessing-tab:hover {
+  color: var(--blessing-fg-1);
+}
+.blessing-tab-active {
+  color: var(--blessing-fg-0);
+}
+.blessing-tab-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.blessing-tab-label {
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+}
+.blessing-tab-active .blessing-tab-label {
+  font-weight: 700;
+}
+.blessing-fab {
+  width: 52px;
+  height: 52px;
+  background: var(--blessing-accent);
+  color: #fff;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -34px;
+  flex-shrink: 0;
+  box-shadow: 0 6px 18px rgba(91, 122, 94, 0.4),
+    0 0 0 4px var(--blessing-bg-0);
+  transition: transform 0.15s, box-shadow 0.15s;
+  text-decoration: none;
+}
+.blessing-fab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(91, 122, 94, 0.45);
+}
+

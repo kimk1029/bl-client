@@ -1,0 +1,116 @@
+/* =========================================================================
+   Admin list (verify requests)
+   ========================================================================= */
+.blessing-admin-list {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0;
+  background: var(--blessing-bg-0);
+}
+.blessing-admin-row {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--blessing-border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.blessing-admin-row-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.blessing-admin-row-head-info {
+  flex: 1;
+  min-width: 0;
+}
+.blessing-admin-row-user {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--blessing-fg-0);
+  letter-spacing: -0.3px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.blessing-admin-row-user-email {
+  font-size: 11.5px;
+  color: var(--blessing-fg-2);
+  font-weight: 400;
+  font-family: var(--blessing-mono);
+}
+.blessing-admin-row-meta {
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--blessing-fg-2);
+}
+.blessing-admin-status {
+  font-family: var(--blessing-mono);
+  font-weight: 700;
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 100px;
+  letter-spacing: 0.02em;
+  margin-left: 4px;
+}
+.blessing-admin-status-pending {
+  background: var(--blessing-pin-soft);
+  color: var(--blessing-pin);
+}
+.blessing-admin-status-approved {
+  background: var(--blessing-accent-soft);
+  color: var(--blessing-accent-strong);
+}
+.blessing-admin-status-rejected {
+  background: var(--blessing-hot-soft);
+  color: var(--blessing-hot);
+}
+.blessing-admin-row-body {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 16px;
+  padding: 12px 14px;
+  background: var(--blessing-bg-2);
+  border-radius: 10px;
+}
+.blessing-admin-row-body > div {
+  min-width: 0;
+}
+.blessing-admin-row-body dt {
+  font-size: 10.5px;
+  font-family: var(--blessing-mono);
+  color: var(--blessing-fg-2);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.blessing-admin-row-body dd {
+  margin: 0;
+  font-size: 13px;
+  color: var(--blessing-fg-0);
+  font-weight: 500;
+  letter-spacing: -0.2px;
+  word-break: keep-all;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.blessing-admin-row-id {
+  font-family: var(--blessing-mono);
+  font-size: 10.5px;
+  color: var(--blessing-fg-2);
+  font-weight: 400;
+}
+.blessing-admin-row-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.blessing-admin-row-actions .blessing-btn-secondary,
+.blessing-admin-row-actions .blessing-btn-primary {
+  min-width: 88px;
+  height: 36px;
+  padding: 0 14px;
+}
+

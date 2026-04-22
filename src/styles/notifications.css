@@ -1,0 +1,134 @@
+/* =========================================================================
+   Notifications screen — matches prototype NotificationsScreen
+   ========================================================================= */
+.blessing-notif-list {
+  background: var(--blessing-bg-0);
+  display: flex;
+  flex-direction: column;
+}
+.blessing-notif-row {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--blessing-border);
+  cursor: pointer;
+  position: relative;
+  background: var(--blessing-bg-0);
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  font-family: inherit;
+  text-align: left;
+  color: inherit;
+  transition: background 0.1s;
+}
+.blessing-notif-row:hover {
+  background: var(--blessing-bg-hover);
+}
+.blessing-notif-unread {
+  background: var(--blessing-accent-soft);
+}
+html.dark .blessing-notif-unread {
+  background: var(--blessing-bg-2);
+}
+.blessing-notif-icon-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+}
+.blessing-notif-type-badge {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 18px;
+  height: 18px;
+  background: var(--blessing-bg-1);
+  border: 2px solid var(--blessing-bg-0);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  line-height: 1;
+}
+.blessing-notif-type-reply {
+  background: var(--blessing-accent);
+  color: #fff;
+}
+.blessing-notif-type-like {
+  background: var(--blessing-hot);
+  color: #fff;
+}
+.blessing-notif-type-prayer {
+  background: var(--blessing-accent-strong);
+  color: #fff;
+}
+.blessing-notif-type-system {
+  background: var(--blessing-fg-0);
+  color: var(--blessing-bg-0);
+}
+.blessing-notif-type-event {
+  background: var(--blessing-pin);
+  color: #fff;
+}
+.blessing-notif-type-mention {
+  background: #4a6fa5;
+  color: #fff;
+  font-weight: 700;
+}
+.blessing-notif-body {
+  flex: 1;
+  min-width: 0;
+}
+.blessing-notif-text {
+  font-size: 13px;
+  color: var(--blessing-fg-0);
+  line-height: 1.45;
+  letter-spacing: -0.3px;
+  margin-bottom: 2px;
+  word-break: keep-all;
+}
+.blessing-notif-text strong {
+  font-weight: 700;
+}
+.blessing-notif-preview {
+  font-size: 12px;
+  color: var(--blessing-fg-1);
+  line-height: 1.4;
+  padding: 4px 10px;
+  background: var(--blessing-bg-1);
+  border-left: 2px solid var(--blessing-border-strong);
+  border-radius: 0 4px 4px 0;
+  margin: 4px 0;
+  font-style: italic;
+  word-break: keep-all;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.blessing-notif-on {
+  font-size: 11.5px;
+  color: var(--blessing-fg-2);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.blessing-notif-time {
+  font-size: 10.5px;
+  color: var(--blessing-fg-2);
+  margin-top: 4px;
+  font-family: var(--blessing-mono);
+}
+.blessing-notif-dot-mark {
+  position: absolute;
+  top: 18px;
+  right: 16px;
+  width: 7px;
+  height: 7px;
+  background: var(--blessing-hot);
+  border-radius: 50%;
+}
+

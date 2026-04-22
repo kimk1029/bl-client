@@ -1,0 +1,226 @@
+/* =========================================================================
+   Messages inbox + thread — matches prototype MessagesScreen
+   ========================================================================= */
+.blessing-dm-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--blessing-bg-0);
+  border-bottom: 1px solid var(--blessing-border);
+}
+.blessing-dm-new-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--blessing-accent);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: background 0.15s, transform 0.1s;
+  box-shadow: 0 2px 8px rgba(91, 122, 94, 0.25);
+}
+.blessing-dm-new-btn:hover {
+  background: var(--blessing-accent-strong);
+}
+.blessing-dm-new-btn:active {
+  transform: scale(0.96);
+}
+.blessing-dm-list {
+  background: var(--blessing-bg-0);
+}
+.blessing-dm-row {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--blessing-border);
+  cursor: pointer;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.12s;
+}
+.blessing-dm-row:hover {
+  background: var(--blessing-bg-hover);
+}
+.blessing-dm-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+.blessing-dm-online {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  background: #3db05e;
+  border: 2px solid var(--blessing-bg-0);
+  border-radius: 50%;
+}
+.blessing-dm-official {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 18px;
+  height: 18px;
+  background: var(--blessing-accent);
+  color: #fff;
+  border: 2px solid var(--blessing-bg-0);
+  border-radius: 50%;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+.blessing-dm-body {
+  flex: 1;
+  min-width: 0;
+}
+.blessing-dm-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 3px;
+}
+.blessing-dm-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--blessing-fg-0);
+  letter-spacing: -0.3px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.blessing-dm-church {
+  font-size: 11px;
+  color: var(--blessing-fg-2);
+  font-weight: 400;
+}
+.blessing-dm-time {
+  font-size: 10.5px;
+  color: var(--blessing-fg-2);
+  font-family: var(--blessing-mono);
+  flex-shrink: 0;
+}
+.blessing-dm-preview-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.blessing-dm-preview {
+  flex: 1;
+  font-size: 12.5px;
+  color: var(--blessing-fg-1);
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+}
+.blessing-dm-unread {
+  background: var(--blessing-hot);
+  color: #fff;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  padding: 0 6px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--blessing-mono);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Thread (1:1 대화) */
+.blessing-detail-topbar-title-wrap {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  padding: 0 8px;
+  overflow: hidden;
+}
+.blessing-dm-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--blessing-fg-0);
+  letter-spacing: -0.3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.blessing-dm-subtitle {
+  font-family: var(--blessing-mono);
+  font-size: 10px;
+  color: var(--blessing-fg-2);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+.blessing-thread-area {
+  padding: 14px 12px;
+  background: var(--blessing-bg-2);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-height: 60vh;
+}
+.blessing-thread-date-divider {
+  text-align: center;
+  padding: 6px 0 10px;
+}
+.blessing-thread-date-divider span {
+  font-size: 10px;
+  color: var(--blessing-fg-2);
+  font-family: var(--blessing-mono);
+  background: var(--blessing-bg-3);
+  padding: 3px 10px;
+  border-radius: 100px;
+}
+.blessing-bubble-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  max-width: 85%;
+}
+.blessing-bubble-me {
+  flex-direction: row-reverse;
+  align-self: flex-end;
+}
+.blessing-bubble-them {
+  align-self: flex-start;
+}
+.blessing-bubble {
+  font-size: 13.5px;
+  line-height: 1.45;
+  padding: 9px 13px;
+  letter-spacing: -0.3px;
+  word-break: keep-all;
+  white-space: pre-wrap;
+}
+.blessing-bubble-them-body {
+  background: var(--blessing-bg-1);
+  color: var(--blessing-fg-0);
+  border-radius: 16px 16px 16px 4px;
+  border: 1px solid var(--blessing-border);
+}
+.blessing-bubble-me-body {
+  background: var(--blessing-accent);
+  color: #fff;
+  border-radius: 16px 16px 4px 16px;
+}
+.blessing-bubble-time {
+  font-size: 9.5px;
+  color: var(--blessing-fg-2);
+  font-family: var(--blessing-mono);
+  flex-shrink: 0;
+}
+

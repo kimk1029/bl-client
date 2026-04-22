@@ -1,6 +1,29 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+// Feature CSS — imported after globals so the domain-specific rules win
+// when specificity ties. Order is alphabetical for predictable cascading.
+import "@/styles/admin.css";
+import "@/styles/bottom-nav.css";
+import "@/styles/cell.css";
+import "@/styles/chip-row.css";
+import "@/styles/compose.css";
+import "@/styles/events-legacy.css";
+import "@/styles/events.css";
+import "@/styles/home.css";
+import "@/styles/meetups.css";
+import "@/styles/messages.css";
+import "@/styles/mychurch.css";
+import "@/styles/notifications.css";
+import "@/styles/onboarding.css";
+import "@/styles/post-detail.css";
+import "@/styles/profile-auth.css";
+import "@/styles/search.css";
+import "@/styles/topbar.css";
+import "@/styles/topic-hub.css";
+import "@/styles/user-menu.css";
+import "@/styles/utility.css";
+import "@/styles/verify.css";
 import RootShell from "@/components/layout/RootShell";
 import { SITE, getSiteUrl } from "@/lib/site";
 

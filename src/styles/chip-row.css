@@ -1,0 +1,51 @@
+/* =========================================================================
+   Chip row (filter / topic picker)
+   ========================================================================= */
+.blessing-chip-row {
+  display: flex;
+  gap: 6px;
+  padding: 10px 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.blessing-chip-row::-webkit-scrollbar {
+  display: none;
+}
+.blessing-chip-row-wrap {
+  flex-wrap: wrap;
+  overflow-x: visible;
+  padding-bottom: 12px;
+}
+.blessing-chip {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border-radius: 100px;
+  background: var(--blessing-bg-2);
+  color: var(--blessing-fg-1);
+  font-size: 12.5px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+  transition: all 0.12s;
+  font-family: inherit;
+}
+.blessing-chip:hover {
+  background: var(--blessing-bg-3);
+}
+.blessing-chip-active {
+  background: var(--blessing-fg-0);
+  color: var(--blessing-bg-0);
+  border-color: var(--blessing-fg-0);
+}
+html.dark .blessing-chip-active {
+  background: var(--blessing-accent);
+  border-color: var(--blessing-accent);
+  color: var(--blessing-bg-0);
+}
+

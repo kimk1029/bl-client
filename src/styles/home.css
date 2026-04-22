@@ -1,0 +1,648 @@
+/* =========================================================================
+   blessing — home screen (route-scoped)
+   Section styles for the redesigned home page. Tokens live in globals.css.
+   ========================================================================= */
+
+/* ---------- Hero verse banner ---------- */
+.blessing-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0;
+  margin: 0;
+  min-height: 190px;
+  display: flex;
+  align-items: flex-end;
+  color: #fff;
+  isolation: isolate;
+}
+.blessing-hero-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+.blessing-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(20, 15, 5, 0.55) 0%,
+    rgba(20, 15, 5, 0.15) 50%,
+    transparent 100%
+  );
+  z-index: 1;
+}
+.blessing-hero-content {
+  position: relative;
+  z-index: 2;
+  padding: 20px 20px 22px;
+}
+.blessing-hero-label {
+  font-family: var(--blessing-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.95;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.blessing-hero-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffe79a;
+  box-shadow: 0 0 8px rgba(255, 231, 154, 0.9);
+}
+.blessing-hero-ko {
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.5px;
+  text-wrap: pretty;
+}
+.blessing-hero-en {
+  font-size: 12px;
+  font-style: italic;
+  opacity: 0.88;
+  margin-top: 6px;
+  line-height: 1.45;
+}
+.blessing-hero-ref {
+  font-family: var(--blessing-mono);
+  font-size: 11px;
+  margin-top: 8px;
+  opacity: 0.9;
+  letter-spacing: 0.04em;
+}
+
+/* ---------- Pinned notice strip ---------- */
+.blessing-pinned {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  margin: 0;
+  background: var(--blessing-pin-soft);
+  color: var(--blessing-pin);
+  border-bottom: 1px solid var(--blessing-border);
+  border-radius: 0;
+  font-size: 13px;
+  text-decoration: none;
+}
+.blessing-pinned strong {
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.blessing-pinned-dot {
+  color: var(--blessing-fg-2);
+  font-size: 10px;
+}
+.blessing-pinned-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.blessing-pinned-time {
+  font-size: 11px;
+  color: var(--blessing-fg-2);
+  flex-shrink: 0;
+}
+
+/* ---------- Topic strip (horizontal scroll) ---------- */
+.blessing-topic-strip {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 2px;
+  padding: 8px 8px 10px;
+  margin: 0;
+  background: var(--blessing-bg-0);
+  border-bottom: 1px solid var(--blessing-border);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.blessing-topic-strip::-webkit-scrollbar {
+  display: none;
+}
+.blessing-topic-tile {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px;
+  min-width: 62px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.12s;
+}
+.blessing-topic-tile:hover {
+  background: var(--blessing-bg-2);
+}
+.blessing-topic-tile-icon {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.blessing-topic-tile-hot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--blessing-hot);
+  border: 1.5px solid var(--blessing-bg-0);
+}
+.blessing-topic-tile-label {
+  font-size: 10.5px;
+  color: var(--blessing-fg-1);
+  font-weight: 500;
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 66px;
+}
+
+/* ---------- Section header ---------- */
+.blessing-section {
+  margin: 0;
+}
+.blessing-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 6px;
+  background: var(--blessing-bg-0);
+}
+.blessing-section-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.blessing-section-icon {
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.blessing-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--blessing-fg-0);
+  letter-spacing: -0.3px;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.blessing-section-en {
+  font-family: var(--blessing-mono);
+  font-size: 9px;
+  color: var(--blessing-fg-2);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 1px;
+}
+.blessing-section-count {
+  font-size: 10px;
+  padding: 2px 6px;
+  background: var(--blessing-bg-2);
+  color: var(--blessing-fg-2);
+  border-radius: 100px;
+  font-family: var(--blessing-mono);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+.blessing-section-more {
+  font-size: 11px;
+  color: var(--blessing-fg-2);
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.blessing-section-more:hover {
+  background: var(--blessing-bg-2);
+  color: var(--blessing-fg-0);
+}
+
+/* ---------- Post row (dense, blind-style) ---------- */
+.blessing-hot-list {
+  background: var(--blessing-bg-0);
+}
+.blessing-post-row {
+  display: flex;
+  gap: 10px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background 0.1s;
+  border-bottom: 1px solid var(--blessing-border);
+  text-decoration: none;
+  color: inherit;
+}
+.blessing-post-row:hover {
+  background: var(--blessing-bg-hover);
+}
+.blessing-post-row:last-child {
+  border-bottom: none;
+}
+.blessing-post-rank {
+  font-family: var(--blessing-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--blessing-fg-2);
+  width: 20px;
+  flex-shrink: 0;
+  padding-top: 20px;
+  text-align: center;
+}
+.blessing-hot-list .blessing-post-row:nth-child(-n+3) .blessing-post-rank {
+  color: var(--blessing-hot);
+}
+.blessing-post-body {
+  flex: 1;
+  min-width: 0;
+}
+.blessing-post-meta-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 3px;
+  min-height: 16px;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+.blessing-post-topic {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--blessing-accent-strong);
+  background: var(--blessing-accent-soft);
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  letter-spacing: -0.2px;
+  vertical-align: middle;
+  line-height: 1.4;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.blessing-post-topic-emoji {
+  font-size: 10px;
+}
+.blessing-post-badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 5px;
+  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-family: var(--blessing-mono);
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+.blessing-badge-pin {
+  background: var(--blessing-pin-soft);
+  color: var(--blessing-pin);
+}
+.blessing-badge-hot {
+  background: var(--blessing-hot-soft);
+  color: var(--blessing-hot);
+}
+.blessing-badge-hot svg {
+  animation: blessing-flicker 1.6s ease-in-out infinite;
+}
+@keyframes blessing-flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+.blessing-post-title {
+  font-size: 14.5px;
+  line-height: 1.35;
+  color: var(--blessing-fg-0);
+  font-weight: 500;
+  letter-spacing: -0.35px;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+.blessing-post-cc {
+  color: var(--blessing-hot);
+  font-weight: 600;
+  margin-left: 4px;
+  font-size: 12.5px;
+  font-family: var(--blessing-mono);
+}
+.blessing-post-meta-bottom {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 5px;
+  font-size: 11px;
+  color: var(--blessing-fg-2);
+  flex-wrap: wrap;
+}
+.blessing-post-author {
+  color: var(--blessing-fg-1);
+  font-weight: 500;
+}
+.blessing-post-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.blessing-post-stat svg {
+  opacity: 0.6;
+}
+.blessing-dot {
+  color: var(--blessing-fg-3);
+}
+
+/* ---------- Prayer stream ---------- */
+.blessing-prayer-stream {
+  padding: 10px 16px 14px;
+  background: var(--blessing-accent-soft);
+  border-bottom: 1px solid var(--blessing-border);
+  border-radius: 0;
+  margin: 0;
+}
+html.dark .blessing-prayer-stream {
+  background: var(--blessing-bg-2);
+}
+.blessing-prayer-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 8px 8px 12px;
+  background: var(--blessing-bg-1);
+  border-radius: 8px;
+  margin-bottom: 4px;
+  font-size: 12.5px;
+  color: var(--blessing-fg-0);
+  letter-spacing: -0.2px;
+}
+.blessing-prayer-item:last-child {
+  margin-bottom: 0;
+}
+.blessing-prayer-link {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: inherit;
+}
+.blessing-prayer-icon {
+  color: var(--blessing-accent);
+  flex-shrink: 0;
+  line-height: 1;
+}
+.blessing-prayer-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--blessing-fg-0);
+}
+.blessing-prayer-time {
+  font-size: 10.5px;
+  color: var(--blessing-fg-2);
+  font-family: var(--blessing-mono);
+  flex-shrink: 0;
+}
+.blessing-prayer-count {
+  font-size: 10px;
+  color: var(--blessing-fg-2);
+  font-family: var(--blessing-mono);
+  margin-left: auto;
+  flex-shrink: 0;
+  display: flex;
+  gap: 6px;
+}
+.blessing-prayer-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  min-width: 54px;
+  justify-content: center;
+  background: var(--blessing-bg-2);
+  color: var(--blessing-fg-1);
+  border: 1px solid var(--blessing-border);
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.12s, transform 0.12s, border-color 0.12s, color 0.12s;
+}
+.blessing-prayer-btn:hover {
+  background: var(--blessing-bg-3);
+  border-color: var(--blessing-border-strong);
+}
+.blessing-prayer-btn:active {
+  transform: scale(0.96);
+}
+.blessing-prayer-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.blessing-prayer-btn-on {
+  background: var(--blessing-accent);
+  color: #fff;
+  border-color: var(--blessing-accent);
+}
+.blessing-prayer-btn-on:hover {
+  background: var(--blessing-accent-strong);
+  border-color: var(--blessing-accent-strong);
+}
+
+/* ---------- Magazine per-topic row ---------- */
+.blessing-mag-wrap {
+  padding: 4px 16px 12px;
+  background: var(--blessing-bg-0);
+  border-bottom: 1px solid var(--blessing-border);
+}
+.blessing-mag-row {
+  display: grid;
+  grid-template-columns: 1fr 80px;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--blessing-border);
+  text-decoration: none;
+  color: inherit;
+}
+.blessing-mag-row:last-child {
+  border-bottom: none;
+}
+.blessing-mag-body {
+  min-width: 0;
+}
+.blessing-mag-title {
+  font-size: 14.5px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--blessing-fg-0);
+  letter-spacing: -0.35px;
+  word-break: keep-all;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.blessing-mag-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--blessing-fg-2);
+  flex-wrap: wrap;
+}
+.blessing-mag-thumb {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, var(--blessing-bg-3), var(--blessing-bg-2));
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  opacity: 0.8;
+}
+
+.blessing-prayer-empty {
+  justify-content: space-between;
+}
+.blessing-prayer-empty .blessing-prayer-title {
+  color: var(--blessing-fg-1);
+  font-weight: 500;
+}
+.blessing-prayer-empty .blessing-prayer-count span {
+  color: var(--blessing-accent-strong);
+  font-weight: 600;
+}
+
+/* ---------- Events rail ---------- */
+.blessing-event-rail {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 8px 16px 14px;
+  margin: 0;
+  background: var(--blessing-bg-0);
+  border-bottom: 1px solid var(--blessing-border);
+  scrollbar-width: none;
+}
+.blessing-event-rail::-webkit-scrollbar {
+  display: none;
+}
+.blessing-event-card {
+  flex-shrink: 0;
+  width: 190px;
+  padding: 12px;
+  background: var(--blessing-bg-1);
+  border: 1px solid var(--blessing-border);
+  border-radius: 12px;
+  transition: border-color 0.15s;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+.blessing-event-card:hover {
+  border-color: var(--blessing-accent);
+}
+.blessing-event-date {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.blessing-event-date-num {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--blessing-accent);
+  font-family: var(--blessing-mono);
+  letter-spacing: -0.5px;
+}
+.blessing-event-date-day {
+  font-size: 10px;
+  color: var(--blessing-fg-2);
+  font-weight: 500;
+}
+.blessing-event-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--blessing-fg-0);
+  letter-spacing: -0.3px;
+  line-height: 1.35;
+  margin-bottom: 4px;
+}
+.blessing-event-where {
+  font-size: 11px;
+  color: var(--blessing-fg-2);
+}
+.blessing-event-ppl {
+  font-size: 10px;
+  color: var(--blessing-fg-2);
+  margin-top: 6px;
+  font-family: var(--blessing-mono);
+}
+
+/* ---------- End spacer ---------- */
+.blessing-end {
+  text-align: center;
+  padding: 24px 16px 16px;
+  font-family: var(--blessing-mono);
+  font-size: 11px;
+  color: var(--blessing-fg-3);
+  letter-spacing: 0.2em;
+  background: var(--blessing-bg-0);
+}
+
+/* ---------- Home page container ---------- */
+.blessing-home {
+  background: var(--blessing-bg-0);
+}
+.blessing-home > * {
+  max-width: 100%;
+}
+
+/* ---------- Loading / empty states ---------- */
+.blessing-loading {
+  padding: 40px 0;
+  display: flex;
+  justify-content: center;
+}
+.blessing-spinner {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--blessing-border);
+  border-top-color: var(--blessing-accent);
+  animation: blessing-spin 0.8s linear infinite;
+}
+@keyframes blessing-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+

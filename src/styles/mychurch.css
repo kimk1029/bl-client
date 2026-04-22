@@ -1,0 +1,263 @@
+/* =========================================================================
+   My Church Feed
+   ========================================================================= */
+.blessing-feed-church-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--blessing-border);
+}
+.blessing-feed-church-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.blessing-feed-church-icon {
+  width: 40px;
+  height: 40px;
+  background: var(--blessing-accent-soft);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--blessing-accent-strong);
+  flex-shrink: 0;
+}
+.blessing-feed-church-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--blessing-fg-0);
+  letter-spacing: -0.4px;
+}
+.blessing-feed-church-meta {
+  font-size: 11px;
+  color: var(--blessing-fg-2);
+  margin-top: 2px;
+  font-family: var(--blessing-mono);
+}
+.blessing-feed-church-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.blessing-feed-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #3db05e;
+  animation: blessing-live-pulse 1.8s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes blessing-live-pulse {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(61, 176, 94, 0.4);
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow: 0 0 0 4px rgba(61, 176, 94, 0);
+  }
+}
+.blessing-feed-live-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #3db05e;
+  font-family: var(--blessing-mono);
+}
+.blessing-feed-stats-row {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--blessing-bg-1);
+  border-bottom: 1px solid var(--blessing-border);
+}
+.blessing-feed-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.blessing-feed-stat strong {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--blessing-fg-0);
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+.blessing-feed-stat span {
+  font-size: 10px;
+  color: var(--blessing-fg-2);
+  font-family: var(--blessing-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.blessing-feed-stat-divider {
+  width: 1px;
+  height: 28px;
+  background: var(--blessing-border);
+  flex-shrink: 0;
+}
+.blessing-mychurch-privacy {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--blessing-accent-soft);
+  border-bottom: 1px solid var(--blessing-border);
+  color: var(--blessing-accent-strong);
+  font-size: 12px;
+  letter-spacing: -0.2px;
+}
+.blessing-mychurch-privacy strong {
+  font-weight: 700;
+}
+.blessing-mychurch-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 56px 24px 48px;
+  text-align: center;
+  background: var(--blessing-bg-0);
+  border-bottom: 1px solid var(--blessing-border);
+}
+.blessing-mychurch-empty-icon {
+  color: var(--blessing-accent);
+  display: inline-flex;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--blessing-accent-soft);
+  align-items: center;
+  justify-content: center;
+}
+.blessing-mychurch-empty-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--blessing-fg-0);
+  letter-spacing: -0.4px;
+}
+.blessing-mychurch-empty-msg {
+  font-size: 13px;
+  color: var(--blessing-fg-2);
+  line-height: 1.5;
+  letter-spacing: -0.2px;
+  max-width: 320px;
+}
+.blessing-mychurch-empty .blessing-btn-primary {
+  margin-top: 6px;
+  min-width: 160px;
+  padding: 0 20px;
+  text-decoration: none;
+}
+
+/* ---------- Complete profile (post-SNS) ---------- */
+.blessing-complete-wrap {
+  padding: 28px 16px 48px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.blessing-complete-head {
+  margin-bottom: 22px;
+}
+.blessing-complete-title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  color: var(--blessing-fg-0);
+}
+.blessing-complete-sub {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--blessing-fg-2);
+  line-height: 1.5;
+  letter-spacing: -0.2px;
+}
+.blessing-complete-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.blessing-complete-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.blessing-complete-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--blessing-fg-1);
+  letter-spacing: -0.2px;
+}
+.blessing-complete-input {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--blessing-border);
+  border-radius: 10px;
+  background: var(--blessing-bg-1);
+  color: var(--blessing-fg-0);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+}
+.blessing-complete-input:focus {
+  border-color: var(--blessing-accent);
+  box-shadow: 0 0 0 3px var(--blessing-accent-soft);
+}
+.blessing-complete-help {
+  font-size: 11.5px;
+  color: var(--blessing-fg-2);
+  letter-spacing: -0.1px;
+}
+.blessing-complete-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+.blessing-complete-actions .blessing-btn-primary {
+  flex: 1;
+  min-height: 42px;
+}
+.blessing-complete-actions .blessing-btn-secondary {
+  min-height: 42px;
+  padding: 0 18px;
+}
+.blessing-sort-bar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 16px;
+  background: var(--blessing-bg-0);
+  border-bottom: 1px solid var(--blessing-border);
+  font-size: 12px;
+}
+.blessing-sort-btn {
+  padding: 4px 10px;
+  border-radius: 4px;
+  color: var(--blessing-fg-2);
+  font-weight: 500;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+.blessing-sort-btn-active {
+  color: var(--blessing-fg-0);
+  font-weight: 700;
+  background: var(--blessing-bg-2);
+}
+.blessing-sort-meta {
+  font-size: 10px;
+  color: var(--blessing-fg-2);
+  font-family: var(--blessing-mono);
+  padding: 4px 8px;
+}
+.blessing-feed-list {
+  padding: 0 16px;
+  background: var(--blessing-bg-0);
+}
+

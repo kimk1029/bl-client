@@ -1,0 +1,146 @@
+/* =========================================================================
+   Top bar / header (blessing prototype style)
+   ========================================================================= */
+.blessing-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--blessing-bg-0);
+  border-bottom: 1px solid var(--blessing-border);
+  backdrop-filter: blur(8px);
+}
+.blessing-topbar-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  min-height: 56px;
+}
+.blessing-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  color: var(--blessing-accent);
+  text-decoration: none;
+}
+.blessing-logo-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--blessing-accent);
+}
+.blessing-logo-text {
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: -0.5px;
+  color: var(--blessing-fg-0);
+  font-family: var(--blessing-sans);
+  line-height: 1;
+}
+.blessing-search-trigger {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  background: var(--blessing-bg-2);
+  border-radius: 18px;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  color: var(--blessing-fg-2);
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+.blessing-search-trigger:hover {
+  background: var(--blessing-bg-3);
+}
+.blessing-search-placeholder {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+  font-weight: 500;
+}
+.blessing-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 18px;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--blessing-fg-1);
+  position: relative;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-family: inherit;
+}
+.blessing-icon-btn:hover {
+  background: var(--blessing-bg-2);
+}
+.blessing-notif-dot {
+  position: absolute;
+  top: 8px;
+  right: 9px;
+  width: 7px;
+  height: 7px;
+  background: var(--blessing-hot);
+  border-radius: 50%;
+  border: 1.5px solid var(--blessing-bg-0);
+}
+.blessing-bell-btn {
+  overflow: visible;
+}
+.blessing-bell-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  background: var(--blessing-hot);
+  color: #fff;
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 700;
+  font-family: var(--blessing-mono);
+  border-radius: 100px;
+  border: 1.5px solid var(--blessing-bg-0);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: -0.2px;
+  pointer-events: none;
+}
+
+/* Back header (sub pages) */
+.blessing-back-title-wrap {
+  flex: 1;
+  min-width: 0;
+}
+.blessing-back-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--blessing-fg-0);
+  letter-spacing: -0.4px;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.blessing-back-subtitle {
+  font-family: var(--blessing-mono);
+  font-size: 10.5px;
+  color: var(--blessing-fg-2);
+  margin-top: 2px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+

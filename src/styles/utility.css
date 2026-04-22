@@ -1,0 +1,83 @@
+/* ---------- Generic list empty / error state ---------- */
+.blessing-list-empty {
+  padding: 40px 14px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--blessing-fg-2);
+}
+.blessing-list-error {
+  padding: 40px 14px;
+  text-align: center;
+  font-size: 13px;
+  color: #b91c1c;
+}
+
+/* ---------- Pagination ---------- */
+.blessing-pagination {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  padding: 16px 0 20px;
+}
+.blessing-page-btn {
+  min-width: 30px;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--blessing-fg-2);
+  font-size: 12.5px;
+  font-weight: 500;
+  font-family: var(--blessing-mono);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.blessing-page-btn:hover {
+  background: var(--blessing-bg-2);
+  color: var(--blessing-fg-0);
+}
+.blessing-page-btn-active {
+  background: var(--blessing-fg-0);
+  color: var(--blessing-bg-0);
+  font-weight: 700;
+}
+.blessing-page-btn-active:hover {
+  background: var(--blessing-fg-0);
+  color: var(--blessing-bg-0);
+}
+
+/* ---------- Search heading / results ---------- */
+.blessing-search-heading {
+  padding: 14px 2px 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--blessing-fg-0);
+  letter-spacing: -0.5px;
+}
+.blessing-search-mark {
+  background: color-mix(in oklab, var(--blessing-accent) 22%, transparent);
+  color: var(--blessing-accent-strong);
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+/* ---------- Comments/meta on my-articles ---------- */
+.blessing-comment-row {
+  padding: 12px 2px;
+  border-bottom: 1px solid var(--blessing-border);
+}
+.blessing-comment-row:last-child {
+  border-bottom: none;
+}
+.blessing-comment-body {
+  font-size: 13.5px;
+  color: var(--blessing-fg-0);
+  line-height: 1.5;
+  margin-bottom: 4px;
+}
+.blessing-comment-meta {
+  font-size: 11px;
+  color: var(--blessing-fg-3);
+  font-family: var(--blessing-mono);
+}
