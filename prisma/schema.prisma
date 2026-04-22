@@ -58,6 +58,10 @@ model User {
   affiliation_posts AffiliationPost[]
   events            Event[]
 
+  sent_messages     Message[] @relation("MessageSender")
+  received_messages Message[] @relation("MessageReceiver")
+  verify_requests   ChurchVerifyRequest[]
+
   @@index([church_id])
 }
 
@@ -201,5 +205,41 @@ model AffiliationPost {
 
   @@index([author_id])
   @@index([affiliation])
+  @@index([created_at])
+}
+
+model Message {
+  id         Int       @id @default(autoincrement())
+  content    String    @db.Text
+  created_at DateTime  @default(now())
+  read_at    DateTime?
+
+  sender_id   Int
+  sender      User @relation("MessageSender", fields: [sender_id], references: [id], onDelete: Cascade)
+  receiver_id Int
+  receiver    User @relation("MessageReceiver", fields: [receiver_id], references: [id], onDelete: Cascade)
+
+  @@index([sender_id])
+  @@index([receiver_id])
+  @@index([created_at])
+  @@index([sender_id, receiver_id, created_at])
+  @@index([receiver_id, sender_id, created_at])
+}
+
+model ChurchVerifyRequest {
+  id          Int      @id @default(autoincrement())
+  user_id     Int
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  church_id   Int?
+  church_name String
+  role        String
+  method      String
+  // pending | approved | rejected
+  status      String   @default("pending")
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@index([user_id])
+  @@index([status])
   @@index([created_at])
 }

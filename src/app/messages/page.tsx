@@ -2,8 +2,23 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
+import useSWR from "swr";
 import Avatar from "@/components/common/Avatar";
-import { DMS } from "./data";
+import { formatTimeAgo } from "@/components/home/lib/postAdapters";
+
+interface ThreadItem {
+  otherUserId: number;
+  otherUsername: string;
+  otherAffiliation: string | null;
+  lastMessage: {
+    id: number;
+    content: string;
+    created_at: string;
+    sender_id: number;
+  };
+  unread: number;
+}
 
 function IconSearch() {
   return (
@@ -19,18 +34,36 @@ function IconSearch() {
   );
 }
 
+const tokenFetcher = async (url: string, token?: string | null) => {
+  const res = await fetch(url, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!res.ok) throw new Error(`fetch ${url} ${res.status}`);
+  return res.json();
+};
+
 export default function MessagesPage() {
+  const { data: session, status } = useSession();
+  const token = (session as { accessToken?: string } | null)?.accessToken;
   const [query, setQuery] = useState("");
+
+  const { data: threads, isLoading } = useSWR<ThreadItem[]>(
+    status === "authenticated" ? "/api/messages" : null,
+    (url: string) => tokenFetcher(url, token),
+    { refreshInterval: 15000 },
+  );
+
   const filtered = useMemo(() => {
+    const list = Array.isArray(threads) ? threads : [];
     const q = query.trim();
-    if (!q) return DMS;
-    return DMS.filter(
-      (d) =>
-        d.who.includes(q) ||
-        (d.church ?? "").includes(q) ||
-        d.preview.includes(q),
+    if (!q) return list;
+    return list.filter(
+      (t) =>
+        t.otherUsername.includes(q) ||
+        (t.otherAffiliation ?? "").includes(q) ||
+        t.lastMessage.content.includes(q),
     );
-  }, [query]);
+  }, [threads, query]);
 
   return (
     <div className="blessing-home">
@@ -43,49 +76,88 @@ export default function MessagesPage() {
             onChange={(e) => setQuery(e.target.value)}
             placeholder="성도님 이름 검색"
             aria-label="쪽지 검색"
+            disabled={status !== "authenticated"}
           />
         </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {status !== "authenticated" ? (
+        <div className="blessing-mychurch-empty">
+          <div className="blessing-mychurch-empty-icon" aria-hidden>
+            ✉️
+          </div>
+          <div className="blessing-mychurch-empty-title">
+            로그인하고 쪽지 주고받기
+          </div>
+          <div className="blessing-mychurch-empty-msg">
+            성도님들과 1:1로 따뜻한 이야기를 나눠보세요.
+          </div>
+          <Link href="/auth" className="blessing-btn-primary">
+            로그인
+          </Link>
+        </div>
+      ) : isLoading && !threads ? (
+        <div className="blessing-loading">
+          <div className="blessing-spinner" aria-label="Loading" />
+        </div>
+      ) : filtered.length === 0 ? (
         <div
           className="blessing-event-detail-missing"
           style={{ minHeight: 200 }}
         >
-          <div>검색 결과가 없어요.</div>
+          <div>
+            {query.trim()
+              ? "검색 결과가 없어요."
+              : "아직 받은 쪽지가 없어요."}
+          </div>
         </div>
       ) : (
         <div className="blessing-dm-list">
-          {filtered.map((dm) => (
-            <Link
-              key={dm.id}
-              href={`/messages/${dm.id}`}
-              className="blessing-dm-row"
-            >
-              <div className="blessing-dm-avatar-wrap">
-                <Avatar name={dm.who} size={46} seed={dm.id * 11} anon={dm.anon} />
-                {dm.online && <span className="blessing-dm-online" />}
-                {dm.official && <span className="blessing-dm-official">✓</span>}
-              </div>
-              <div className="blessing-dm-body">
-                <div className="blessing-dm-head">
-                  <span className="blessing-dm-name">
-                    {dm.anon ? "🫧 익명" : dm.who}
-                    {dm.church && !dm.anon && (
-                      <span className="blessing-dm-church"> · {dm.church}</span>
+          {filtered.map((t) => {
+            const sentByMe =
+              t.lastMessage.sender_id !== t.otherUserId;
+            const previewPrefix = sentByMe ? "나: " : "";
+            return (
+              <Link
+                key={t.otherUserId}
+                href={`/messages/${t.otherUserId}`}
+                className="blessing-dm-row"
+              >
+                <div className="blessing-dm-avatar-wrap">
+                  <Avatar
+                    name={t.otherUsername}
+                    size={46}
+                    seed={t.otherUserId * 11}
+                  />
+                </div>
+                <div className="blessing-dm-body">
+                  <div className="blessing-dm-head">
+                    <span className="blessing-dm-name">
+                      {t.otherUsername}
+                      {t.otherAffiliation && (
+                        <span className="blessing-dm-church">
+                          {" "}
+                          · {t.otherAffiliation}
+                        </span>
+                      )}
+                    </span>
+                    <span className="blessing-dm-time">
+                      {formatTimeAgo(t.lastMessage.created_at)}
+                    </span>
+                  </div>
+                  <div className="blessing-dm-preview-line">
+                    <span className="blessing-dm-preview">
+                      {previewPrefix}
+                      {t.lastMessage.content}
+                    </span>
+                    {t.unread > 0 && (
+                      <span className="blessing-dm-unread">{t.unread}</span>
                     )}
-                  </span>
-                  <span className="blessing-dm-time">{dm.time}</span>
+                  </div>
                 </div>
-                <div className="blessing-dm-preview-line">
-                  <span className="blessing-dm-preview">{dm.preview}</span>
-                  {dm.unread > 0 && (
-                    <span className="blessing-dm-unread">{dm.unread}</span>
-                  )}
-                </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       )}
       <div style={{ height: 40 }} />

@@ -1,10 +1,33 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import useSWR from "swr";
 import { toast } from "sonner";
 import Avatar from "@/components/common/Avatar";
-import { findDM, SAMPLE_THREAD, type ThreadMessage } from "../data";
+
+interface ThreadMessage {
+  id: number;
+  content: string;
+  created_at: string;
+  read_at: string | null;
+  sender_id: number;
+  receiver_id: number;
+}
+interface ThreadPayload {
+  other: { id: number; username: string; affiliation: string | null };
+  messages: ThreadMessage[];
+}
+
+const tokenFetcher = async (url: string, token?: string | null) => {
+  const res = await fetch(url, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!res.ok) throw new Error(`fetch ${url} ${res.status}`);
+  return res.json();
+};
 
 function IconBack() {
   return (
@@ -32,47 +55,183 @@ function IconPlus() {
   );
 }
 
+function formatClock(iso: string): string {
+  const d = new Date(iso);
+  const hh = d.getHours();
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  const ampm = hh >= 12 ? "오후" : "오전";
+  const h12 = ((hh + 11) % 12) + 1;
+  return `${ampm} ${h12}:${mm}`;
+}
+
+function dateLabel(iso: string, todayISO: string): string {
+  const d = new Date(iso);
+  const t = new Date(todayISO);
+  if (
+    d.getFullYear() === t.getFullYear() &&
+    d.getMonth() === t.getMonth() &&
+    d.getDate() === t.getDate()
+  ) {
+    return "오늘";
+  }
+  const yy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yy}.${mm}.${dd}`;
+}
+
 export default function MessageThreadPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const router = useRouter();
+  const { data: session, status } = useSession();
+  const token = (session as { accessToken?: string } | null)?.accessToken;
   const { id } = use(params);
-  const dm = findDM(Number(id));
+  const otherId = Number(id);
 
-  const [messages, setMessages] = useState<ThreadMessage[]>(SAMPLE_THREAD);
   const [text, setText] = useState("");
+  const [sending, setSending] = useState(false);
+  const [todayISO, setTodayISO] = useState<string>("");
+  useEffect(() => {
+    setTodayISO(new Date().toISOString());
+  }, []);
 
-  if (!dm) {
+  const url = `/api/messages/${otherId}`;
+  const { data, isLoading, error, mutate } = useSWR<ThreadPayload>(
+    status === "authenticated" && Number.isFinite(otherId) ? url : null,
+    (u: string) => tokenFetcher(u, token),
+    { refreshInterval: 8000 },
+  );
+
+  // Mark as read once when the thread opens + whenever unread messages arrive.
+  useEffect(() => {
+    if (!data || !token) return;
+    const hasUnread = data.messages.some(
+      (m) => m.receiver_id !== otherId && m.read_at == null,
+    );
+    if (!hasUnread) return;
+    fetch(url, {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${token}` },
+    }).catch(() => {});
+  }, [data, token, url, otherId]);
+
+  if (!Number.isFinite(otherId)) {
     return (
       <div className="blessing-home">
-        <div
-          className="blessing-event-detail-missing"
-          style={{ minHeight: 240 }}
-        >
-          <div>대화를 찾을 수 없어요.</div>
+        <div className="blessing-event-detail-missing" style={{ minHeight: 240 }}>
+          <div>잘못된 상대예요.</div>
+          <Link href="/messages" className="blessing-section-more">
+            ← 쪽지함
+          </Link>
         </div>
       </div>
     );
   }
 
-  const title = dm.anon ? "🫧 익명의 성도" : dm.who;
-  const subtitle = dm.church ?? (dm.anon ? "익명 메시지" : "범교회");
+  if (status !== "authenticated") {
+    return (
+      <div className="blessing-home">
+        <div className="blessing-mychurch-empty">
+          <div className="blessing-mychurch-empty-icon" aria-hidden>
+            ✉️
+          </div>
+          <div className="blessing-mychurch-empty-title">로그인이 필요해요</div>
+          <div className="blessing-mychurch-empty-msg">
+            쪽지 대화를 확인하려면 로그인해 주세요.
+          </div>
+          <Link href="/auth" className="blessing-btn-primary">
+            로그인
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
-  const send = (e: React.FormEvent) => {
+  if (isLoading && !data) {
+    return (
+      <div className="blessing-home">
+        <div className="blessing-loading">
+          <div className="blessing-spinner" aria-label="Loading" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="blessing-home">
+        <div className="blessing-event-detail-missing" style={{ minHeight: 240 }}>
+          <div>대화를 불러올 수 없어요.</div>
+          <Link href="/messages" className="blessing-section-more">
+            ← 쪽지함
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const myId = (session?.user as { id?: number } | undefined)?.id ?? -1;
+  const other = data.other;
+  const title = other.username;
+  const subtitle = other.affiliation ?? "범교회";
+
+  const send = async (e: React.FormEvent) => {
     e.preventDefault();
     const v = text.trim();
-    if (!v) return;
-    const now = new Date();
-    const hh = now.getHours();
-    const mm = String(now.getMinutes()).padStart(2, "0");
-    const ampm = hh >= 12 ? "오후" : "오전";
-    const h12 = ((hh + 11) % 12) + 1;
-    setMessages((prev) => [...prev, { from: "me", text: v, time: `${ampm} ${h12}:${mm}` }]);
-    setText("");
-    toast.message("쪽지 전송 UI는 데모입니다. 서버 연동 전이에요.");
+    if (!v || sending) return;
+    setSending(true);
+    try {
+      const res = await fetch("/api/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ to: otherId, content: v }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.error || "전송 실패");
+      }
+      setText("");
+      mutate();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "전송 실패";
+      toast.error(msg);
+    } finally {
+      setSending(false);
+    }
   };
+
+  // Group messages with date dividers
+  const renderedNodes: Array<
+    { kind: "divider"; label: string; key: string } | { kind: "bubble"; m: ThreadMessage; showAvatar: boolean; key: string }
+  > = [];
+  let prevDay = "";
+  data.messages.forEach((m, idx) => {
+    const day = m.created_at.slice(0, 10);
+    if (day !== prevDay) {
+      renderedNodes.push({
+        kind: "divider",
+        label: dateLabel(m.created_at, todayISO || m.created_at),
+        key: `d-${day}-${idx}`,
+      });
+      prevDay = day;
+    }
+    const fromMe = m.sender_id === myId;
+    const prev = data.messages[idx - 1];
+    const showAvatar =
+      !fromMe && (!prev || prev.sender_id !== m.sender_id || prev.created_at.slice(0, 10) !== day);
+    renderedNodes.push({
+      kind: "bubble",
+      m,
+      showAvatar,
+      key: `m-${m.id}`,
+    });
+  });
 
   return (
     <div className="blessing-detail">
@@ -101,28 +260,53 @@ export default function MessageThreadPage({
       </header>
 
       <div className="blessing-thread-area">
-        <div className="blessing-thread-date-divider">
-          <span>오늘</span>
-        </div>
-        {messages.map((m, i) => {
-          const prev = messages[i - 1];
-          const showAvatar =
-            m.from === "them" && (!prev || prev.from !== "them");
-          return (
-            <div key={i} className={`blessing-bubble-row blessing-bubble-${m.from}`}>
-              {m.from === "them" &&
-                (showAvatar ? (
-                  <Avatar name={dm.who} size={28} seed={dm.id * 11} anon={dm.anon} />
-                ) : (
-                  <div style={{ width: 28, flexShrink: 0 }} />
-                ))}
-              <div className={`blessing-bubble blessing-bubble-${m.from}-body`}>
-                {m.text}
+        {renderedNodes.length === 0 ? (
+          <div
+            style={{
+              textAlign: "center",
+              padding: "48px 12px",
+              color: "var(--blessing-fg-2)",
+              fontSize: 13,
+            }}
+          >
+            첫 쪽지를 보내보세요.
+          </div>
+        ) : (
+          renderedNodes.map((node) => {
+            if (node.kind === "divider") {
+              return (
+                <div key={node.key} className="blessing-thread-date-divider">
+                  <span>{node.label}</span>
+                </div>
+              );
+            }
+            const m = node.m;
+            const fromMe = m.sender_id === myId;
+            return (
+              <div
+                key={node.key}
+                className={`blessing-bubble-row blessing-bubble-${fromMe ? "me" : "them"}`}
+              >
+                {!fromMe &&
+                  (node.showAvatar ? (
+                    <Avatar
+                      name={other.username}
+                      size={28}
+                      seed={other.id * 11}
+                    />
+                  ) : (
+                    <div style={{ width: 28, flexShrink: 0 }} />
+                  ))}
+                <div
+                  className={`blessing-bubble blessing-bubble-${fromMe ? "me" : "them"}-body`}
+                >
+                  {m.content}
+                </div>
+                <span className="blessing-bubble-time">{formatClock(m.created_at)}</span>
               </div>
-              <span className="blessing-bubble-time">{m.time}</span>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
 
       <form className="blessing-comment-compose" onSubmit={send}>
@@ -139,13 +323,14 @@ export default function MessageThreadPage({
           value={text}
           onChange={(e) => setText(e.target.value)}
           aria-label="쪽지 입력"
+          disabled={sending}
         />
         <button
           type="submit"
           className="blessing-comment-submit"
-          disabled={!text.trim()}
+          disabled={sending || !text.trim()}
         >
-          전송
+          {sending ? "전송 중..." : "전송"}
         </button>
       </form>
     </div>

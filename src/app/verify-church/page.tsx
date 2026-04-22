@@ -130,39 +130,38 @@ function VerifyChurchInner() {
       setStep((s) => ((s + 1) as Step));
       return;
     }
-    // Step 3 → submit the verification (persists the church_id + affiliation now,
-    // real verification method integration is a later step).
-    if (!selected) return;
-    const userId = (session?.user as { id?: number } | undefined)?.id;
+    // Step 3 → log the verify request. Server also eagerly sets affiliation
+    // so the user can access church-gated UI while their request is reviewed.
+    if (!selected || !role || !method) return;
     const token = (session as { accessToken?: string } | null)?.accessToken;
-    if (!userId || !token) {
+    if (!token) {
       toast.error("로그인 후 이용할 수 있어요.");
       router.push("/auth");
       return;
     }
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/users/account/${userId}`, {
-        method: "PATCH",
+      const res = await fetch("/api/verify-church", {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          affiliation: selected.name,
           church_id: selected.id,
+          church_name: selected.name,
+          role,
+          method,
         }),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(err?.error || "인증 요청에 실패했어요.");
       }
-      await update({
-        user: {
-          affiliation: selected.name,
-        },
-      });
-      toast.success(`${selected.name} 인증 요청을 보냈어요.`);
+      await update({ user: { affiliation: selected.name } });
+      toast.success(
+        `${selected.name} 인증 요청이 접수됐어요. 검토 후 알림으로 알려드릴게요.`,
+      );
       router.replace(returnTo);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "인증 요청 실패";
