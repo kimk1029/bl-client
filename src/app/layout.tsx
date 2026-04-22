@@ -11,18 +11,13 @@ import BottomNav from "@/components/layout/BottomNav";
 import GoogleAd from "@/components/layout/GoogleAd";
 import { useTheme } from '@/context/ThemeContext';
 import { Toaster } from 'sonner';
-import { usePathname } from 'next/navigation';
 
 const inter = Inter({ subsets: ["latin"] });
 
 function RootLayoutContent({ children }: { children: React.ReactNode }) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const pathname = usePathname();
-  const isFullBleed = pathname === '/topics';
-  const mainClass = isFullBleed
-    ? 'flex-1 w-full pb-20'
-    : 'flex-1 w-full px-4 py-4 pb-20';
+  const mainClass = 'flex-1 w-full';
 
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-gray-950 text-white' : 'bg-gray-100 text-gray-900'}`}>
