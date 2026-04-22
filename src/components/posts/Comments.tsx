@@ -1,239 +1,220 @@
 "use client";
 
-import React, { useState, FormEvent, useMemo } from "react";
+import { FormEvent, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import useSWR from "swr";
-import { Comment } from "@/types/type";
-import { useTheme } from "@/context/ThemeContext";
-import { showSuccess, showError } from '@/components/toast';
+import { toast } from "sonner";
+import Avatar from "@/components/common/Avatar";
+import { formatTimeAgo } from "@/components/home/lib/postAdapters";
+import type { Comment } from "@/types/type";
 
-// Fetcher for SWR
-const fetcher = async (url: string) => {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error("Failed to fetch");
+const commentsFetcher = (url: string) =>
+  fetch(url).then((res) => {
+    if (!res.ok) throw new Error("fetch fail");
     return res.json();
-};
-
-// 댓글 입력 폼
-interface CommentInputProps {
-    content: string;
-    setContent: (val: string) => void;
-    onSubmit: (e: FormEvent) => void;
-    onCancel: () => void;
-}
-const CommentInput: React.FC<CommentInputProps> = ({ content, setContent, onSubmit, onCancel }) => {
-    const { theme } = useTheme();
-    return (
-        <div className={`border mt-5 transition-colors duration-200 ${theme === 'dark' ? 'border-gray-600' : 'border-gray-300'}`}>
-            <form onSubmit={onSubmit}>
-                <div className="relative p-5">
-                    <textarea
-                        className={`w-full min-h-[96px] p-2 text-base leading-relaxed resize-none rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${theme === 'dark' ? 'bg-gray-700 text-gray-100' : 'bg-gray-100 text-gray-900'
-                            }`}
-                        placeholder="댓글을 남겨주세요."
-                        value={content}
-                        onChange={e => setContent(e.target.value)}
-                        required
-                    />
-                    <div className="absolute bottom-5 left-0 flex items-center space-x-2">
-                        <label className={`flex items-center text-sm transition-colors duration-200 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                            }`}>
-                            <input type="checkbox" className="mr-1" /> 비공개
-                        </label>
-                    </div>
-                    <div className="flex justify-end space-x-2">
-                        <button
-                            type="button"
-                            onClick={onCancel}
-                            className={`px-4 py-2 text-base hover:underline transition-colors duration-200 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                                }`}
-                        >
-                            취소
-                        </button>
-                        <button
-                            type="submit"
-                            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded transition-colors duration-200"
-                        >
-                            등록
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    );
-};
-
-// 댓글 아이템
-interface CommentItemProps {
-    comment: Comment;
-    onReply: (id: number) => void;
-}
-const CommentItem: React.FC<CommentItemProps> = ({ comment, onReply }) => {
-    const { theme } = useTheme();
-    return (
-        <div className={`border-b pb-4 transition-colors duration-200 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
-            }`}>
-            <div className="flex justify-between items-start mb-2">
-                <div className="flex items-center space-x-3">
-                    <img
-                        src={comment.author.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(comment.author.username)}&background=random`}
-                        alt={comment.author.username}
-                        className="w-8 h-8 rounded-full"
-                    />
-                    <div className="flex flex-col">
-                        <span className={`font-semibold text-sm transition-colors duration-200 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
-                            }`}>{comment.author.username}</span>
-                        <span className={`text-xs transition-colors duration-200 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                            }`}>
-                            {new Date(comment.created_at).toLocaleString()}
-                        </span>
-                    </div>
-                </div>
-                <button
-                    onClick={() => onReply(comment.id)}
-                    className="text-sm text-blue-500 hover:underline transition-colors duration-200"
-                >
-                    대댓글 작성
-                </button>
-            </div>
-            <p className={`whitespace-pre-wrap mb-2 text-base transition-colors duration-200 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
-                }`}>{comment.content}</p>
-            {comment.replies && comment.replies.length > 0 && (
-                <div className="ml-6 mt-3 space-y-3">
-                    {comment.replies.map(reply => (
-                        <div key={reply.id}>
-                            <div className="flex justify-between items-start mb-1">
-                                <div className="flex items-center space-x-2">
-                                    <img
-                                        src={reply.author.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(reply.author.username)}&background=random`}
-                                        alt={reply.author.username}
-                                        className="w-6 h-6 rounded-full"
-                                    />
-                                    <span className={`font-medium text-sm transition-colors duration-200 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>{reply.author.username}</span>
-                                </div>
-                                <span className={`text-xs transition-colors duration-200 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                                    {new Date(reply.created_at).toLocaleString()}
-                                </span>
-                            </div>
-                            <p className={`whitespace-pre-wrap text-sm transition-colors duration-200 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>{reply.content}</p>
-                        </div>
-                    ))}
-                </div>
-            )}
-        </div>
-    );
-};
+  });
 
 interface CommentsProps {
-    postId: number;
-    showForm: boolean;
-    setShowForm: (flag: boolean) => void;
-    isAnonymous?: boolean;
+  postId: number;
+  postAuthorId?: number | null;
+  commentCount: number;
 }
-export default function Comments({ postId, showForm, setShowForm, isAnonymous = false }: CommentsProps) {
-    const { data: session } = useSession();
-    const [content, setContent] = useState("");
-    const [replyParentId, setReplyParentId] = useState<number | null>(null);
-    const { theme } = useTheme();
-    const token = (session as any)?.accessToken as string | undefined;
 
-    const url = isAnonymous ? `/api/anonymous/${postId}/comments` : `/api/posts/${postId}/comments`;
-    const { data: comments, mutate } = useSWR<Comment[]>(url, fetcher);
+type NestedComment = Comment & { replies: Comment[] };
 
-    // Build nested comments by parentId
-    const nestedComments = useMemo(() => {
-        if (!comments || comments.length === 0) return [] as Comment[];
-        const map = new Map<number, Comment & { replies: Comment[] }>();
-        comments.forEach(c => {
-            map.set(c.id, { ...c, replies: Array.isArray(c.replies) ? c.replies : [] });
-        });
-        const roots: (Comment & { replies: Comment[] })[] = [];
-        comments.forEach(c => {
-            const node = map.get(c.id)!;
-            if (c.parentId) {
-                const parent = map.get(c.parentId);
-                if (parent) {
-                    if (!Array.isArray(parent.replies)) parent.replies = [] as any;
-                    (parent.replies as any).push(node);
-                } else {
-                    roots.push(node);
-                }
-            } else {
-                roots.push(node);
-            }
-        });
-        return roots as unknown as Comment[];
-    }, [comments]);
+function buildTree(list: Comment[]): NestedComment[] {
+  const map = new Map<number, NestedComment>();
+  list.forEach((c) =>
+    map.set(c.id, { ...c, replies: Array.isArray(c.replies) ? [...c.replies] : [] }),
+  );
+  const roots: NestedComment[] = [];
+  list.forEach((c) => {
+    const node = map.get(c.id)!;
+    const pid = (c as Comment & { parentId?: number | null; parent_id?: number | null })
+      .parentId ??
+      (c as Comment & { parent_id?: number | null }).parent_id ??
+      null;
+    if (pid) {
+      const parent = map.get(Number(pid));
+      if (parent) parent.replies.push(node);
+      else roots.push(node);
+    } else {
+      roots.push(node);
+    }
+  });
+  return roots;
+}
 
-    const handleSubmit = async (e: FormEvent) => {
-        e.preventDefault();
-        if (!session) {
-            showError('로그인 후 댓글을 작성할 수 있습니다.');
-            return;
-        }
-        try {
-            const payload: any = { content };
-            if (replyParentId) {
-                // 서버 호환을 위해 parent / parentId 둘 다 포함
-                payload.parent = replyParentId;
-                payload.parentId = replyParentId;
-            }
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                },
-                body: JSON.stringify(payload),
-            });
-            if (!response.ok) throw new Error('댓글 작성 실패');
-            setContent("");
-            setShowForm(false);
-            setReplyParentId(null);
-            mutate();
-            showSuccess('댓글이 작성되었습니다.');
-        } catch {
-            showError('댓글 작성에 실패했습니다.');
-        }
-    };
+interface CommentRowProps {
+  c: Comment;
+  postAuthorId?: number | null;
+  nested?: boolean;
+  onReply: (id: number) => void;
+}
 
-    return (
-        <div className="mt-10">
-            <h3 className={`text-lg font-semibold mb-4 transition-colors duration-200 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
-                }`}>댓글</h3>
-            {!showForm ? (
-                <button
-                    onClick={() => { setReplyParentId(null); setShowForm(true); }}
-                    className={`w-full h-16 text-left px-4 bg-transparent text-base border border-dashed rounded transition-colors duration-200 ${theme === 'dark'
-                        ? 'border-gray-600 hover:bg-gray-700 text-gray-100'
-                        : 'border-gray-300 hover:bg-gray-100 text-gray-900'
-                        }`}
-                >
-                    댓글을 남겨주세요.
-                </button>
-            ) : (
-                <CommentInput
-                    content={content}
-                    setContent={setContent}
-                    onSubmit={handleSubmit}
-                    onCancel={() => { setShowForm(false); setReplyParentId(null); }}
-                />
-            )}
-
-            {!comments ? (
-                <div className="flex justify-center py-8">
-                    <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full" />
-                </div>
-            ) : comments.length === 0 ? (
-                <p className={`text-center transition-colors duration-200 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                    }`}>현재 작성된 댓글이 없습니다.</p>
-            ) : (
-                <div className="space-y-6 mt-4">
-                    {nestedComments.map(cmt => (
-                        <CommentItem key={cmt.id} comment={cmt} onReply={(id: number) => { setReplyParentId(id); setShowForm(true); }} />
-                    ))}
-                </div>
-            )}
+function CommentRow({ c, postAuthorId, nested, onReply }: CommentRowProps) {
+  const name = c.author?.username ?? "익명";
+  const isOp = postAuthorId != null && c.author?.id === postAuthorId;
+  return (
+    <div className={`blessing-comment${nested ? " blessing-comment-nested" : ""}`}>
+      <Avatar name={name} size={30} seed={c.id} />
+      <div className="blessing-comment-body">
+        <div className="blessing-comment-head">
+          <span className="blessing-comment-name">{name}</span>
+          {isOp && <span className="blessing-comment-op">작성자</span>}
+          <span className="blessing-comment-time">
+            · {formatTimeAgo(c.created_at)}
+          </span>
         </div>
-    );
+        <div className="blessing-comment-text">{c.content}</div>
+        <div className="blessing-comment-actions">
+          <button type="button" onClick={() => onReply(c.id)}>답글</button>
+          <button
+            type="button"
+            onClick={() => toast.message("신고가 접수되었어요.")}
+          >
+            신고
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function Comments({
+  postId,
+  postAuthorId,
+  commentCount,
+}: CommentsProps) {
+  const router = useRouter();
+  const { data: session } = useSession();
+  const token = (session as { accessToken?: string } | null)?.accessToken;
+  const url = `/api/posts/${postId}/comments`;
+  const { data, mutate, isLoading } = useSWR<Comment[]>(url, commentsFetcher);
+
+  const [text, setText] = useState("");
+  const [replyTo, setReplyTo] = useState<number | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const tree = useMemo(() => (data ? buildTree(data) : []), [data]);
+  const flat = (t: NestedComment[]): Array<{ c: Comment; nested: boolean }> => {
+    const out: Array<{ c: Comment; nested: boolean }> = [];
+    t.forEach((n) => {
+      out.push({ c: n, nested: false });
+      n.replies.forEach((r) => out.push({ c: r, nested: true }));
+    });
+    return out;
+  };
+  const rows = flat(tree);
+
+  const onSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!text.trim()) return;
+    if (!session || !token) {
+      toast.error("로그인 후 댓글을 작성할 수 있어요.");
+      router.push("/auth");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          content: text.trim(),
+          parentId: replyTo,
+        }),
+      });
+      if (!res.ok) throw new Error("fail");
+      setText("");
+      setReplyTo(null);
+      mutate();
+      toast.success("댓글이 등록되었습니다.");
+    } catch {
+      toast.error("댓글 등록에 실패했어요.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <>
+      <div className="blessing-comment-section-head">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
+          <path
+            d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-4 3V6Z"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinejoin="round"
+          />
+        </svg>
+        댓글{" "}
+        <span className="blessing-comment-count-num">
+          {data?.length ?? commentCount ?? 0}
+        </span>
+      </div>
+
+      <div className="blessing-comment-list">
+        {isLoading && !data ? (
+          <div className="blessing-loading">
+            <div className="blessing-spinner" aria-label="Loading" />
+          </div>
+        ) : rows.length === 0 ? (
+          <div className="blessing-comment-empty">
+            아직 댓글이 없어요. 첫 댓글을 남겨보세요.
+          </div>
+        ) : (
+          rows.map((row) => (
+            <CommentRow
+              key={row.c.id}
+              c={row.c}
+              postAuthorId={postAuthorId}
+              nested={row.nested}
+              onReply={(id) => {
+                setReplyTo(id);
+                const el = document.getElementById("blessing-comment-input");
+                el?.focus();
+              }}
+            />
+          ))
+        )}
+      </div>
+
+      <form className="blessing-comment-compose" onSubmit={onSubmit}>
+        <Avatar name={session?.user?.name ?? "나"} size={28} seed={99} />
+        <input
+          id="blessing-comment-input"
+          type="text"
+          placeholder={
+            replyTo != null
+              ? "답글을 입력하세요..."
+              : "댓글을 입력하세요..."
+          }
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+        />
+        {replyTo != null && (
+          <button
+            type="button"
+            className="blessing-comment-reply-cancel"
+            onClick={() => setReplyTo(null)}
+            aria-label="답글 취소"
+          >
+            ✕
+          </button>
+        )}
+        <button
+          type="submit"
+          className="blessing-comment-submit"
+          disabled={submitting || !text.trim()}
+        >
+          등록
+        </button>
+      </form>
+    </>
+  );
 }

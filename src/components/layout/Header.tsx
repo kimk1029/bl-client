@@ -134,6 +134,9 @@ export default function Header() {
   const goSearch = () => router.push("/search");
   const goNotif = () => router.push("/profile");
 
+  // Post detail owns its own header (back + bookmark + share + kebab).
+  if (/^\/posts\/\d+(\/|$)/.test(pathname)) return null;
+
   if (pathname === "/") {
     return (
       <header className="blessing-topbar">
