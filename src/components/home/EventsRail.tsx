@@ -41,7 +41,7 @@ export default function EventsRail() {
           return (
             <Link
               key={e.id}
-              href="/events"
+              href={`/events/${e.id}`}
               className="blessing-event-card"
             >
               <div className="blessing-event-date">
