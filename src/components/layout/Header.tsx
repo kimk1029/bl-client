@@ -159,6 +159,8 @@ export default function Header() {
   if (pathname === "/messages/new") return null;
   // Church verify 3-step wizard has its own header with dynamic step subtitle.
   if (pathname === "/verify-church") return null;
+  // Public user profile has its own header (back + more menu).
+  if (/^\/users\/\d+(\/|$)/.test(pathname)) return null;
 
   if (pathname === "/") {
     return (

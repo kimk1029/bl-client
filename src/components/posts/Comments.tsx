@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import useSWR from "swr";
 import { toast } from "sonner";
 import Avatar from "@/components/common/Avatar";
+import UserLink from "@/components/users/UserLink";
 import { formatTimeAgo } from "@/components/home/lib/postAdapters";
 import type { Comment } from "@/types/type";
 
@@ -61,7 +62,14 @@ function CommentRow({ c, postAuthorId, nested, onReply }: CommentRowProps) {
       <Avatar name={name} size={30} seed={c.id} />
       <div className="blessing-comment-body">
         <div className="blessing-comment-head">
-          <span className="blessing-comment-name">{name}</span>
+          <UserLink
+            userId={c.author?.id ?? null}
+            username={name}
+            className="blessing-comment-name"
+            disabled={!c.author}
+          >
+            {name}
+          </UserLink>
           {isOp && <span className="blessing-comment-op">작성자</span>}
           <span className="blessing-comment-time">
             · {formatTimeAgo(c.created_at)}

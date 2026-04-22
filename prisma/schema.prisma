@@ -62,6 +62,12 @@ model User {
   received_messages Message[] @relation("MessageReceiver")
   verify_requests   ChurchVerifyRequest[]
 
+  following         Follow[] @relation("Follower")
+  followers         Follow[] @relation("Followee")
+  blocks_made       Block[]  @relation("Blocker")
+  blocks_received   Block[]  @relation("Blocked")
+  reports_made      Report[] @relation("Reporter")
+
   @@index([church_id])
 }
 
@@ -240,6 +246,52 @@ model ChurchVerifyRequest {
   updated_at  DateTime @updatedAt
 
   @@index([user_id])
+  @@index([status])
+  @@index([created_at])
+}
+
+model Follow {
+  id           Int      @id @default(autoincrement())
+  follower_id  Int
+  follower     User     @relation("Follower", fields: [follower_id], references: [id], onDelete: Cascade)
+  followee_id  Int
+  followee     User     @relation("Followee", fields: [followee_id], references: [id], onDelete: Cascade)
+  created_at   DateTime @default(now())
+
+  @@unique([follower_id, followee_id])
+  @@index([follower_id])
+  @@index([followee_id])
+}
+
+model Block {
+  id          Int      @id @default(autoincrement())
+  blocker_id  Int
+  blocker     User     @relation("Blocker", fields: [blocker_id], references: [id], onDelete: Cascade)
+  blocked_id  Int
+  blocked     User     @relation("Blocked", fields: [blocked_id], references: [id], onDelete: Cascade)
+  created_at  DateTime @default(now())
+
+  @@unique([blocker_id, blocked_id])
+  @@index([blocker_id])
+  @@index([blocked_id])
+}
+
+model Report {
+  id          Int      @id @default(autoincrement())
+  reporter_id Int
+  reporter    User     @relation("Reporter", fields: [reporter_id], references: [id], onDelete: Cascade)
+  // "user" | "post" | "comment"
+  target_type String
+  target_id   Int
+  // "spam" | "harassment" | "inappropriate" | "impersonation" | "other"
+  reason      String
+  note        String?  @db.Text
+  // pending | reviewed | dismissed
+  status      String   @default("pending")
+  created_at  DateTime @default(now())
+
+  @@index([reporter_id])
+  @@index([target_type, target_id])
   @@index([status])
   @@index([created_at])
 }

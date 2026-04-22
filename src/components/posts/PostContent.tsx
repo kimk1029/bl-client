@@ -11,6 +11,7 @@ import { formatTimeAgo } from "@/components/home/lib/postAdapters";
 import { postBookmarks, usePostBookmarked } from "@/lib/postBookmarks";
 import { shareOrCopy } from "@/lib/share";
 import Avatar from "@/components/common/Avatar";
+import UserLink from "@/components/users/UserLink";
 import Comments from "./Comments";
 
 const URL_LIKE = (id: number | string) => `/api/posts/${id}/like`;
@@ -366,11 +367,23 @@ export default function PostContent({
         <h1 className="blessing-detail-title">{post.title}</h1>
 
         <div className="blessing-detail-author-line">
-          <Avatar name={displayAuthor} seed={postId} size={38} anon={isAnonymous} />
+          <UserLink
+            userId={isAnonymous ? null : post.author?.id ?? null}
+            username={displayAuthor}
+            disabled={isAnonymous || !post.author}
+            className="blessing-detail-author-avatar"
+          >
+            <Avatar name={displayAuthor} seed={postId} size={38} anon={isAnonymous} />
+          </UserLink>
           <div className="blessing-detail-author-info">
-            <div className="blessing-detail-author-name">
+            <UserLink
+              userId={isAnonymous ? null : post.author?.id ?? null}
+              username={displayAuthor}
+              disabled={isAnonymous || !post.author}
+              className="blessing-detail-author-name"
+            >
               {isAnonymous ? "🫧 익명" : displayAuthor}
-            </div>
+            </UserLink>
             <div className="blessing-detail-author-church">
               {isAnonymous ? "익명 게시판" : "blessing 성도"}
             </div>

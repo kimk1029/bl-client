@@ -3848,6 +3848,266 @@ html.dark .blessing-chip-active {
   padding: 0 14px;
 }
 
+/* =========================================================================
+   User menu (bottom sheet) — opened by tapping a username/avatar
+   ========================================================================= */
+.blessing-user-link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline;
+}
+.blessing-user-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.blessing-user-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 15, 5, 0.45);
+  z-index: 80;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: blessing-sheet-fade 0.15s ease-out;
+}
+.blessing-user-sheet {
+  width: 100%;
+  max-width: 480px;
+  background: var(--blessing-bg-1);
+  border-radius: 20px 20px 0 0;
+  padding: 10px 16px 24px;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  box-shadow: 0 -10px 40px rgba(20, 15, 5, 0.25);
+  animation: blessing-sheet-rise 0.18s ease-out;
+}
+@keyframes blessing-sheet-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes blessing-sheet-rise {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.blessing-user-sheet-handle {
+  width: 42px;
+  height: 4px;
+  background: var(--blessing-border-strong);
+  border-radius: 100px;
+  margin: 0 auto 14px;
+}
+.blessing-user-sheet-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 4px 12px;
+  border-bottom: 1px solid var(--blessing-border);
+}
+.blessing-user-sheet-head-info {
+  flex: 1;
+  min-width: 0;
+}
+.blessing-user-sheet-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--blessing-fg-0);
+  letter-spacing: -0.3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.blessing-user-sheet-sub {
+  font-size: 11.5px;
+  color: var(--blessing-fg-2);
+  margin-top: 2px;
+}
+.blessing-user-sheet-menu {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 0 0;
+}
+.blessing-user-sheet-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 8px;
+  background: none;
+  border: none;
+  color: var(--blessing-fg-0);
+  font-size: 14px;
+  font-family: inherit;
+  letter-spacing: -0.2px;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 8px;
+  font-weight: 500;
+}
+.blessing-user-sheet-item:hover:not(:disabled) {
+  background: var(--blessing-bg-2);
+}
+.blessing-user-sheet-item:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.blessing-user-sheet-item > span:first-child {
+  width: 22px;
+  text-align: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.blessing-user-sheet-item-on {
+  color: var(--blessing-accent-strong);
+  background: var(--blessing-accent-soft);
+}
+.blessing-user-sheet-item-danger {
+  color: var(--blessing-hot);
+}
+.blessing-user-sheet-item-danger:hover:not(:disabled) {
+  background: var(--blessing-hot-soft);
+}
+.blessing-user-sheet-divider {
+  height: 1px;
+  background: var(--blessing-border);
+  margin: 6px 4px;
+}
+.blessing-user-sheet-form {
+  padding: 8px 4px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.blessing-user-sheet-sectiontitle {
+  font-family: var(--blessing-mono);
+  font-size: 10.5px;
+  color: var(--blessing-fg-2);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.blessing-user-sheet-copy {
+  font-size: 13.5px;
+  color: var(--blessing-fg-1);
+  line-height: 1.55;
+  letter-spacing: -0.2px;
+  margin: 0;
+}
+.blessing-user-sheet-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+.blessing-user-sheet-actions .blessing-btn-secondary {
+  min-height: 42px;
+  padding: 0 16px;
+}
+.blessing-user-sheet-actions .blessing-btn-primary,
+.blessing-user-sheet-actions .blessing-btn-danger {
+  flex: 1;
+  min-height: 42px;
+}
+
+/* Report reasons pill grid */
+.blessing-report-reasons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.blessing-report-reason {
+  padding: 11px 12px;
+  background: var(--blessing-bg-2);
+  border: 1px solid var(--blessing-border);
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--blessing-fg-0);
+  font-family: inherit;
+  cursor: pointer;
+  text-align: center;
+  letter-spacing: -0.2px;
+  transition: border-color 0.12s, background 0.12s;
+}
+.blessing-report-reason-on {
+  background: var(--blessing-accent-soft);
+  border-color: var(--blessing-accent);
+  color: var(--blessing-accent-strong);
+  font-weight: 600;
+}
+.blessing-report-note {
+  width: 100%;
+  min-height: 88px;
+  padding: 10px 12px;
+  border: 1px solid var(--blessing-border);
+  border-radius: 10px;
+  background: var(--blessing-bg-1);
+  color: var(--blessing-fg-0);
+  font-size: 13px;
+  font-family: inherit;
+  letter-spacing: -0.2px;
+  resize: vertical;
+  outline: none;
+}
+.blessing-report-note:focus {
+  border-color: var(--blessing-accent);
+  box-shadow: 0 0 0 3px var(--blessing-accent-soft);
+}
+
+/* Danger button */
+.blessing-btn-danger {
+  padding: 0 16px;
+  height: 40px;
+  background: var(--blessing-hot);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  cursor: pointer;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+.blessing-btn-danger:hover {
+  background: #a43924;
+}
+.blessing-btn-danger:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Follow row (followers/following list) */
+.blessing-follow-row {
+  justify-content: space-between;
+}
+.blessing-follow-row-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+.blessing-btn-secondary-on {
+  background: var(--blessing-accent-soft);
+  border-color: var(--blessing-accent);
+  color: var(--blessing-accent-strong);
+  font-weight: 700;
+}
+.blessing-btn-primary-on {
+  background: var(--blessing-accent-soft);
+  color: var(--blessing-accent-strong);
+  box-shadow: inset 0 0 0 1px var(--blessing-accent);
+}
+
+/* Detail author tap targets */
+.blessing-detail-author-avatar .blessing-avatar {
+  display: inline-flex;
+}
+
 /* Complete-profile → verify-church jump link */
 .blessing-complete-verify-link {
   margin-top: 8px;

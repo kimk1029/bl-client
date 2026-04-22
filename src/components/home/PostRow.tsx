@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { Post } from "@/types/type";
 import { topicByCategory } from "./data/topics";
 import { countComments, countLikes, formatTimeAgo, formatViews } from "./lib/postAdapters";
+import UserLink from "@/components/users/UserLink";
 
 interface Props {
   post: Post;
@@ -52,7 +53,14 @@ export default function PostRow({ post, rank, showTopic = true, hot, pinned }: P
           {comments > 0 && <span className="blessing-post-cc">[{comments}]</span>}
         </div>
         <div className="blessing-post-meta-bottom">
-          <span className="blessing-post-author">{post.author?.username ?? "익명"}</span>
+          <UserLink
+            userId={post.is_anonymous ? null : post.author?.id ?? null}
+            username={post.author?.username ?? "익명"}
+            className="blessing-post-author"
+            disabled={!!post.is_anonymous || !post.author}
+          >
+            {post.is_anonymous ? "🫧 익명" : post.author?.username ?? "익명"}
+          </UserLink>
           <span className="blessing-dot">·</span>
           <span>{formatTimeAgo(post.created_at)}</span>
           <span className="blessing-dot">·</span>
