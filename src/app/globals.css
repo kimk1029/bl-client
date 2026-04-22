@@ -2233,6 +2233,7 @@ html.dark .blessing-chip-active {
 .blessing-article {
   display: flex;
   flex-direction: column;
+  padding: 0 16px;
 }
 .blessing-article-back {
   display: inline-flex;

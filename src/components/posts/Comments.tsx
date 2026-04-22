@@ -135,6 +135,7 @@ export default function Comments({ postId, showForm, setShowForm, isAnonymous = 
     const [content, setContent] = useState("");
     const [replyParentId, setReplyParentId] = useState<number | null>(null);
     const { theme } = useTheme();
+    const token = (session as any)?.accessToken as string | undefined;
 
     const url = isAnonymous ? `/api/anonymous/${postId}/comments` : `/api/posts/${postId}/comments`;
     const { data: comments, mutate } = useSWR<Comment[]>(url, fetcher);
@@ -181,6 +182,7 @@ export default function Comments({ postId, showForm, setShowForm, isAnonymous = 
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
                 },
                 body: JSON.stringify(payload),
             });
