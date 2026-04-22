@@ -136,6 +136,8 @@ export default function Header() {
 
   // Post detail owns its own header (back + bookmark + share + kebab).
   if (/^\/posts\/\d+(\/|$)/.test(pathname)) return null;
+  // Search owns its own top bar with the live input field.
+  if (pathname === "/search") return null;
 
   if (pathname === "/") {
     return (
