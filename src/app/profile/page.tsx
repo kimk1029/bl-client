@@ -1,232 +1,222 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
-import { useSession } from "next-auth/react";
-import useSWR from "swr";
-import { useTheme } from "@/context/ThemeContext";
-import { computeLevel } from "@/utils/level";
-import { showSuccess, showError } from "@/components/toast";
-import { Check, Pencil, X } from "lucide-react";
-import { apiFetcher } from "@/lib/fetcher";
-import { createApiUrl } from "@/utils/apiConfig";
+import Link from "next/link";
+import { useSession, signOut } from "next-auth/react";
 
-const fetcher = apiFetcher;
+function MenuChevron() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      style={{ color: "var(--blessing-fg-3)", flexShrink: 0 }}
+      aria-hidden
+    >
+      <path
+        d="M9 6l6 6-6 6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
-type EditableKey = "username" | "affiliation" | "cell";
+function initialOf(name: string | null | undefined): string {
+  if (!name) return "·";
+  return name.slice(0, 1).toUpperCase();
+}
 
 export default function ProfilePage() {
-    const { data: session, update } = useSession();
-    const { theme } = useTheme();
-    const userId = (session?.user as any)?.id;
+  const { data: session, status } = useSession();
+  const u = session?.user as
+    | {
+        name?: string | null;
+        email?: string | null;
+        affiliation?: string;
+        cell?: string;
+      }
+    | undefined;
 
-    const { data: account, mutate } = useSWR(userId ? `/api/users/account/${userId}` : null, fetcher, { revalidateOnFocus: false });
+  const me = {
+    name: u?.name ?? "게스트",
+    church: u?.affiliation ?? "교회 미인증",
+    role: u?.cell ?? "성도",
+    verified: !!u?.affiliation,
+    joined: "2025. 04",
+    posts: 0,
+    comments: 0,
+    prayers: 0,
+    bookmarks: 0,
+  };
 
-    const points = (account?.points ?? (session?.user as any)?.points) ?? 0;
-    const { level, progressPct, rangeEnd } = computeLevel(points);
-
-    const [editing, setEditing] = useState<Record<EditableKey, boolean>>({ username: false, affiliation: false, cell: false });
-    const [values, setValues] = useState<Record<EditableKey, string>>({
-        username: account?.username ?? (session?.user as any)?.name ?? "",
-        affiliation: account?.affiliation ?? (session?.user as any)?.affiliation ?? "",
-        cell: account?.cell ?? "",
-    });
-    const [pristine, setPristine] = useState(true);
-    const [checking, setChecking] = useState(false);
-    const [usernameValid, setUsernameValid] = useState<boolean | null>(null);
-    const [usernameError, setUsernameError] = useState<string | null>(null);
-
-    useEffect(() => {
-        setValues({
-            username: account?.username ?? (session?.user as any)?.name ?? "",
-            affiliation: account?.affiliation ?? (session?.user as any)?.affiliation ?? "",
-            cell: account?.cell ?? "",
-        });
-        setPristine(true);
-        setUsernameValid(null);
-        setUsernameError(null);
-    }, [account, session]);
-
-    const onChange = (key: EditableKey, val: string) => {
-        setValues(prev => ({ ...prev, [key]: val }));
-        setPristine(false);
-        if (key === "username") {
-            setUsernameValid(null);
-            setUsernameError(null);
-        }
-    };
-
-    const checkUsername = async () => {
-        try {
-            setChecking(true);
-            const q = values.username.trim();
-            if (!q) {
-                setUsernameValid(false);
-                setUsernameError("닉네임을 입력하세요.");
-                return;
-            }
-            // 본인과 동일하면 통과
-            const current = account?.username ?? (session?.user as any)?.name ?? "";
-            if (q === current) {
-                setUsernameValid(true);
-                setUsernameError(null);
-                return;
-            }
-            const res = await fetch(createApiUrl('/auth/check-username'), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: q })
-            });
-            const data = await res.json();
-            const exists = Boolean(data?.exists);
-            if (!exists) {
-                setUsernameValid(true);
-                setUsernameError(null);
-            } else {
-                setUsernameValid(false);
-                setUsernameError("중복된 닉네임입니다.");
-            }
-        } catch {
-            setUsernameValid(false);
-            setUsernameError("중복 확인에 실패했습니다.");
-        } finally {
-            setChecking(false);
-        }
-    };
-
-    const save = async () => {
-        try {
-            if (!userId) return;
-            const payload: any = {};
-            const initial = {
-                username: account?.username ?? (session?.user as any)?.name ?? "",
-                affiliation: account?.affiliation ?? (session?.user as any)?.affiliation ?? "",
-                cell: account?.cell ?? "",
-            };
-            (Object.keys(values) as EditableKey[]).forEach(k => {
-                if (values[k] !== (initial as any)[k]) payload[k] = values[k];
-            });
-            if (Object.keys(payload).length === 0) return;
-
-            const res = await fetch(`/api/users/account/${userId}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
-            });
-            if (!res.ok) {
-                const text = await res.text();
-                throw new Error(text || '수정 실패');
-            }
-            const updated = await res.json();
-            showSuccess('프로필이 저장되었습니다.');
-            mutate();
-            // 세션 업데이트 시도
-            await update?.({
-                user: {
-                    ...(session?.user || {}),
-                    name: values.username || (session?.user as any)?.name,
-                    email: (session?.user as any)?.email,
-                    affiliation: values.affiliation,
-                    image: (session?.user as any)?.image,
-                } as any,
-            } as any).catch(() => { });
-        } catch (e: any) {
-            showError(e?.message || '저장 중 오류가 발생했습니다.');
-        }
-    };
-
-    const section = (label: string, key: EditableKey, placeholder = "") => (
-        <div className="mb-4">
-            <div className="flex items-center justify-between">
-                <label className="text-sm font-medium">{label}</label>
-                {!editing[key] ? (
-                    <button className={`p-1 rounded ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`} onClick={() => setEditing(p => ({ ...p, [key]: true }))}>
-                        <Pencil className="w-4 h-4" />
-                    </button>
-                ) : (
-                    <div className="flex items-center space-x-2">
-                        {key === 'username' && (
-                            <button disabled={checking} onClick={checkUsername} className={`text-xs px-2 py-1 rounded ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-800'}`}>중복검사</button>
-                        )}
-                        <button onClick={() => setEditing(p => ({ ...p, [key]: false }))} className={`p-1 rounded ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}>
-                            <X className="w-4 h-4" />
-                        </button>
-                        <button disabled={key === 'username' && usernameValid === false} onClick={() => { setEditing(p => ({ ...p, [key]: false })); }} className={`p-1 rounded ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} ${key === 'username' && usernameValid === false ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                            <Check className="w-4 h-4" />
-                        </button>
-                    </div>
-                )}
-            </div>
-            {!editing[key] ? (
-                <div className={`mt-1 text-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>{values[key] || '-'}</div>
-            ) : (
-                <div className="mt-1">
-                    <input
-                        className={`w-full px-3 py-2 border rounded text-sm focus:outline-none ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
-                        value={values[key]}
-                        onChange={e => onChange(key, e.target.value)}
-                        placeholder={placeholder}
-                    />
-                    {key === 'username' && usernameValid === false && (
-                        <div className={`flex items-center mt-1 text-xs ${theme === 'dark' ? 'text-red-300' : 'text-red-600'}`}>
-                            <X className="w-3 h-3 mr-1" /> {usernameError || '중복된 닉네임입니다.'}
-                        </div>
-                    )}
-                </div>
-            )}
+  return (
+    <div className="blessing-home">
+      <div className="blessing-profile-head">
+        <div
+          className="blessing-profile-avatar"
+          aria-hidden
+          style={{
+            background: `oklch(88% 0.04 ${
+              (me.name.charCodeAt(0) * 17) % 360
+            })`,
+            color: `oklch(35% 0.06 ${(me.name.charCodeAt(0) * 17) % 360})`,
+          }}
+        >
+          {initialOf(me.name)}
         </div>
-    );
-
-    const canSave = useMemo(() => {
-        const initial = {
-            username: account?.username ?? (session?.user as any)?.name ?? "",
-            affiliation: account?.affiliation ?? (session?.user as any)?.affiliation ?? "",
-            cell: account?.cell ?? "",
-        };
-        const changed = (Object.keys(values) as EditableKey[]).some(k => values[k] !== (initial as any)[k]);
-        const usernameOk = editing.username ? usernameValid !== false : true;
-        return changed && usernameOk;
-    }, [values, account, session, editing, usernameValid]);
-
-    return (
-        <div className={`min-h-screen transition-colors duration-200 ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
-            <div className="max-w-3xl mx-auto px-4 md:px-6 py-6">
-                <div className="flex items-center space-x-4 mb-6">
-                    <img
-                        src={(session?.user as any)?.image ?? `https://ui-avatars.com/api/?name=${encodeURIComponent((session?.user as any)?.name ?? '')}&background=random`}
-                        alt={(session?.user as any)?.name ?? 'User'}
-                        className="w-16 h-16 rounded-full"
-                    />
-                    <div className="flex-1">
-                        <div className="text-lg font-bold">{(session?.user as any)?.name ?? '-'}</div>
-                        <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>{(session?.user as any)?.email ?? '-'}</div>
-                    </div>
-                    <div className="text-right">
-                        <div className="text-sm font-semibold">Lv.{level}</div>
-                        <div className="text-xs">{points}pt</div>
-                        <div className={`mt-1 h-1 w-40 rounded ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'}`}>
-                            <div className="h-1 rounded bg-blue-500" style={{ width: `${progressPct}%` }} />
-                        </div>
-                    </div>
-                </div>
-
-                <div className={`border rounded-md ${theme === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'} p-4`}>
-                    {section('닉네임', 'username', '닉네임을 입력하세요')}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {section('소속', 'affiliation', '소속을 입력하세요')}
-                        {section('셀', 'cell', '셀을 입력하세요')}
-                    </div>
-
-                    <div className="flex justify-end mt-4">
-                        <button
-                            disabled={!canSave}
-                            onClick={save}
-                            className={`px-4 py-2 rounded text-sm font-medium ${canSave ? 'bg-blue-600 text-white hover:bg-blue-700' : theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-500'}`}
-                        >
-                            저장
-                        </button>
-                    </div>
-                </div>
-            </div>
+        <div className="blessing-profile-name-line">
+          <span className="blessing-profile-name">{me.name}</span>
+          {me.verified && <span className="blessing-verify-badge">✓ 인증</span>}
         </div>
-    );
+        <div className="blessing-profile-church">
+          {me.church} · {me.role}
+        </div>
+        <div className="blessing-profile-joined">블레싱 가입 · {me.joined}</div>
+        {status === "authenticated" ? (
+          <button className="blessing-profile-edit-btn" type="button">
+            프로필 편집
+          </button>
+        ) : (
+          <Link href="/auth" className="blessing-profile-edit-btn">
+            로그인
+          </Link>
+        )}
+      </div>
+
+      <div className="blessing-profile-stats">
+        <div className="blessing-profile-stat">
+          <div className="blessing-stat-num">{me.posts}</div>
+          <div className="blessing-stat-label">작성한 글</div>
+        </div>
+        <div className="blessing-profile-stat">
+          <div className="blessing-stat-num">{me.comments}</div>
+          <div className="blessing-stat-label">댓글</div>
+        </div>
+        <div className="blessing-profile-stat">
+          <div className="blessing-stat-num">{me.prayers}</div>
+          <div className="blessing-stat-label">🙏 중보</div>
+        </div>
+        <div className="blessing-profile-stat">
+          <div className="blessing-stat-num">{me.bookmarks}</div>
+          <div className="blessing-stat-label">북마크</div>
+        </div>
+      </div>
+
+      <div className="blessing-profile-menu-group">
+        <div className="blessing-profile-menu-title">내 활동</div>
+        <Link href="/my-articles" className="blessing-profile-menu-row">
+          <span className="blessing-menu-emoji">📝</span>
+          <span className="blessing-menu-label">내가 쓴 글</span>
+          <span className="blessing-menu-badge">{me.posts}</span>
+          <MenuChevron />
+        </Link>
+        <button className="blessing-profile-menu-row" type="button">
+          <span className="blessing-menu-emoji">💬</span>
+          <span className="blessing-menu-label">내 댓글</span>
+          <span className="blessing-menu-badge">{me.comments}</span>
+          <MenuChevron />
+        </button>
+        <button className="blessing-profile-menu-row" type="button">
+          <span className="blessing-menu-emoji">🔖</span>
+          <span className="blessing-menu-label">북마크</span>
+          <span className="blessing-menu-badge">{me.bookmarks}</span>
+          <MenuChevron />
+        </button>
+        <button className="blessing-profile-menu-row" type="button">
+          <span className="blessing-menu-emoji">🙏</span>
+          <span className="blessing-menu-label">기도 중인 제목</span>
+          <span className="blessing-menu-badge">0</span>
+          <MenuChevron />
+        </button>
+      </div>
+
+      <div className="blessing-profile-menu-group">
+        <div className="blessing-profile-menu-title">알림 & 메시지</div>
+        <button className="blessing-profile-menu-row" type="button">
+          <span className="blessing-menu-emoji">🔔</span>
+          <span className="blessing-menu-label">알림</span>
+          <span className="blessing-menu-badge-hot">0</span>
+          <MenuChevron />
+        </button>
+        <button className="blessing-profile-menu-row" type="button">
+          <span className="blessing-menu-emoji">✉️</span>
+          <span className="blessing-menu-label">쪽지함</span>
+          <span className="blessing-menu-badge-hot">0</span>
+          <MenuChevron />
+        </button>
+      </div>
+
+      <div className="blessing-profile-menu-group">
+        <div className="blessing-profile-menu-title">교회 & 인증</div>
+        <Link href="/church" className="blessing-profile-menu-row">
+          <span className="blessing-menu-emoji">🏛️</span>
+          <span className="blessing-menu-label">교회 인증</span>
+          <span
+            className="blessing-menu-badge"
+            style={{
+              background: "var(--blessing-accent-soft)",
+              color: "var(--blessing-accent-strong)",
+            }}
+          >
+            {me.church}
+          </span>
+          <MenuChevron />
+        </Link>
+        <button className="blessing-profile-menu-row" type="button">
+          <span className="blessing-menu-emoji">🫂</span>
+          <span className="blessing-menu-label">나의 셀·목장</span>
+          <MenuChevron />
+        </button>
+      </div>
+
+      <div className="blessing-profile-menu-group">
+        <div className="blessing-profile-menu-title">설정</div>
+        <button className="blessing-profile-menu-row" type="button">
+          <span className="blessing-menu-emoji">🎨</span>
+          <span className="blessing-menu-label">테마 및 표시</span>
+          <MenuChevron />
+        </button>
+        <button className="blessing-profile-menu-row" type="button">
+          <span className="blessing-menu-emoji">🔒</span>
+          <span className="blessing-menu-label">개인정보 및 보안</span>
+          <MenuChevron />
+        </button>
+        <button className="blessing-profile-menu-row" type="button">
+          <span className="blessing-menu-emoji">❓</span>
+          <span className="blessing-menu-label">고객센터 · FAQ</span>
+          <MenuChevron />
+        </button>
+        {status === "authenticated" && (
+          <button
+            className="blessing-profile-menu-row"
+            type="button"
+            onClick={() => signOut({ callbackUrl: "/" })}
+          >
+            <span
+              className="blessing-menu-emoji"
+              style={{ color: "var(--blessing-hot)" }}
+            >
+              🚪
+            </span>
+            <span
+              className="blessing-menu-label"
+              style={{ color: "var(--blessing-hot)" }}
+            >
+              로그아웃
+            </span>
+            <span style={{ flex: 1 }} />
+          </button>
+        )}
+      </div>
+
+      <div className="blessing-profile-footer">
+        blessing v1.2.0 · 2026
+        <br />
+        &quot;너희는 세상의 빛이라&quot; — 마태복음 5:14
+      </div>
+    </div>
+  );
 }

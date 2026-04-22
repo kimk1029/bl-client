@@ -11,12 +11,18 @@ import BottomNav from "@/components/layout/BottomNav";
 import GoogleAd from "@/components/layout/GoogleAd";
 import { useTheme } from '@/context/ThemeContext';
 import { Toaster } from 'sonner';
+import { usePathname } from 'next/navigation';
 
 const inter = Inter({ subsets: ["latin"] });
 
 function RootLayoutContent({ children }: { children: React.ReactNode }) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const pathname = usePathname();
+  const isFullBleed = pathname === '/topics';
+  const mainClass = isFullBleed
+    ? 'flex-1 w-full pb-20'
+    : 'flex-1 w-full px-4 py-4 pb-20';
 
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-gray-950 text-white' : 'bg-gray-100 text-gray-900'}`}>
@@ -31,7 +37,7 @@ function RootLayoutContent({ children }: { children: React.ReactNode }) {
           className={`flex flex-col min-h-screen w-full max-w-[800px] transition-colors duration-200 ${isDark ? 'bg-gray-900' : 'bg-white'} md:shadow-[0_0_40px_rgba(0,0,0,0.06)]`}
         >
           <Header />
-          <main className="flex-1 w-full px-4 py-4 pb-20">
+          <main className={mainClass}>
             {children}
           </main>
           <BottomNav />

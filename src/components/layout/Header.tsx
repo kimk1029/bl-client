@@ -1,72 +1,256 @@
 "use client";
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
-import { useTheme } from '@/context/ThemeContext';
-import { Search } from 'lucide-react';
-import { FaSun, FaMoon } from 'react-icons/fa';
-import UserAuth from './UserAuth';
 
-const Header = () => {
-    const [searchOpen, setSearchOpen] = useState(false);
-    const [q, setQ] = useState('');
-    const router = useRouter();
-    const pathname = usePathname();
-    const { theme, toggleTheme } = useTheme();
-    const isDark = theme === 'dark';
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useTheme } from "@/context/ThemeContext";
+import LogoMark from "./LogoMark";
 
-    const submit = (e: React.FormEvent) => {
-        e.preventDefault();
-        const trimmed = q.trim();
-        if (trimmed) {
-            router.push(`/search?q=${encodeURIComponent(trimmed)}`);
-            setQ('');
-            setSearchOpen(false);
-        }
-    };
+function IconSearch({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.8" />
+      <path d="m20 20-3.5-3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
 
-    return (
-        <header className={`sticky top-0 z-40 w-full transition-colors ${isDark ? 'bg-gray-900/95 backdrop-blur border-gray-800' : 'bg-white/95 backdrop-blur border-gray-200'} border-b`}>
-            <div className="flex items-center justify-between h-14 px-4">
-                <Link href="/" className={`text-lg font-bold tracking-tight ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>
-                    blessing
-                </Link>
+function IconBell() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M6 8a6 6 0 1 1 12 0c0 5 2 6 2 8H4c0-2 2-3 2-8Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <path d="M10 20a2 2 0 0 0 4 0" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
 
-                <div className="flex items-center gap-1">
-                    <button
-                        aria-label="검색"
-                        onClick={() => setSearchOpen(o => !o)}
-                        className={`p-2 rounded-full ${isDark ? 'hover:bg-gray-800 text-gray-300' : 'hover:bg-gray-100 text-gray-700'}`}
-                    >
-                        <Search className="w-5 h-5" />
-                    </button>
-                    <button
-                        aria-label="테마 전환"
-                        onClick={toggleTheme}
-                        className={`p-2 rounded-full ${isDark ? 'hover:bg-gray-800 text-yellow-300' : 'hover:bg-gray-100 text-gray-700'}`}
-                    >
-                        {isDark ? <FaSun className="w-4 h-4" /> : <FaMoon className="w-4 h-4" />}
-                    </button>
-                    <UserAuth />
-                </div>
-            </div>
+function IconBack() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M15 6l-6 6 6 6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
-            {searchOpen && (
-                <form onSubmit={submit} className={`px-4 pb-3 ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
-                    <div className={`flex items-center gap-2 rounded-full px-3 py-2 ${isDark ? 'bg-gray-800' : 'bg-gray-100'}`}>
-                        <Search className={`w-4 h-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`} />
-                        <input
-                            value={q}
-                            onChange={e => setQ(e.target.value)}
-                            autoFocus
-                            placeholder="검색어를 입력하세요"
-                            className={`flex-1 bg-transparent outline-none text-sm ${isDark ? 'text-gray-100 placeholder-gray-500' : 'text-gray-900 placeholder-gray-400'}`}
-                        />
-                    </div>
-                </form>
-            )}
-        </header>
-    );
+function IconEdit() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M3 21v-4l12-12 4 4L7 21H3Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <path d="m13 6 4 4" stroke="currentColor" strokeWidth="1.6" />
+    </svg>
+  );
+}
+
+function IconCog() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.7" />
+      <path
+        d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"
+        stroke="currentColor"
+        strokeWidth="1.4"
+      />
+    </svg>
+  );
+}
+
+function IconSun() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.8" />
+      <path
+        d="M12 2v2M12 20v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2 12h2M20 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function IconMoon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+interface SubHeader {
+  title: string;
+  subtitle?: string;
+}
+
+const SUB_HEADERS: Record<string, SubHeader> = {
+  "/posts/new": { title: "새 글 쓰기", subtitle: "New Post" },
+  "/events": { title: "이벤트", subtitle: "Events & Announcements" },
+  "/profile": { title: "마이페이지", subtitle: "My Profile" },
+  "/posts": { title: "게시판", subtitle: "Posts" },
+  "/search": { title: "검색", subtitle: "Search" },
+  "/church": { title: "교회", subtitle: "Churches" },
+  "/my-articles": { title: "내 글", subtitle: "My Articles" },
+  "/auth": { title: "로그인", subtitle: "Sign In" },
+  "/about": { title: "소개", subtitle: "About" },
 };
 
-export default Header;
+function resolveSubHeader(pathname: string): SubHeader | null {
+  if (SUB_HEADERS[pathname]) return SUB_HEADERS[pathname];
+  // longer keys first so /posts/new wins over /posts
+  const keys = Object.keys(SUB_HEADERS).sort((a, b) => b.length - a.length);
+  for (const key of keys) {
+    if (pathname.startsWith(key + "/")) return SUB_HEADERS[key];
+  }
+  return null;
+}
+
+export default function Header() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const { theme, toggleTheme } = useTheme();
+  const isDark = theme === "dark";
+
+  const goSearch = () => router.push("/search");
+  const goNotif = () => router.push("/profile");
+
+  if (pathname === "/") {
+    return (
+      <header className="blessing-topbar">
+        <div className="blessing-topbar-inner">
+          <Link href="/" className="blessing-logo" aria-label="홈">
+            <LogoMark size={26} />
+            <span className="blessing-logo-text">blessing</span>
+          </Link>
+          <button
+            type="button"
+            className="blessing-search-trigger"
+            onClick={goSearch}
+            aria-label="검색"
+          >
+            <IconSearch />
+            <span className="blessing-search-placeholder">
+              기도제목, 설교노트, 청년부...
+            </span>
+          </button>
+          <button
+            type="button"
+            className="blessing-icon-btn"
+            onClick={goNotif}
+            aria-label="알림"
+          >
+            <IconBell />
+            <span className="blessing-notif-dot" />
+          </button>
+          <button
+            type="button"
+            className="blessing-icon-btn"
+            onClick={toggleTheme}
+            aria-label="테마 전환"
+          >
+            {isDark ? <IconSun /> : <IconMoon />}
+          </button>
+        </div>
+      </header>
+    );
+  }
+
+  if (pathname === "/topics") {
+    return (
+      <header className="blessing-topbar">
+        <div className="blessing-topbar-inner">
+          <Link href="/" className="blessing-logo" aria-label="홈">
+            <LogoMark size={26} />
+            <span className="blessing-logo-text">토픽</span>
+          </Link>
+          <div style={{ flex: 1 }} />
+          <button
+            type="button"
+            className="blessing-icon-btn"
+            onClick={() => router.push("/posts/new")}
+            aria-label="글쓰기"
+          >
+            <IconEdit />
+          </button>
+          <button
+            type="button"
+            className="blessing-icon-btn"
+            onClick={toggleTheme}
+            aria-label="테마 전환"
+          >
+            {isDark ? <IconSun /> : <IconMoon />}
+          </button>
+        </div>
+      </header>
+    );
+  }
+
+  const sub = resolveSubHeader(pathname);
+  const title = sub?.title ?? "blessing";
+  const subtitle = sub?.subtitle;
+  const isProfile = pathname.startsWith("/profile");
+
+  return (
+    <header className="blessing-topbar">
+      <div className="blessing-topbar-inner">
+        <button
+          type="button"
+          className="blessing-icon-btn"
+          onClick={() => router.back()}
+          aria-label="뒤로가기"
+        >
+          <IconBack />
+        </button>
+        <div className="blessing-back-title-wrap">
+          <div className="blessing-back-title">{title}</div>
+          {subtitle && <div className="blessing-back-subtitle">{subtitle}</div>}
+        </div>
+        {pathname === "/events" && (
+          <button
+            type="button"
+            className="blessing-icon-btn"
+            onClick={goSearch}
+            aria-label="검색"
+          >
+            <IconSearch />
+          </button>
+        )}
+        {isProfile && (
+          <button
+            type="button"
+            className="blessing-icon-btn"
+            aria-label="설정"
+          >
+            <IconCog />
+          </button>
+        )}
+        <button
+          type="button"
+          className="blessing-icon-btn"
+          onClick={toggleTheme}
+          aria-label="테마 전환"
+        >
+          {isDark ? <IconSun /> : <IconMoon />}
+        </button>
+      </div>
+    </header>
+  );
+}

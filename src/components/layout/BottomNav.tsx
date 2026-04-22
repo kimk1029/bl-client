@@ -1,49 +1,135 @@
-'use client';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Home, MessagesSquare, Church, Search, User } from 'lucide-react';
-import { useTheme } from '@/context/ThemeContext';
+"use client";
 
-const items = [
-  { href: '/', label: '홈', icon: Home },
-  { href: '/posts', label: '게시판', icon: MessagesSquare },
-  { href: '/church', label: '교회', icon: Church },
-  { href: '/search', label: '검색', icon: Search },
-  { href: '/profile', label: '마이', icon: User },
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+function HomeIcon({ active }: { active?: boolean }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M3 11 12 3l9 8v10H3V11Z"
+        stroke="currentColor"
+        strokeWidth={active ? 2 : 1.7}
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function GridIcon({ active }: { active?: boolean }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth={active ? 2 : 1.7} />
+      <rect x="14" y="3" width="7" height="7" stroke="currentColor" strokeWidth={active ? 2 : 1.7} />
+      <rect x="3" y="14" width="7" height="7" stroke="currentColor" strokeWidth={active ? 2 : 1.7} />
+      <rect x="14" y="14" width="7" height="7" stroke="currentColor" strokeWidth={active ? 2 : 1.7} />
+    </svg>
+  );
+}
+
+function CalendarIcon({ active }: { active?: boolean }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <rect
+        x="3"
+        y="5"
+        width="18"
+        height="16"
+        rx="2"
+        stroke="currentColor"
+        strokeWidth={active ? 2 : 1.7}
+      />
+      <path
+        d="M3 10h18M8 3v4M16 3v4"
+        stroke="currentColor"
+        strokeWidth={active ? 2 : 1.7}
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function UserIcon({ active }: { active?: boolean }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth={active ? 2 : 1.7} />
+      <path
+        d="M4 21c0-4 4-7 8-7s8 3 8 7"
+        stroke="currentColor"
+        strokeWidth={active ? 2 : 1.7}
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function PlusIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M12 5v14M5 12h14"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+const TABS = [
+  { href: "/", label: "홈", Icon: HomeIcon },
+  { href: "/topics", label: "토픽", Icon: GridIcon },
+  { href: "/events", label: "이벤트", Icon: CalendarIcon },
+  { href: "/profile", label: "나", Icon: UserIcon },
 ];
 
 export default function BottomNav() {
   const pathname = usePathname();
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
-
   const isActive = (href: string) =>
-    href === '/' ? pathname === '/' : pathname.startsWith(href);
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
     <nav
-      className={`fixed bottom-0 left-1/2 -translate-x-1/2 z-40 w-full max-w-[800px] border-t transition-colors duration-200 ${isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}
-      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      className="blessing-bottom-nav"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <ul className="grid grid-cols-5">
-        {items.map(({ href, label, icon: Icon }) => {
+      <div className="blessing-bottom-tabs">
+        {TABS.slice(0, 2).map(({ href, label, Icon }) => {
           const active = isActive(href);
-          const color = active
-            ? isDark ? 'text-white' : 'text-gray-900'
-            : isDark ? 'text-gray-500' : 'text-gray-400';
           return (
-            <li key={href}>
-              <Link
-                href={href}
-                className={`flex flex-col items-center justify-center gap-0.5 py-2 text-[11px] ${color}`}
-              >
-                <Icon className="w-5 h-5" strokeWidth={active ? 2.4 : 1.8} />
-                <span className={active ? 'font-semibold' : ''}>{label}</span>
-              </Link>
-            </li>
+            <Link
+              key={href}
+              href={href}
+              className={`blessing-tab ${active ? "blessing-tab-active" : ""}`}
+            >
+              <div className="blessing-tab-icon">
+                <Icon active={active} />
+              </div>
+              <span className="blessing-tab-label">{label}</span>
+            </Link>
           );
         })}
-      </ul>
+
+        <Link href="/posts/new" className="blessing-fab" aria-label="글쓰기">
+          <PlusIcon />
+        </Link>
+
+        {TABS.slice(2).map(({ href, label, Icon }) => {
+          const active = isActive(href);
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={`blessing-tab ${active ? "blessing-tab-active" : ""}`}
+            >
+              <div className="blessing-tab-icon">
+                <Icon active={active} />
+              </div>
+              <span className="blessing-tab-label">{label}</span>
+            </Link>
+          );
+        })}
+      </div>
     </nav>
   );
 }
