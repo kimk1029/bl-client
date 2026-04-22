@@ -1,43 +1,102 @@
 import GoogleProvider from "next-auth/providers/google";
+import KakaoProvider from "next-auth/providers/kakao";
+import NaverProvider from "next-auth/providers/naver";
 import CredentialsProvider from "next-auth/providers/credentials";
-import axios from "axios";
+import bcrypt from "bcrypt";
+import { prisma } from "@/lib/prisma";
+import { signToken } from "@/lib/jwt";
+import { computeLevel } from "@/utils/level";
 import { createApiUrl } from "@/utils/apiConfig";
 
 const stripBearer = (t?: string | null) => {
   if (!t) return undefined as any;
-  const s = String(t).trim();
-  return s.replace(/^Bearer\s+/i, "");
+  return String(t).trim().replace(/^Bearer\s+/i, "");
 };
 
+/** 소셜 로그인: DB에서 사용자 찾거나 자동 생성 후 JWT 반환 */
+async function upsertSocialUser(email: string, name: string, provider: string) {
+  let user = await prisma.user.findUnique({ where: { email } });
+
+  if (!user) {
+    // 유니크 username 생성
+    const base = (name || email.split("@")[0])
+      .replace(/[^a-zA-Z0-9가-힣]/g, "")
+      .slice(0, 14) || "user";
+    let username = base;
+    let n = 1;
+    while (await prisma.user.findUnique({ where: { username } })) {
+      username = `${base}${n++}`;
+    }
+    // 소셜 전용 placeholder 비밀번호 (직접 로그인 불가)
+    const placeholderPw = await bcrypt.hash(
+      `SOCIAL:${provider}:${email}:${Date.now()}`,
+      10
+    );
+    user = await prisma.user.create({
+      data: { username, email, password: placeholderPw },
+    });
+  }
+
+  const jwtToken = signToken({ id: user.id, email: user.email });
+  const { level } = computeLevel(user.points);
+  return {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    accessToken: jwtToken,
+    affiliation: user.affiliation ?? null,
+    points: user.points,
+    level,
+  };
+}
+
 export const authOptions = {
-  debug: true,
+  debug: false,
   providers: [
-    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET ? [
-      GoogleProvider({
-        clientId: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      })
-    ] : []),
+    // ── Google ──────────────────────────────────────────────
+    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+      ? [
+          GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+          }),
+        ]
+      : []),
+
+    // ── Kakao ───────────────────────────────────────────────
+    ...(process.env.KAKAO_CLIENT_ID && process.env.KAKAO_CLIENT_SECRET
+      ? [
+          KakaoProvider({
+            clientId: process.env.KAKAO_CLIENT_ID,
+            clientSecret: process.env.KAKAO_CLIENT_SECRET,
+          }),
+        ]
+      : []),
+
+    // ── Naver ───────────────────────────────────────────────
+    ...(process.env.NAVER_CLIENT_ID && process.env.NAVER_CLIENT_SECRET
+      ? [
+          NaverProvider({
+            clientId: process.env.NAVER_CLIENT_ID,
+            clientSecret: process.env.NAVER_CLIENT_SECRET,
+          }),
+        ]
+      : []),
+
+    // ── 이메일/비밀번호 ──────────────────────────────────────
     CredentialsProvider({
       id: "credentials",
       name: "credentials",
       credentials: {
-        email: { label: "이메일", type: "email", placeholder: "이메일 입력" },
+        email: { label: "이메일", type: "email" },
         password: { label: "비밀번호", type: "password" },
       },
-      async authorize(credentials, req) {
-        console.log("🔐 [CredentialsProvider] authorize 함수 호출됨!");
-        console.log("🔐 [CredentialsProvider] 받은 credentials:", credentials);
-        console.log("🔐 [CredentialsProvider] 요청 정보:", req);
-
+      async authorize(credentials) {
         if (!credentials?.email || !credentials.password) {
           throw new Error("이메일과 비밀번호를 모두 입력해주세요.");
         }
-
         try {
-          const apiUrl = createApiUrl('/auth/login');
-          console.log("apiUrl>>", apiUrl);
-
+          const apiUrl = createApiUrl("/auth/login");
           const res = await fetch(apiUrl, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -46,134 +105,97 @@ export const authOptions = {
               password: credentials.password,
             }),
           });
-
-          console.log("API Response status:", res.status);
-
           if (!res.ok) {
-            let errorMessage = "로그인에 실패했습니다.";
-            try {
-              const errorData = await res.json();
-              errorMessage = errorData.message || errorMessage;
-              console.error("API Error response:", errorData);
-            } catch (parseError) {
-              console.error("Error parsing API response:", parseError);
-              errorMessage = `서버 오류 (${res.status}): ${res.statusText}`;
-            }
-            console.error("Login failed:", errorMessage);
-            return null;
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.message || "로그인에 실패했습니다.");
           }
-
-          const result = await res.json();
-          console.log("API Success response:", result);
-
-          const { user, token } = result;
-
-          if (user && user.id && user.username && user.email && token) {
-            const userData = {
-              id: user.id,
-              username: user.username,
-              email: user.email,
-              accessToken: stripBearer(token),
-              affiliation: user.affiliation || null,
-              points: typeof user.points === 'number' ? user.points : 0,
-              level: typeof user.level === 'number' ? Math.max(user.level, 1) : 1,
-            };
-            console.log("Returning user data:", userData);
-            return userData as any;
-          } else {
-            console.error("Invalid user data structure:", { user, token });
-            return null;
-          }
-        } catch (err) {
-          console.error("Authorize Error:", err);
-          return null;
+          const { user, token } = await res.json();
+          if (!user?.id || !token) return null;
+          return {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            accessToken: stripBearer(token),
+            affiliation: user.affiliation ?? null,
+            points: user.points ?? 0,
+            level: Math.max(user.level ?? 1, 1),
+          } as any;
+        } catch (err: any) {
+          throw new Error(err.message || "서버 오류가 발생했습니다.");
         }
       },
     }),
   ],
+
   pages: {
-    signIn: "/auth/login",
+    signIn: "/auth",
+    error: "/auth",
   },
+
   session: {
     strategy: "jwt",
-    maxAge: 60 * 60,
+    maxAge: 60 * 60 * 24 * 7, // 7일
   },
+
   secret: process.env.NEXTAUTH_SECRET || "fallback-secret-for-development",
+
   callbacks: {
-    async jwt({ token, user, trigger, session }: any) {
-      console.log('JWT callback triggered:', { hasUser: !!user, trigger, hasSession: !!session });
+    async jwt({ token, user, account, trigger, session }: any) {
+      // ── 최초 로그인 ──────────────────────────────────────
+      if (user && account) {
+        const provider = account.provider as string;
 
-      if (user) {
-        console.log('Processing user in JWT callback:', {
-          id: user.id,
-          email: user.email,
-          hasAccessToken: !!(user as any).accessToken,
-          hasImage: !!(user as any).image
-        });
-
-        if ((user as any).image && !(user as any).accessToken) {
-          console.log('Google login detected, checking user existence...');
-          try {
-            const checkUserUrl = createApiUrl('/auth/check-user');
-
-            const response = await axios.post(checkUserUrl, { email: user.email });
-            if (!response.data.exists) {
-              (token as any).needsSignUp = true;
-              (token as any).googleData = {
-                email: user.email as string,
-                name: (user as any).name as string,
-                image: (user as any).image as string,
-              };
-            } else {
-              (token as any).needsSignUp = false;
-            }
-          } catch (error) {
-            console.error("Error checking user existence:", error);
-            (token as any).needsSignUp = false;
-          }
+        if (provider === "credentials") {
+          // 이메일/비밀번호 로그인
+          (token as any).accessToken = stripBearer((user as any).accessToken);
+          (token as any).id = user.id;
+          (token as any).username = (user as any).username;
+          (token as any).email = user.email;
+          (token as any).affiliation = (user as any).affiliation ?? null;
+          (token as any).points = (user as any).points ?? 0;
+          (token as any).level = Math.max((user as any).level ?? 1, 1);
         } else {
-          console.log('Credentials login detected');
-          (token as any).needsSignUp = false;
+          // 소셜 로그인 (google / kakao / naver)
+          const email = user.email as string;
+          const name = (user.name || user.email?.split("@")[0] || "user") as string;
+          try {
+            const data = await upsertSocialUser(email, name, provider);
+            (token as any).accessToken = data.accessToken;
+            (token as any).id = data.id;
+            (token as any).username = data.username;
+            (token as any).email = data.email;
+            (token as any).affiliation = data.affiliation;
+            (token as any).points = data.points;
+            (token as any).level = data.level;
+          } catch (e) {
+            console.error("소셜 로그인 upsert 실패:", e);
+          }
         }
-
-        (token as any).accessToken = stripBearer((user as any).accessToken);
-        (token as any).id = user.id;
-        (token as any).username = (user as any).username;
-        (token as any).email = user.email;
-        (token as any).affiliation = (user as any).affiliation ?? null;
-        (token as any).points = typeof (user as any).points === 'number' ? (user as any).points : 0;
-        (token as any).level = typeof (user as any).level === 'number' ? Math.max((user as any).level, 1) : 1;
-
-        console.log('Token updated with user data:', {
-          id: (token as any).id,
-          username: (token as any).username,
-          points: (token as any).points,
-          level: (token as any).level
-        });
       }
 
-      if (trigger === 'update' && session) {
-        console.log('JWT update trigger:', { session, token });
-        const srcUser = (session as any).user || session;
-        if (srcUser) {
-          if (typeof srcUser.username === 'string') (token as any).username = srcUser.username;
-          if (typeof srcUser.email === 'string') (token as any).email = srcUser.email;
-          if (typeof srcUser.affiliation !== 'undefined') (token as any).affiliation = srcUser.affiliation ?? null;
-          if (typeof srcUser.points !== 'undefined') (token as any).points = Number(srcUser.points ?? 0);
-          if (typeof srcUser.level !== 'undefined') (token as any).level = Number(srcUser.level ?? 1);
-          console.log('JWT updated with:', { points: (token as any).points, level: (token as any).level });
-        }
+      // ── update 트리거 ────────────────────────────────────
+      if (trigger === "update" && session) {
+        const src = (session as any).user || session;
+        if (typeof src.username === "string") (token as any).username = src.username;
+        if (typeof src.email === "string") (token as any).email = src.email;
+        if (typeof src.affiliation !== "undefined")
+          (token as any).affiliation = src.affiliation ?? null;
+        if (typeof src.points !== "undefined")
+          (token as any).points = Number(src.points ?? 0);
+        if (typeof src.level !== "undefined")
+          (token as any).level = Number(src.level ?? 1);
       }
 
       return token;
     },
+
     async session({ session, token }: any) {
       if (token && session.user) {
-        (session.user as any).id = (token as any).id as string;
-        session.user.name = (token as any).username as string;
-        session.user.email = (token as any).email as string;
+        (session.user as any).id = (token as any).id;
+        session.user.name = (token as any).username;
+        session.user.email = (token as any).email;
         (session.user as any).affiliation = (token as any).affiliation ?? null;
-        (session as any).accessToken = (token as any).accessToken as string;
+        (session as any).accessToken = (token as any).accessToken;
         (session.user as any).points = (token as any).points ?? 0;
         (session.user as any).level = Math.max((token as any).level ?? 1, 1);
       }
