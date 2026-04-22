@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 
 function MenuChevron() {
@@ -31,6 +33,17 @@ function initialOf(name: string | null | undefined): string {
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.replace("/auth");
+    }
+  }, [status, router]);
+
+  if (status === "loading" || status === "unauthenticated") {
+    return null;
+  }
   const u = session?.user as
     | {
         name?: string | null;

@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import useSWR from "swr";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import PostList from "@/components/posts/PostList";
 import type { Post, Comment } from "@/types/type";
 import { apiFetcher } from "@/lib/fetcher";
@@ -28,8 +29,19 @@ function normalizeToArray<T>(data: any): T[] {
 }
 
 export default function MyArticlesPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabKey>("posts");
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.replace("/auth");
+    }
+  }, [status, router]);
+
+  if (status === "loading" || status === "unauthenticated") {
+    return null;
+  }
 
   const userId = (session?.user as unknown as { id?: string | number })?.id;
   const endpoint = userId ? `/api/users/account/${userId}` : null;

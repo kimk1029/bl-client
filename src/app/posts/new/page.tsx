@@ -1,11 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { TOPICS, TOPIC_BY_ID, type TopicId } from "@/components/home/data/topics";
 
 export default function ComposePage() {
   const router = useRouter();
+  const { status } = useSession();
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.replace("/auth");
+    }
+  }, [status, router]);
+
+  if (status === "loading" || status === "unauthenticated") {
+    return null;
+  }
   const [topicId, setTopicId] = useState<TopicId>("free");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
