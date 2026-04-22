@@ -9,6 +9,7 @@ import HeroVerse from "@/components/home/HeroVerse";
 import PinnedNotice from "@/components/home/PinnedNotice";
 import TopicStrip from "@/components/home/TopicStrip";
 import HotSection from "@/components/home/HotSection";
+import NoticeSection from "@/components/home/NoticeSection";
 import PrayerStream from "@/components/home/PrayerStream";
 import TopicLatestSection from "@/components/home/TopicLatestSection";
 import EventsRail from "@/components/home/EventsRail";
@@ -21,8 +22,14 @@ const SECTION_TOPIC_IDS = [
   "testimony",
   "free",
   "sermon",
+  "worship",
+  "qt",
   "family",
+  "cell",
+  "mission",
   "market",
+  "local",
+  "kids",
 ] as const;
 
 export default function Home() {
@@ -47,6 +54,7 @@ export default function Home() {
       ) : (
         <>
           <HotSection posts={list} outputIds={hotIds} />
+          <NoticeSection posts={list} excludeIds={hotIds} />
           <PrayerStream />
 
           {SECTION_TOPIC_IDS.map((tid) => {

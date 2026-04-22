@@ -569,6 +569,63 @@ html.dark .blessing-prayer-stream {
   opacity: 0.8;
 }
 
+/* ---------- Notice (공지·행사) list ---------- */
+.blessing-notice-list {
+  background: var(--blessing-bg-0);
+  padding: 4px 16px 10px;
+  border-bottom: 1px solid var(--blessing-border);
+}
+.blessing-notice-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 10px;
+  background: var(--blessing-pin-soft);
+  border-radius: 8px;
+  margin-bottom: 4px;
+  font-size: 13px;
+  letter-spacing: -0.2px;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.12s;
+}
+.blessing-notice-item:last-child {
+  margin-bottom: 0;
+}
+.blessing-notice-item:hover {
+  background: var(--blessing-bg-hover);
+}
+.blessing-notice-badge {
+  font-family: var(--blessing-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--blessing-fg-2);
+  background: var(--blessing-bg-1);
+  padding: 3px 7px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+.blessing-notice-badge-pin {
+  color: var(--blessing-pin);
+  background: var(--blessing-bg-1);
+  border: 1px solid var(--blessing-pin);
+}
+.blessing-notice-title {
+  flex: 1;
+  color: var(--blessing-fg-0);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.blessing-notice-time {
+  font-size: 10.5px;
+  color: var(--blessing-fg-2);
+  font-family: var(--blessing-mono);
+  flex-shrink: 0;
+}
+
 /* ---------- Events rail ---------- */
 .blessing-event-rail {
   display: flex;
