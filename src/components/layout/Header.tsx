@@ -143,6 +143,8 @@ export default function Header() {
   if (pathname === "/search") return null;
   // Message thread has a custom header (peer name + subtitle + ⋯).
   if (/^\/messages\/\d+(\/|$)/.test(pathname)) return null;
+  // New-message composer owns a search-style top bar.
+  if (pathname === "/messages/new") return null;
   // Church verify 3-step wizard has its own header with dynamic step subtitle.
   if (pathname === "/verify-church") return null;
 

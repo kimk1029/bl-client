@@ -4,9 +4,22 @@ import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import useSWR from "swr";
+import useSWR, { mutate as swrMutate } from "swr";
 import { toast } from "sonner";
 import Avatar from "@/components/common/Avatar";
+
+interface ThreadListItem {
+  otherUserId: number;
+  otherUsername: string;
+  otherAffiliation: string | null;
+  lastMessage: {
+    id: number;
+    content: string;
+    created_at: string;
+    sender_id: number;
+  };
+  unread: number;
+}
 
 interface ThreadMessage {
   id: number;
@@ -115,7 +128,23 @@ export default function MessageThreadPage({
     fetch(url, {
       method: "PATCH",
       headers: { Authorization: `Bearer ${token}` },
-    }).catch(() => {});
+    })
+      .then((res) => {
+        if (!res.ok) return;
+        // Optimistically zero this thread's unread badge so the inbox/nav
+        // updates instantly (polling will reconcile within 15s).
+        swrMutate<ThreadListItem[] | undefined>(
+          "/api/messages",
+          (current) =>
+            current
+              ? current.map((t) =>
+                  t.otherUserId === otherId ? { ...t, unread: 0 } : t,
+                )
+              : current,
+          { revalidate: false },
+        );
+      })
+      .catch(() => {});
   }, [data, token, url, otherId]);
 
   if (!Number.isFinite(otherId)) {

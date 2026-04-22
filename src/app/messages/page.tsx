@@ -79,6 +79,29 @@ export default function MessagesPage() {
             disabled={status !== "authenticated"}
           />
         </div>
+        {status === "authenticated" && (
+          <Link
+            href="/messages/new"
+            className="blessing-dm-new-btn"
+            aria-label="새 쪽지"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden
+            >
+              <path
+                d="M3 21v-4l12-12 4 4L7 21H3Z"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinejoin="round"
+              />
+              <path d="m13 6 4 4" stroke="currentColor" strokeWidth="1.7" />
+            </svg>
+          </Link>
+        )}
       </div>
 
       {status !== "authenticated" ? (
