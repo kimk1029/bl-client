@@ -86,6 +86,7 @@ export default function ProfilePage() {
         )}
       </div>
 
+      <div className="px-4">
       <div className="blessing-profile-stats">
         <div className="blessing-profile-stat">
           <div className="blessing-stat-num">{me.posts}</div>
@@ -216,6 +217,7 @@ export default function ProfilePage() {
         blessing v1.2.0 · 2026
         <br />
         &quot;너희는 세상의 빛이라&quot; — 마태복음 5:14
+      </div>
       </div>
     </div>
   );

@@ -59,15 +59,17 @@ export default function TopicsPage() {
         </button>
       </div>
 
-      {!loaded ? (
-        <div className="blessing-loading">
-          <div className="blessing-spinner" aria-label="Loading" />
-        </div>
-      ) : tab === "feed" ? (
-        <MyChurchFeed posts={list} />
-      ) : (
-        <TopicBrowser posts={list} />
-      )}
+      <div className="px-4">
+        {!loaded ? (
+          <div className="blessing-loading">
+            <div className="blessing-spinner" aria-label="Loading" />
+          </div>
+        ) : tab === "feed" ? (
+          <MyChurchFeed posts={list} />
+        ) : (
+          <TopicBrowser posts={list} />
+        )}
+      </div>
     </div>
   );
 }

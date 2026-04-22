@@ -44,6 +44,7 @@ export default function EventsPage() {
         ))}
       </div>
 
+      <div className="px-4">
       {featured && (
         <div className="blessing-event-featured">
           <div className="blessing-event-featured-cover">
@@ -133,6 +134,7 @@ export default function EventsPage() {
       </div>
 
       <div className="blessing-end">· · · END · · ·</div>
+      </div>
     </div>
   );
 }
