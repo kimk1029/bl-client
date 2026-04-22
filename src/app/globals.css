@@ -1638,6 +1638,30 @@ html.dark .blessing-prayer-stream {
   border-radius: 50%;
   border: 1.5px solid var(--blessing-bg-0);
 }
+.blessing-bell-btn {
+  overflow: visible;
+}
+.blessing-bell-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  background: var(--blessing-hot);
+  color: #fff;
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 700;
+  font-family: var(--blessing-mono);
+  border-radius: 100px;
+  border: 1.5px solid var(--blessing-bg-0);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: -0.2px;
+  pointer-events: none;
+}
 
 /* Back header (sub pages) */
 .blessing-back-title-wrap {

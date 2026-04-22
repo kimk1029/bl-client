@@ -5,7 +5,19 @@ import { usePathname, useRouter } from "next/navigation";
 import { useSyncExternalStore } from "react";
 import { useTheme } from "@/context/ThemeContext";
 import { composeBus, composeServerSnapshot } from "@/lib/composeBus";
+import { useUnreadCounts } from "@/lib/unreadCounts";
 import LogoMark from "./LogoMark";
+
+function BellBadge() {
+  const { total, ready } = useUnreadCounts();
+  if (!ready || total <= 0) return null;
+  const label = total > 99 ? "99+" : String(total);
+  return (
+    <span className="blessing-bell-badge" aria-label={`읽지 않은 알림 ${total}개`}>
+      {label}
+    </span>
+  );
+}
 
 function IconSearch({ size = 20 }: { size?: number }) {
   return (
@@ -169,12 +181,12 @@ export default function Header() {
           </button>
           <button
             type="button"
-            className="blessing-icon-btn"
+            className="blessing-icon-btn blessing-bell-btn"
             onClick={goNotif}
             aria-label="알림"
           >
             <IconBell />
-            <span className="blessing-notif-dot" />
+            <BellBadge />
           </button>
           <button
             type="button"
