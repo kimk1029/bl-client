@@ -2,35 +2,29 @@
 import React, { useState } from "react";
 import SignUp from "./sign-up";
 import Login from "./login";
-import { useTheme } from "@/context/ThemeContext";
 
-const AuthForm: React.FC = () => {
-    const [toggleLogin, setToggleLogin] = useState(false);
-    const { theme } = useTheme();
+export default function AuthPage() {
+  const [showSignUp, setShowSignUp] = useState(false);
 
-    return (
-        <div className="w-full flex justify-center pt-6 pb-12">
-            <div className="max-w-md w-full px-4">
-                <div className="space-y-6">
-                    <div className="text-center">
-                        <h1 className={`text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                            {toggleLogin ? '회원가입' : '로그인'}
-                        </h1>
-                        <p className={`mt-1 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                            모든 기능을 즐겨보세요 ✌️
-                        </p>
-                    </div>
-                    <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} shadow rounded-xl p-6`}>
-                        {toggleLogin ? (
-                            <SignUp onToggle={() => setToggleLogin(!toggleLogin)} />
-                        ) : (
-                            <Login onToggle={() => setToggleLogin(!toggleLogin)} />
-                        )}
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-export default AuthForm;
+  return (
+    <div className="blessing-auth-wrap">
+      <div className="blessing-auth-header">
+        <h1 className="blessing-auth-title">
+          {showSignUp ? "회원가입" : "로그인"}
+        </h1>
+        <p className="blessing-auth-subtitle">
+          {showSignUp
+            ? "블레싱과 함께 시작해보세요 ✨"
+            : "다시 오신 것을 환영합니다 👋"}
+        </p>
+      </div>
+      <div className="blessing-auth-card">
+        {showSignUp ? (
+          <SignUp onToggle={() => setShowSignUp(false)} />
+        ) : (
+          <Login onToggle={() => setShowSignUp(true)} />
+        )}
+      </div>
+    </div>
+  );
+}

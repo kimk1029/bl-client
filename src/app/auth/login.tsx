@@ -1,144 +1,111 @@
 "use client";
 import React, { useState } from "react";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
-import { useTheme } from "@/context/ThemeContext";
 
 interface LoginFormData {
-    email: string;
-    password: string;
+  email: string;
+  password: string;
 }
 
 interface LoginProps {
-    onToggle: React.Dispatch<React.SetStateAction<boolean>>;
+  onToggle: () => void;
 }
 
-const Login: React.FC<LoginProps> = ({ onToggle }) => {
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-    } = useForm<LoginFormData>();
-    const { data: session } = useSession();
-    const { theme } = useTheme();
-    const [serverError, setServerError] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+export default function Login({ onToggle }: LoginProps) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>();
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-    const onSubmit = async (data: LoginFormData) => {
-        setIsLoading(true);
-        setServerError(null);
-        try {
-            console.log("🚀 [Login] 로그인 시도 시작");
-            console.log("🚀 [Login] 입력 데이터:", data);
+  const onSubmit = async (data: LoginFormData) => {
+    setIsLoading(true);
+    setServerError(null);
+    try {
+      const result = await signIn("credentials", {
+        redirect: false,
+        email: data.email,
+        password: data.password,
+      });
+      if (result?.error) {
+        const msg =
+          result.error === "CredentialsSignin"
+            ? "이메일 또는 비밀번호가 올바르지 않습니다."
+            : result.error.includes("Internal server error")
+              ? "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
+              : result.error;
+        setServerError(msg);
+      } else if (result?.ok) {
+        window.location.href = "/";
+      } else {
+        setServerError("알 수 없는 오류가 발생했습니다.");
+      }
+    } catch {
+      setServerError("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-            const result = await signIn("credentials", {
-                redirect: false,
-                email: data.email,
-                password: data.password,
-            });
-
-            console.log("🚀 [Login] signIn 결과:", result);
-
-            if (result?.error) {
-                console.error("🚀 [Login] 로그인 에러:", result.error);
-                // NextAuth 에러 메시지를 사용자 친화적으로 변환
-                let errorMessage = result.error;
-                if (result.error === "CredentialsSignin") {
-                    errorMessage = "이메일 또는 비밀번호가 올바르지 않습니다.";
-                } else if (result.error.includes("Internal server error")) {
-                    errorMessage = "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
-                }
-                setServerError(errorMessage);
-            } else if (result?.ok) {
-                console.log("🚀 [Login] 로그인 성공, 리다이렉트");
-                window.location.href = "/";
-            } else {
-                setServerError("알 수 없는 오류가 발생했습니다.");
-            }
-        } catch (error) {
-            console.error("🚀 [Login] 예외 발생:", error);
-            setServerError("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleSocialSignIn = async () => {
-        await signIn("google");
-        onToggle(true);
-    };
-
-    return (
-        <div>
-            {serverError && (
-                <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                    <strong className="font-bold">에러!</strong>
-                    <span className="block sm:inline ml-2">{serverError}</span>
-                </div>
-            )}
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <div className="space-y-4">
-                    <div>
-                        <label htmlFor="email" className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-600'}`}>
-                            이메일 주소
-                        </label>
-                        <input
-                            id="email"
-                            type="email"
-                            {...register("email", { required: "이메일은 필수 입력입니다." })}
-                            className={`mt-1 block w-full px-3 py-2 ${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-200'} border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === 'dark' ? 'focus:bg-gray-700' : 'focus:bg-white'}`}
-                        />
-                        {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>}
-                    </div>
-                    <div>
-                        <label htmlFor="password" className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-600'}`}>
-                            비밀번호
-                        </label>
-                        <input
-                            id="password"
-                            type="password"
-                            {...register("password", { required: "비밀번호는 필수 입력입니다." })}
-                            className={`mt-1 block w-full px-3 py-2 ${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-200'} border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === 'dark' ? 'focus:bg-gray-700' : 'focus:bg-white'}`}
-                        />
-                        {errors.password && <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>}
-                    </div>
-                    <button
-                        type="submit"
-                        disabled={isLoading}
-                        className="w-full py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {isLoading ? "로그인 중..." : "로그인"}
-                    </button>
-                    <button
-                        type="button"
-                        onClick={handleSocialSignIn}
-                        className="w-full py-2 px-4 bg-red-500 hover:bg-red-600 text-white font-medium rounded"
-                    >
-                        Google으로 로그인
-                    </button>
-                    <div className="flex justify-center space-x-1">
-                        <p className={`${theme === 'dark' ? 'text-gray-200' : 'text-gray-600'}`}>아직 계정이 없으신가요?</p>
-                        <button
-                            type="button"
-                            onClick={() => onToggle(true)}
-                            className={`${theme === 'dark' ? 'text-blue-300' : 'text-blue-500'} hover:underline`}
-                        >
-                            회원가입
-                        </button>
-                    </div>
-                    {session && (
-                        <button
-                            type="button"
-                            onClick={() => signOut()}
-                            className={`w-full py-2 px-4 ${theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600 text-gray-200' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'} font-medium rounded`}
-                        >
-                            로그아웃
-                        </button>
-                    )}
-                </div>
-            </form>
+  return (
+    <div>
+      {serverError && (
+        <div className="blessing-notice blessing-notice-error">{serverError}</div>
+      )}
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="blessing-field">
+          <label htmlFor="email" className="blessing-field-label">
+            이메일
+          </label>
+          <input
+            id="email"
+            type="email"
+            autoComplete="email"
+            placeholder="name@example.com"
+            className="blessing-field-input"
+            {...register("email", { required: "이메일을 입력해주세요." })}
+          />
+          {errors.email && (
+            <p className="blessing-field-error">{errors.email.message}</p>
+          )}
         </div>
-    );
-};
 
-export default Login;
+        <div className="blessing-field">
+          <label htmlFor="password" className="blessing-field-label">
+            비밀번호
+          </label>
+          <input
+            id="password"
+            type="password"
+            autoComplete="current-password"
+            placeholder="••••••••"
+            className="blessing-field-input"
+            {...register("password", { required: "비밀번호를 입력해주세요." })}
+          />
+          {errors.password && (
+            <p className="blessing-field-error">{errors.password.message}</p>
+          )}
+        </div>
+
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="blessing-btn-primary"
+          style={{ width: "100%", marginTop: 6 }}
+        >
+          {isLoading ? "로그인 중..." : "로그인"}
+        </button>
+      </form>
+
+      <div className="blessing-auth-switch">
+        아직 계정이 없으신가요?
+        <button type="button" onClick={onToggle} className="blessing-auth-switch-btn">
+          회원가입
+        </button>
+      </div>
+    </div>
+  );
+}

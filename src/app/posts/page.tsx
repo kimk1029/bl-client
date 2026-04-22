@@ -1,107 +1,108 @@
 "use client";
 
-import React, { Suspense, useEffect, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 import PostList from "@/components/posts/PostList";
-import { Post } from "@/types/type";
-import { Topic } from "@/types/type";
-import { useSearchParams } from 'next/navigation';
+import type { Post, Topic } from "@/types/type";
+import { useSearchParams } from "next/navigation";
 import { apiFetcher } from "@/lib/fetcher";
-import { useTheme } from "@/context/ThemeContext";
-
 
 const CATEGORY_LABELS: Record<Topic, string> = {
-  worship: '예배/설교',
-  prayer:  '기도/QT',
-  life:    '교회생활',
-  faith:   '신앙고민',
-  mission: '봉사/선교',
-  youth:   '청년/셀',
-  free:    '자유게시판',
+  worship: "예배/설교",
+  prayer: "기도/QT",
+  life: "교회생활",
+  faith: "신앙고민",
+  mission: "봉사/선교",
+  youth: "청년/셀",
+  free: "자유게시판",
 };
-const categories: Topic[] = ['worship', 'prayer', 'life', 'faith', 'mission', 'youth', 'free'];
+const categories: Topic[] = ["worship", "prayer", "life", "faith", "mission", "youth", "free"];
 
-const GridFormatBoardContent: React.FC = () => {
-    const searchParams = useSearchParams();
-    const [currentPage, setCurrentPage] = useState(1);
-    const [selectedCategory, setSelectedCategory] = useState<Topic | 'all'>('all');
-    const pageSize = 10;
-    const { theme } = useTheme();
-    const isDark = theme === 'dark';
+function PostsContent() {
+  const searchParams = useSearchParams();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedCategory, setSelectedCategory] = useState<Topic | "all">("all");
+  const pageSize = 10;
 
-    const { data, error } = useSWR<Post[]>('/api/posts', apiFetcher);
+  const { data, error } = useSWR<Post[]>("/api/posts", apiFetcher);
 
-    useEffect(() => {
-        const cat = searchParams.get('category') as Topic | null;
-        if (cat && categories.includes(cat)) {
-            setSelectedCategory(cat);
-            setCurrentPage(1);
-        }
-    }, [searchParams]);
-
-    const filteredPosts = React.useMemo(() => {
-        if (!data || !Array.isArray(data)) return [];
-        return selectedCategory === 'all'
-            ? data
-            : data.filter(post => post && post.category === selectedCategory);
-    }, [data, selectedCategory]);
-
-    const totalPages = Math.ceil(filteredPosts.length / pageSize);
-    const startIndex = (currentPage - 1) * pageSize;
-    const currentPosts = filteredPosts.slice(startIndex, startIndex + pageSize);
-
-    if (error) return <div className="text-center py-10 text-sm text-red-500">게시글을 불러오지 못했습니다.</div>;
-    if (!data) {
-        return (
-            <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
-            </div>
-        );
+  useEffect(() => {
+    const cat = searchParams.get("category") as Topic | null;
+    if (cat && categories.includes(cat)) {
+      setSelectedCategory(cat);
+      setCurrentPage(1);
     }
+  }, [searchParams]);
 
+  const filteredPosts = useMemo(() => {
+    if (!data || !Array.isArray(data)) return [];
+    return selectedCategory === "all"
+      ? data
+      : data.filter((post) => post && post.category === selectedCategory);
+  }, [data, selectedCategory]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredPosts.length / pageSize));
+  const startIndex = (currentPage - 1) * pageSize;
+  const currentPosts = filteredPosts.slice(startIndex, startIndex + pageSize);
+
+  if (error) {
+    return <div className="blessing-list-error">게시글을 불러오지 못했습니다.</div>;
+  }
+  if (!data) {
     return (
-        <div className="w-full">
-            <div className="-mx-4 px-4 mb-3 overflow-x-auto no-scrollbar">
-                <div className="flex gap-2 whitespace-nowrap">
-                    <button
-                        onClick={() => { setSelectedCategory('all'); setCurrentPage(1); }}
-                        className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${selectedCategory === 'all'
-                            ? (isDark ? 'bg-white text-gray-900' : 'bg-gray-900 text-white')
-                            : (isDark ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200')
-                            }`}
-                    >
-                        전체
-                    </button>
-                    {categories.map((category) => (
-                        <button
-                            key={category}
-                            onClick={() => { setSelectedCategory(category); setCurrentPage(1); }}
-                            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${selectedCategory === category
-                                ? (isDark ? 'bg-white text-gray-900' : 'bg-gray-900 text-white')
-                                : (isDark ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200')
-                                }`}
-                        >
-                            {CATEGORY_LABELS[category]}
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            <PostList
-                posts={currentPosts}
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-                selectedCategory={selectedCategory}
-            />
-        </div>
+      <div className="blessing-loading">
+        <div className="blessing-spinner" aria-label="Loading" />
+      </div>
     );
-};
+  }
 
-const GridFormatBoard: React.FC = () => (
-    <Suspense fallback={<div className="flex justify-center items-center h-64"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" /></div>}>
-        <GridFormatBoardContent />
+  return (
+    <div>
+      <div className="blessing-chip-row">
+        <button
+          onClick={() => {
+            setSelectedCategory("all");
+            setCurrentPage(1);
+          }}
+          className={`blessing-chip ${selectedCategory === "all" ? "blessing-chip-active" : ""}`}
+        >
+          전체
+        </button>
+        {categories.map((c) => (
+          <button
+            key={c}
+            onClick={() => {
+              setSelectedCategory(c);
+              setCurrentPage(1);
+            }}
+            className={`blessing-chip ${selectedCategory === c ? "blessing-chip-active" : ""}`}
+          >
+            {CATEGORY_LABELS[c]}
+          </button>
+        ))}
+      </div>
+
+      <PostList
+        posts={currentPosts}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        selectedCategory={selectedCategory}
+      />
+    </div>
+  );
+}
+
+export default function PostsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="blessing-loading">
+          <div className="blessing-spinner" aria-label="Loading" />
+        </div>
+      }
+    >
+      <PostsContent />
     </Suspense>
-);
-
-export default GridFormatBoard;
+  );
+}
