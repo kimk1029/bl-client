@@ -9,7 +9,6 @@ import HeroVerse from "@/components/home/HeroVerse";
 import PinnedNotice from "@/components/home/PinnedNotice";
 import TopicStrip from "@/components/home/TopicStrip";
 import HotSection from "@/components/home/HotSection";
-import NoticeSection from "@/components/home/NoticeSection";
 import PrayerStream from "@/components/home/PrayerStream";
 import TopicLatestSection from "@/components/home/TopicLatestSection";
 import EventsRail from "@/components/home/EventsRail";
@@ -50,7 +49,6 @@ export default function Home() {
     <div className="blessing-home">
       <HeroVerse />
       <PinnedNotice post={pinned} />
-      {loaded && <NoticeSection posts={list} excludeIds={hotIds} />}
       <TopicStrip />
 
       {!loaded ? (
