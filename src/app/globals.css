@@ -625,15 +625,12 @@ html.dark .blessing-prayer-stream {
   font-family: var(--blessing-mono);
   flex-shrink: 0;
 }
-.blessing-notice-empty {
-  background: var(--blessing-bg-2);
-  color: var(--blessing-fg-2);
+.blessing-notice-sample {
   cursor: default;
+  opacity: 0.88;
 }
-.blessing-notice-empty .blessing-notice-title {
-  color: var(--blessing-fg-2);
-  font-weight: 400;
-  white-space: normal;
+.blessing-notice-sample:hover {
+  background: var(--blessing-pin-soft);
 }
 .blessing-prayer-empty {
   justify-content: space-between;
