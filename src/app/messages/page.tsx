@@ -50,7 +50,6 @@ export default function MessagesPage() {
   const { data: threads, isLoading } = useSWR<ThreadItem[]>(
     status === "authenticated" ? "/api/messages" : null,
     (url: string) => tokenFetcher(url, token),
-    { refreshInterval: 15000 },
   );
 
   const filtered = useMemo(() => {

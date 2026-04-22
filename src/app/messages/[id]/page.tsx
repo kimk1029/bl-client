@@ -115,7 +115,6 @@ export default function MessageThreadPage({
   const { data, isLoading, error, mutate } = useSWR<ThreadPayload>(
     status === "authenticated" && Number.isFinite(otherId) ? url : null,
     (u: string) => tokenFetcher(u, token),
-    { refreshInterval: 8000 },
   );
 
   // Mark as read once when the thread opens + whenever unread messages arrive.
