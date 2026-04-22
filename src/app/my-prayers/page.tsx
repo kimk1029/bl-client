@@ -1,13 +1,17 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import useSWR from "swr";
 import type { Post } from "@/types/type";
-import PostRow from "@/components/home/PostRow";
+import {
+  countLikes,
+  formatTimeAgo,
+} from "@/components/home/lib/postAdapters";
 import { DetailHeader } from "@/components/layout/DetailHeader";
-import { EmptyState, Button } from "@/components/ui";
+import { Button, EmptyState } from "@/components/ui";
 
 const tokenFetcher = async (url: string, token?: string | null) => {
   const res = await fetch(url, {
@@ -17,7 +21,7 @@ const tokenFetcher = async (url: string, token?: string | null) => {
   return res.json();
 };
 
-export default function MyArticlesPage() {
+export default function MyPrayersPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const token = (session as { accessToken?: string } | null)?.accessToken;
@@ -27,21 +31,21 @@ export default function MyArticlesPage() {
   }, [status, router]);
 
   const { data, isLoading } = useSWR<Post[]>(
-    status === "authenticated" ? "/api/posts/my" : null,
+    status === "authenticated" ? "/api/posts/my-prayers" : null,
     (u: string) => tokenFetcher(u, token),
   );
 
-  const posts = Array.isArray(data) ? data : [];
+  const prayers = Array.isArray(data) ? data : [];
 
   return (
     <div className="blessing-detail">
-      <DetailHeader title="내가 쓴 글" subtitle="My Posts" />
+      <DetailHeader title="기도 중인 제목" subtitle="Praying For" />
 
       {status !== "authenticated" ? (
         <EmptyState
-          icon="📝"
+          icon="🙏"
           title="로그인이 필요해요"
-          message="내 글을 모아보려면 먼저 로그인해 주세요."
+          message="내가 함께 기도 중인 제목을 모아보려면 로그인해 주세요."
           action={<Button href="/auth">로그인</Button>}
           minHeight={280}
         />
@@ -49,29 +53,43 @@ export default function MyArticlesPage() {
         <div className="blessing-loading">
           <div className="blessing-spinner" aria-label="Loading" />
         </div>
-      ) : posts.length === 0 ? (
+      ) : prayers.length === 0 ? (
         <EmptyState
-          icon="✍️"
-          title="아직 작성한 글이 없어요"
-          message="첫 글을 남기고 성도들과 나눠보세요."
-          action={<Button href="/posts/new">글 쓰러 가기</Button>}
+          icon="🙏"
+          title="함께 기도 중인 제목이 없어요"
+          message="기도제목에 공감(🙏)하거나 댓글을 남기면 이곳에 모입니다."
+          action={<Button href="/posts?category=prayer">기도제목 보러 가기</Button>}
           minHeight={320}
         />
       ) : (
         <>
           <div className="blessing-section-header">
             <div className="blessing-section-title-wrap">
+              <span className="blessing-section-icon">🙏</span>
               <div>
-                <div className="blessing-section-title">내 글</div>
+                <div className="blessing-section-title">기도 중인 제목</div>
                 <div className="blessing-section-en">
-                  POSTS · {posts.length}
+                  PRAYING · {prayers.length}
                 </div>
               </div>
             </div>
           </div>
-          <div className="blessing-hot-list">
-            {posts.map((p) => (
-              <PostRow key={p.id} post={p} />
+          <div className="blessing-prayer-stream">
+            {prayers.map((p) => (
+              <Link
+                key={p.id}
+                href={`/posts/${p.id}`}
+                className="blessing-prayer-item"
+              >
+                <span className="blessing-prayer-icon" aria-hidden>
+                  🙏
+                </span>
+                <span className="blessing-prayer-title">{p.title}</span>
+                <span className="blessing-prayer-count">
+                  <span>🙏 {countLikes(p)}</span>
+                  <span>{formatTimeAgo(p.created_at)}</span>
+                </span>
+              </Link>
             ))}
           </div>
         </>

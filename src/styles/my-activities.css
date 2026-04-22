@@ -1,0 +1,108 @@
+/* =========================================================================
+   My activities — comments / bookmarks / prayers list screens + profile edit
+   ========================================================================= */
+.blessing-my-comments-list {
+  background: var(--blessing-bg-0);
+  display: flex;
+  flex-direction: column;
+}
+.blessing-my-comment-row {
+  display: block;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--blessing-border);
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.1s;
+}
+.blessing-my-comment-row:hover {
+  background: var(--blessing-bg-hover);
+}
+.blessing-my-comment-on {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 11.5px;
+  color: var(--blessing-fg-2);
+  margin-bottom: 4px;
+  overflow: hidden;
+}
+.blessing-my-comment-on-arrow {
+  color: var(--blessing-fg-3);
+  flex-shrink: 0;
+}
+.blessing-my-comment-on-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  color: var(--blessing-fg-1);
+}
+.blessing-my-comment-text {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--blessing-fg-0);
+  letter-spacing: -0.2px;
+  word-break: keep-all;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.blessing-my-comment-time {
+  margin-top: 6px;
+  font-size: 10.5px;
+  font-family: var(--blessing-mono);
+  color: var(--blessing-fg-2);
+}
+
+.blessing-bookmark-missing {
+  padding: 16px;
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--blessing-fg-3);
+}
+
+/* Profile edit */
+.blessing-profile-edit {
+  padding: 18px 16px 120px;
+  background: var(--blessing-bg-2);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.blessing-profile-edit-avatar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0 18px;
+}
+.blessing-profile-edit-avatar-caption {
+  font-size: 11.5px;
+  color: var(--blessing-fg-2);
+  letter-spacing: -0.2px;
+}
+.blessing-profile-edit-help {
+  margin-top: 8px;
+  font-size: 11.5px;
+  color: var(--blessing-fg-2);
+  letter-spacing: -0.2px;
+}
+.blessing-profile-edit-nick-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 4px 4px;
+  flex-wrap: wrap;
+  font-size: 11.5px;
+}
+.blessing-profile-edit-footer {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+}
+.blessing-profile-edit-footer .blessing-btn-primary,
+.blessing-profile-edit-footer .blessing-btn-secondary {
+  flex: 1;
+  min-height: 44px;
+}

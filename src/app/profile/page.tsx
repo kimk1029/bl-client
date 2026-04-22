@@ -89,9 +89,9 @@ export default function ProfilePage() {
         </div>
         <div className="blessing-profile-joined">블레싱 가입 · {me.joined}</div>
         {status === "authenticated" ? (
-          <button className="blessing-profile-edit-btn" type="button">
+          <Link href="/profile/edit" className="blessing-profile-edit-btn">
             프로필 편집
-          </button>
+          </Link>
         ) : (
           <Link href="/auth" className="blessing-profile-edit-btn">
             로그인
@@ -127,24 +127,21 @@ export default function ProfilePage() {
           <span className="blessing-menu-badge">{me.posts}</span>
           <MenuChevron />
         </Link>
-        <button className="blessing-profile-menu-row" type="button">
+        <Link href="/my-comments" className="blessing-profile-menu-row">
           <span className="blessing-menu-emoji">💬</span>
           <span className="blessing-menu-label">내 댓글</span>
-          <span className="blessing-menu-badge">{me.comments}</span>
           <MenuChevron />
-        </button>
-        <button className="blessing-profile-menu-row" type="button">
+        </Link>
+        <Link href="/my-bookmarks" className="blessing-profile-menu-row">
           <span className="blessing-menu-emoji">🔖</span>
           <span className="blessing-menu-label">북마크</span>
-          <span className="blessing-menu-badge">{me.bookmarks}</span>
           <MenuChevron />
-        </button>
-        <button className="blessing-profile-menu-row" type="button">
+        </Link>
+        <Link href="/my-prayers" className="blessing-profile-menu-row">
           <span className="blessing-menu-emoji">🙏</span>
           <span className="blessing-menu-label">기도 중인 제목</span>
-          <span className="blessing-menu-badge">0</span>
           <MenuChevron />
-        </button>
+        </Link>
       </div>
 
       <div className="blessing-profile-menu-group">

@@ -13,6 +13,7 @@ import "@/styles/events.css";
 import "@/styles/home.css";
 import "@/styles/meetups.css";
 import "@/styles/messages.css";
+import "@/styles/my-activities.css";
 import "@/styles/mychurch.css";
 import "@/styles/notifications.css";
 import "@/styles/onboarding.css";

@@ -167,6 +167,15 @@ export default function Header() {
   if (/^\/events\/meetups(\/|$)/.test(pathname)) return null;
   // Onboarding owns its own header (logo + brand centered).
   if (pathname === "/auth/complete-profile") return null;
+  // My-activities screens use DetailHeader.
+  if (
+    pathname === "/my-articles" ||
+    pathname === "/my-comments" ||
+    pathname === "/my-bookmarks" ||
+    pathname === "/my-prayers" ||
+    pathname === "/profile/edit"
+  )
+    return null;
 
   if (pathname === "/") {
     return (
