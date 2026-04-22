@@ -111,6 +111,7 @@ const SUB_HEADERS: Record<string, SubHeader> = {
   "/search": { title: "검색", subtitle: "Search" },
   "/church": { title: "교회", subtitle: "Churches" },
   "/my-articles": { title: "내 글", subtitle: "My Articles" },
+  "/notifications": { title: "알림", subtitle: "Notifications" },
   "/auth": { title: "로그인", subtitle: "Sign In" },
   "/about": { title: "소개", subtitle: "About" },
 };
@@ -132,7 +133,7 @@ export default function Header() {
   const isDark = theme === "dark";
 
   const goSearch = () => router.push("/search");
-  const goNotif = () => router.push("/profile");
+  const goNotif = () => router.push("/notifications");
 
   // Post detail owns its own header (back + bookmark + share + kebab).
   if (/^\/posts\/\d+(\/|$)/.test(pathname)) return null;
