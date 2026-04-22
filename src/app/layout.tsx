@@ -1,52 +1,92 @@
-'use client';
-
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/context/ThemeContext";
-import { SessionProvider } from "next-auth/react";
-import CustomSessionProvider from "@/components/SessionProvider";
-import Script from "next/script";
-import Header from "@/components/layout/Header";
-import BottomNav from "@/components/layout/BottomNav";
-import GoogleAd from "@/components/layout/GoogleAd";
-import { useTheme } from '@/context/ThemeContext';
-import { Toaster } from 'sonner';
+import RootShell from "@/components/layout/RootShell";
+import { SITE, getSiteUrl } from "@/lib/site";
 
 const inter = Inter({ subsets: ["latin"] });
 
-function RootLayoutContent({ children }: { children: React.ReactNode }) {
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
-  const mainClass = 'flex-1 w-full';
+const siteUrl = getSiteUrl();
 
-  return (
-    <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-gray-950 text-white' : 'bg-gray-100 text-gray-900'}`}>
-      <div className="mx-auto flex justify-center gap-6 px-0 xl:px-4">
-        <aside className="hidden xl:block w-40 shrink-0 pt-4">
-          <div className="sticky top-20">
-            <GoogleAd slot="1111111111" className="w-full" minHeight={600} />
-          </div>
-        </aside>
+export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: SITE.title,
+    template: `%s · ${SITE.name}`,
+  },
+  description: SITE.description,
+  keywords: [...SITE.keywords],
+  applicationName: SITE.name,
+  authors: [{ name: SITE.author }],
+  creator: SITE.author,
+  publisher: SITE.author,
+  generator: "Next.js",
+  referrer: "origin-when-cross-origin",
+  category: "community",
+  alternates: {
+    canonical: "/",
+    languages: {
+      "ko-KR": "/",
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: SITE.locale,
+    url: siteUrl,
+    siteName: SITE.name,
+    title: SITE.title,
+    description: SITE.description,
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: SITE.title,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE.title,
+    description: SITE.description,
+    images: ["/opengraph-image"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  icons: {
+    icon: [
+      { url: "/icon", type: "image/png", sizes: "any" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: [{ url: "/apple-icon", sizes: "180x180", type: "image/png" }],
+  },
+  manifest: "/manifest.webmanifest",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+};
 
-        <div
-          className={`flex flex-col min-h-screen w-full max-w-[800px] transition-colors duration-200 ${isDark ? 'bg-gray-900' : 'bg-white'} md:shadow-[0_0_40px_rgba(0,0,0,0.06)]`}
-        >
-          <Header />
-          <main className={mainClass} style={{ paddingBottom: "calc(60px + env(safe-area-inset-bottom))" }}>
-            {children}
-          </main>
-          <BottomNav />
-        </div>
-
-        <aside className="hidden xl:block w-40 shrink-0 pt-4">
-          <div className="sticky top-20">
-            <GoogleAd slot="2222222222" className="w-full" minHeight={600} />
-          </div>
-        </aside>
-      </div>
-    </div>
-  );
-}
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: SITE.themeColor },
+    { media: "(prefers-color-scheme: dark)", color: "#121210" },
+  ],
+};
 
 export default function RootLayout({
   children,
@@ -54,24 +94,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ko">
+    <html lang="ko" suppressHydrationWarning>
       <body className={inter.className} suppressHydrationWarning>
-        {process.env.NEXT_PUBLIC_ADSENSE_CLIENT && (
-          <Script
-            async
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_CLIENT}`}
-            crossOrigin="anonymous"
-            strategy="afterInteractive"
-          />
-        )}
-        <SessionProvider>
-          <CustomSessionProvider>
-            <ThemeProvider>
-              <RootLayoutContent>{children}</RootLayoutContent>
-              <Toaster position="top-center" richColors closeButton />
-            </ThemeProvider>
-          </CustomSessionProvider>
-        </SessionProvider>
+        <RootShell>{children}</RootShell>
       </body>
     </html>
   );
