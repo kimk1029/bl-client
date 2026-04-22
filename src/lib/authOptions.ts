@@ -13,13 +13,36 @@ const stripBearer = (t?: string | null) => {
   return String(t).trim().replace(/^Bearer\s+/i, "");
 };
 
-/** 소셜 로그인: DB에서 사용자 찾거나 자동 생성 후 JWT 반환 */
-async function upsertSocialUser(email: string, name: string, provider: string) {
-  let user = await prisma.user.findUnique({ where: { email } });
+/** 소셜 로그인: DB에서 사용자 찾거나 자동 생성 후 JWT 반환
+ *  - email 은 제공자가 안 주는 경우(예: 카카오 개인앱)를 대비해 옵션
+ *  - providerAccountId 가 주어지면 이메일 없어도 합성 이메일로 식별
+ *    (kakao.{pid}@social.blessing.local 등)
+ */
+async function upsertSocialUser(args: {
+  providerAccountId: string | null;
+  email: string | null;
+  name: string;
+  provider: string;
+}) {
+  const { providerAccountId, email, name, provider } = args;
+
+  // 이메일이 없을 때 고유성 확보용 합성 이메일 생성
+  const effectiveEmail =
+    (email && email.trim()) ||
+    (providerAccountId
+      ? `${provider}.${providerAccountId}@social.blessing.local`
+      : null);
+
+  if (!effectiveEmail) {
+    throw new Error(
+      `소셜 로그인 식별 실패: ${provider} 계정에서 이메일/고유 ID 모두 받지 못했습니다.`,
+    );
+  }
+
+  let user = await prisma.user.findUnique({ where: { email: effectiveEmail } });
 
   if (!user) {
-    // 유니크 username 생성
-    const base = (name || email.split("@")[0])
+    const base = (name || effectiveEmail.split("@")[0])
       .replace(/[^a-zA-Z0-9가-힣]/g, "")
       .slice(0, 14) || "user";
     let username = base;
@@ -27,13 +50,12 @@ async function upsertSocialUser(email: string, name: string, provider: string) {
     while (await prisma.user.findUnique({ where: { username } })) {
       username = `${base}${n++}`;
     }
-    // 소셜 전용 placeholder 비밀번호 (직접 로그인 불가)
     const placeholderPw = await bcrypt.hash(
-      `SOCIAL:${provider}:${email}:${Date.now()}`,
-      10
+      `SOCIAL:${provider}:${providerAccountId ?? effectiveEmail}:${Date.now()}`,
+      10,
     );
     user = await prisma.user.create({
-      data: { username, email, password: placeholderPw },
+      data: { username, email: effectiveEmail, password: placeholderPw },
     });
   }
 
@@ -156,10 +178,26 @@ export const authOptions = {
           (token as any).level = Math.max((user as any).level ?? 1, 1);
         } else {
           // 소셜 로그인 (google / kakao / naver)
-          const email = user.email as string;
-          const name = (user.name || user.email?.split("@")[0] || "user") as string;
+          const providerAccountId =
+            (account?.providerAccountId as string | undefined) ??
+            (user.id != null ? String(user.id) : null);
+          const rawEmail =
+            typeof user.email === "string" && user.email.trim()
+              ? user.email.trim()
+              : null;
+          const rawName =
+            typeof user.name === "string" && user.name.trim()
+              ? user.name.trim()
+              : null;
+          const name =
+            rawName || rawEmail?.split("@")[0] || providerAccountId || "user";
           try {
-            const data = await upsertSocialUser(email, name, provider);
+            const data = await upsertSocialUser({
+              providerAccountId,
+              email: rawEmail,
+              name,
+              provider,
+            });
             (token as any).accessToken = data.accessToken;
             (token as any).id = data.id;
             (token as any).username = data.username;
