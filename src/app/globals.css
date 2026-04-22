@@ -625,6 +625,27 @@ html.dark .blessing-prayer-stream {
   font-family: var(--blessing-mono);
   flex-shrink: 0;
 }
+.blessing-notice-empty {
+  background: var(--blessing-bg-2);
+  color: var(--blessing-fg-2);
+  cursor: default;
+}
+.blessing-notice-empty .blessing-notice-title {
+  color: var(--blessing-fg-2);
+  font-weight: 400;
+  white-space: normal;
+}
+.blessing-prayer-empty {
+  justify-content: space-between;
+}
+.blessing-prayer-empty .blessing-prayer-title {
+  color: var(--blessing-fg-1);
+  font-weight: 500;
+}
+.blessing-prayer-empty .blessing-prayer-count span {
+  color: var(--blessing-accent-strong);
+  font-weight: 600;
+}
 
 /* ---------- Events rail ---------- */
 .blessing-event-rail {

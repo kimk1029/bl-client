@@ -11,29 +11,49 @@ export default function PrayerStream() {
   const { data } = useSWR<Post[]>("/api/posts?category=prayer&limit=5", apiFetcher);
   const prayers = Array.isArray(data) ? data : [];
 
-  if (prayers.length === 0) return null;
-
   return (
     <section className="blessing-section">
       <SectionHeader
         icon="🙏"
         title="기도제목"
         en="Prayer Stream"
-        moreHref="/posts?topic=prayer"
+        count={prayers.length}
+        moreHref="/posts?category=prayer"
       />
       <div className="blessing-prayer-stream">
-        {prayers.map((p) => (
-          <Link key={p.id} href={`/posts/${p.id}`} className="blessing-prayer-item">
+        {prayers.length === 0 ? (
+          <Link
+            href="/posts/new"
+            className="blessing-prayer-item blessing-prayer-empty"
+          >
             <span className="blessing-prayer-icon" aria-hidden>
               🙏
             </span>
-            <span className="blessing-prayer-title">{p.title}</span>
+            <span className="blessing-prayer-title">
+              아직 기도제목이 없어요. 먼저 나눠보시겠어요?
+            </span>
             <span className="blessing-prayer-count">
-              <span>🙏 {countLikes(p)}</span>
-              <span>{formatTimeAgo(p.created_at)}</span>
+              <span>시작하기</span>
             </span>
           </Link>
-        ))}
+        ) : (
+          prayers.slice(0, 3).map((p) => (
+            <Link
+              key={p.id}
+              href={`/posts/${p.id}`}
+              className="blessing-prayer-item"
+            >
+              <span className="blessing-prayer-icon" aria-hidden>
+                🙏
+              </span>
+              <span className="blessing-prayer-title">{p.title}</span>
+              <span className="blessing-prayer-count">
+                <span>🙏 {countLikes(p)}</span>
+                <span>{formatTimeAgo(p.created_at)}</span>
+              </span>
+            </Link>
+          ))
+        )}
       </div>
     </section>
   );

@@ -23,7 +23,6 @@ export default function NoticeSection({ posts, excludeIds }: Props) {
     ? prioritized.filter((p) => !excludeIds.has(p.id))
     : prioritized;
   const items = pickable.slice(0, 5);
-  if (items.length === 0) return null;
 
   return (
     <section className="blessing-section">
@@ -35,6 +34,14 @@ export default function NoticeSection({ posts, excludeIds }: Props) {
         moreHref="/posts?category=life"
       />
       <div className="blessing-notice-list">
+        {items.length === 0 && (
+          <div className="blessing-notice-item blessing-notice-empty">
+            <span className="blessing-notice-badge">공지</span>
+            <span className="blessing-notice-title">
+              등록된 공지가 아직 없어요. 첫 공지를 남겨보세요.
+            </span>
+          </div>
+        )}
         {items.map((p) => {
           if (excludeIds) excludeIds.add(p.id);
           const isPinned =
