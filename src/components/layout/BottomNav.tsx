@@ -66,12 +66,13 @@ function UserIcon({ active }: { active?: boolean }) {
 }
 
 function PlusIcon() {
+  // Christian cross (십자가): 수직 빔이 더 길고, 수평 빔은 위쪽 1/3 지점
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
       <path
-        d="M12 5v14M5 12h14"
+        d="M12 3v18M6 9h12"
         stroke="currentColor"
-        strokeWidth="2.2"
+        strokeWidth="2.4"
         strokeLinecap="round"
       />
     </svg>
