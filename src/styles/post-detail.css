@@ -320,9 +320,12 @@
 }
 
 .blessing-comment-compose {
-  position: sticky;
+  position: fixed;
   bottom: calc(60px + env(safe-area-inset-bottom));
-  flex-shrink: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 800px;
   display: flex;
   gap: 8px;
   padding: 10px 14px 12px;
@@ -330,6 +333,10 @@
   border-top: 1px solid var(--blessing-border);
   align-items: center;
   z-index: 25;
+  box-shadow: 0 -4px 12px color-mix(in srgb, var(--blessing-fg-0) 5%, transparent);
+}
+.blessing-comment-list {
+  padding-bottom: 80px;
 }
 .blessing-comment-compose input {
   flex: 1;

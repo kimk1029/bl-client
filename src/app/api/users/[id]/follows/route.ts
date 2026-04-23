@@ -20,37 +20,43 @@ export async function GET(
 
     const me = await getAuthUser(request);
 
-    const rows =
-      tab === "followers"
-        ? await prisma.follow.findMany({
-            where: { followee_id: id },
-            orderBy: { created_at: "desc" },
-            take: 100,
-            include: {
-              follower: {
-                select: { id: true, username: true, affiliation: true },
-              },
-            },
-          })
-        : await prisma.follow.findMany({
-            where: { follower_id: id },
-            orderBy: { created_at: "desc" },
-            take: 100,
-            include: {
-              followee: {
-                select: { id: true, username: true, affiliation: true },
-              },
-            },
-          });
+    const userSelect = {
+      id: true,
+      username: true,
+      affiliation: true,
+    } as const;
 
-    const users = rows.map((r) => {
-      const u = tab === "followers" ? r.follower : r.followee;
-      return {
-        id: u.id,
-        username: u.username,
-        affiliation: u.affiliation ?? null,
-      };
-    });
+    let users: Array<{
+      id: number;
+      username: string;
+      affiliation: string | null;
+    }>;
+
+    if (tab === "followers") {
+      const rows = await prisma.follow.findMany({
+        where: { followee_id: id },
+        orderBy: { created_at: "desc" },
+        take: 100,
+        include: { follower: { select: userSelect } },
+      });
+      users = rows.map((r) => ({
+        id: r.follower.id,
+        username: r.follower.username,
+        affiliation: r.follower.affiliation ?? null,
+      }));
+    } else {
+      const rows = await prisma.follow.findMany({
+        where: { follower_id: id },
+        orderBy: { created_at: "desc" },
+        take: 100,
+        include: { followee: { select: userSelect } },
+      });
+      users = rows.map((r) => ({
+        id: r.followee.id,
+        username: r.followee.username,
+        affiliation: r.followee.affiliation ?? null,
+      }));
+    }
 
     // Tag whether I follow each listed user.
     let following: Record<number, boolean> = {};
