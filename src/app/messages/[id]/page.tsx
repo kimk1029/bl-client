@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -109,6 +109,7 @@ export default function MessageThreadPage({
   const [todayISO, setTodayISO] = useState<string>("");
   const [showMore, setShowMore] = useState(false);
   const [reporting, setReporting] = useState(false);
+  const moreDownOnBackdrop = useRef(false);
   useEffect(() => {
     setTodayISO(new Date().toISOString());
   }, []);
@@ -374,12 +375,27 @@ export default function MessageThreadPage({
           role="dialog"
           aria-modal="true"
           aria-label="대화 설정"
-          onClick={() => setShowMore(false)}
+          onMouseDown={(e) => {
+            moreDownOnBackdrop.current = e.target === e.currentTarget;
+          }}
+          onMouseUp={(e) => {
+            const close =
+              moreDownOnBackdrop.current && e.target === e.currentTarget;
+            moreDownOnBackdrop.current = false;
+            if (close) setShowMore(false);
+          }}
+          onTouchStart={(e) => {
+            moreDownOnBackdrop.current = e.target === e.currentTarget;
+          }}
+          onTouchEnd={(e) => {
+            const close =
+              moreDownOnBackdrop.current && e.target === e.currentTarget;
+            moreDownOnBackdrop.current = false;
+            if (close) setShowMore(false);
+          }}
         >
-          <div
-            className="blessing-user-sheet"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="blessing-user-sheet">
+
             <div className="blessing-user-sheet-handle" aria-hidden />
             <div className="blessing-user-sheet-head">
               <Avatar name={title} size={44} seed={other.id * 11} />

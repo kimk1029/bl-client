@@ -33,7 +33,7 @@ export const TOPICS: TopicMeta[] = [
   { id: "market",    ko: "중고·나눔",     en: "Market",        emoji: "🛍️", anon: false,             mapsTo: "life" },
   { id: "notice",    ko: "공지·행사",     en: "Notice",        emoji: "📣", anon: false,             mapsTo: "life" },
   { id: "mission",   ko: "봉사·선교",     en: "Mission",       emoji: "🌏", anon: false,             mapsTo: "mission" },
-  { id: "cell",      ko: "소그룹·목장",   en: "Small Group",   emoji: "🫂", anon: false,             mapsTo: "youth" },
+  { id: "cell",      ko: "소그룹·목장",   en: "Small Group",   emoji: "👥", anon: false,             mapsTo: "youth" },
   { id: "worship",   ko: "찬양·워십",     en: "Worship",       emoji: "🎵", anon: false,             mapsTo: "worship" },
   { id: "kids",      ko: "주일학교",      en: "Sunday School", emoji: "🧒", anon: false,             mapsTo: "life" },
   { id: "local",     ko: "맛집·동네",     en: "Local",         emoji: "🍚", anon: false,             mapsTo: "life" },

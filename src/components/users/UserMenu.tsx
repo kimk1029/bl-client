@@ -251,7 +251,7 @@ export default function UserMenu({
               className="blessing-user-sheet-item"
               onClick={() => go(`/users/${userId}/follows?tab=followers`)}
             >
-              <span>🫂</span>
+              <span>👥</span>
               <span>팔로워 · 팔로잉</span>
             </button>
 

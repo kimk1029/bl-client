@@ -113,7 +113,7 @@ function FollowsInner({ userId }: { userId: number }) {
           className={`blessing-hub-tab ${tab === "following" ? "blessing-hub-tab-active" : ""}`}
           onClick={() => setTab("following")}
         >
-          <span className="blessing-cell-tab-icon" aria-hidden>🫂</span>
+          <span className="blessing-cell-tab-icon" aria-hidden>➡️</span>
           <span>팔로잉</span>
         </button>
       </div>

@@ -1,6 +1,13 @@
 /* =========================================================================
    Cell (셀·목장)
    ========================================================================= */
+
+/* blessing-detail 컨테이너를 BottomNav 바로 위까지 최소 높이로 채워,
+   피드가 짧을 때도 compose(margin-top:auto)가 하단에 붙도록 함.
+   내용이 길어지면 자연스럽게 페이지 스크롤 */
+.blessing-cell-detail {
+  min-height: calc(100vh - 60px - env(safe-area-inset-bottom));
+}
 .blessing-cell-meeting-banner {
   display: flex;
   align-items: center;
@@ -106,9 +113,7 @@
   border-bottom: 1px solid var(--blessing-border);
 }
 .blessing-cell-quick-post-sticky {
-  position: sticky;
-  bottom: 0;
-  z-index: 5;
+  margin-top: auto;
   border-top: 1px solid var(--blessing-border);
   border-bottom: none;
   box-shadow: 0 -4px 12px color-mix(in srgb, var(--blessing-fg-0) 6%, transparent);
@@ -379,9 +384,7 @@ button.blessing-cell-post-btn:active {
   border-top: 1px solid var(--blessing-border);
 }
 .blessing-cell-prayer-compose-sticky {
-  position: sticky;
-  bottom: 0;
-  z-index: 5;
+  margin-top: auto;
   box-shadow: 0 -4px 12px color-mix(in srgb, var(--blessing-fg-0) 6%, transparent);
 }
 .blessing-cell-textarea {

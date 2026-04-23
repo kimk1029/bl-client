@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -56,12 +56,25 @@ function IconBack() {
 function IconInvite() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle
+        cx="13"
+        cy="8"
+        r="4"
+        stroke="currentColor"
+        strokeWidth="1.7"
+      />
       <path
-        d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M12 3a4 4 0 1 1 0 8 4 4 0 0 1 0-8ZM19 8v6M22 11h-6"
+        d="M5 21v-1c0-3.3 3.6-5 8-5s8 1.7 8 5v1"
         stroke="currentColor"
         strokeWidth="1.7"
         strokeLinecap="round"
         strokeLinejoin="round"
+      />
+      <path
+        d="M4 8v6M1 11h6"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
       />
     </svg>
   );
@@ -129,7 +142,11 @@ export default function CellPage() {
       const raw = localStorage.getItem(INFO_KEY);
       if (raw) {
         try {
-          setCellInfo(JSON.parse(raw) as CellInfoOverride);
+          const info = JSON.parse(raw) as CellInfoOverride;
+          setCellInfo(info);
+          // Custom cell = 사용자가 직접 만들거나 가입한 목장.
+          // mock 초기 데이터(모임·피드·기도제목·멤버)를 노출하지 않음.
+          if (info.name) setUpcoming([]);
         } catch {
           /* ignore invalid JSON */
         }
@@ -143,6 +160,7 @@ export default function CellPage() {
     () => ({ ...MY_CELL, ...cellInfo }),
     [cellInfo],
   );
+  const isCustom = !!cellInfo.name;
 
   useEffect(() => {
     const open =
@@ -186,11 +204,15 @@ export default function CellPage() {
   };
 
   const handleJoin = (code: string) => {
-    const next: CellInfoOverride = { ...cellInfo, inviteCode: code };
-    // If no existing name (e.g., first join), leave the mock default so the
-    // user sees something meaningful; the backend would resolve the real name.
+    const next: CellInfoOverride = {
+      name: `초대코드 ${code}`,
+      type: cellInfo.type ?? "목장",
+      inviteCode: code,
+    };
     persistHasCell(true);
     persistInfo(next);
+    setUpcoming([]);
+    setAttendMap({});
     setHasCell(true);
     setShowJoin(false);
     toast.success(`"${code}" 초대 코드로 목장에 가입했어요.`);
@@ -206,6 +228,8 @@ export default function CellPage() {
     };
     persistHasCell(true);
     persistInfo(next);
+    setUpcoming([]);
+    setAttendMap({});
     setHasCell(true);
     setShowCreate(false);
     toast.success(`"${draft.name}" ${draft.type}이 만들어졌어요.`);
@@ -217,6 +241,8 @@ export default function CellPage() {
     }
     persistHasCell(false);
     setCellInfo({});
+    setUpcoming(CELL_UPCOMING);
+    setAttendMap({});
     try {
       localStorage.removeItem(INFO_KEY);
     } catch {
@@ -263,7 +289,7 @@ export default function CellPage() {
 
   if (!hasCell) {
     return (
-      <div className="blessing-detail">
+      <div className="blessing-detail blessing-cell-detail">
         <header className="blessing-detail-topbar">
           <button
             type="button"
@@ -398,17 +424,22 @@ export default function CellPage() {
         </div>
       )}
 
-      {tab === "feed" && <CellFeed />}
-      {tab === "prayer" && <CellPrayer />}
+      {tab === "feed" && (
+        <CellFeed key={isCustom ? "custom" : "mock"} isCustom={isCustom} />
+      )}
+      {tab === "prayer" && (
+        <CellPrayer key={isCustom ? "custom" : "mock"} isCustom={isCustom} />
+      )}
       {tab === "meeting" && (
         <CellMeeting
           upcoming={upcoming}
           attendMap={attendMap}
           onToggleAttend={toggleAttend}
           onAdd={() => setShowAddMtg(true)}
+          showPast={!isCustom}
         />
       )}
-      {tab === "members" && <CellMembers />}
+      {tab === "members" && <CellMembers isCustom={isCustom} />}
 
       {showInvite && (
         <InviteSheet
@@ -454,8 +485,6 @@ export default function CellPage() {
           totalMembers={myCell.members.length}
         />
       )}
-
-      <div style={{ height: 40 }} />
     </div>
   );
 }
@@ -472,7 +501,7 @@ function CellEmpty({
   return (
     <div className="blessing-cell-empty">
       <div className="blessing-cell-empty-emoji" aria-hidden>
-        🫂
+        👥
       </div>
       <div className="blessing-cell-empty-title">
         아직 속한 목장이 없어요
@@ -504,8 +533,10 @@ function CellEmpty({
 
 // ---------------------- Feed tab ----------------------
 
-function CellFeed() {
-  const [posts, setPosts] = useState<CellPost[]>(CELL_POSTS);
+function CellFeed({ isCustom }: { isCustom: boolean }) {
+  const [posts, setPosts] = useState<CellPost[]>(
+    isCustom ? [] : CELL_POSTS,
+  );
   const [draft, setDraft] = useState("");
   const [liked, setLiked] = useState<Set<number>>(new Set());
   const [prayed, setPrayed] = useState<Set<number>>(new Set());
@@ -550,7 +581,11 @@ function CellFeed() {
     <>
       <div className="blessing-cell-stats-bar">
         <div className="blessing-cell-stat">
-          <strong>{MY_CELL.postCount + (posts.length - CELL_POSTS.length)}</strong>
+          <strong>
+            {isCustom
+              ? posts.length
+              : MY_CELL.postCount + (posts.length - CELL_POSTS.length)}
+          </strong>
           <span>
             <span className="blessing-cell-stat-icon" aria-hidden>💬</span>
             나눔
@@ -558,7 +593,7 @@ function CellFeed() {
         </div>
         <div className="blessing-feed-stat-divider" />
         <div className="blessing-cell-stat">
-          <strong>{MY_CELL.prayerCount}</strong>
+          <strong>{isCustom ? 0 : MY_CELL.prayerCount}</strong>
           <span>
             <span className="blessing-cell-stat-icon" aria-hidden>🙏</span>
             기도제목
@@ -566,7 +601,7 @@ function CellFeed() {
         </div>
         <div className="blessing-feed-stat-divider" />
         <div className="blessing-cell-stat">
-          <strong>{MY_CELL.members.length}</strong>
+          <strong>{isCustom ? 1 : MY_CELL.members.length}</strong>
           <span>
             <span className="blessing-cell-stat-icon" aria-hidden>👥</span>
             멤버
@@ -578,7 +613,7 @@ function CellFeed() {
             LIVE
           </strong>
           <span>
-            <span className="blessing-cell-stat-icon" aria-hidden>🫂</span>
+            <span className="blessing-cell-stat-icon" aria-hidden>👥</span>
             목장
           </span>
         </div>
@@ -660,8 +695,10 @@ function CellFeed() {
 
 // ---------------------- Prayer tab ----------------------
 
-function CellPrayer() {
-  const [prayers, setPrayers] = useState<CellPrayerItem[]>(CELL_PRAYERS);
+function CellPrayer({ isCustom }: { isCustom: boolean }) {
+  const [prayers, setPrayers] = useState<CellPrayerItem[]>(
+    isCustom ? [] : CELL_PRAYERS,
+  );
   const [draft, setDraft] = useState("");
   const [joined, setJoined] = useState<Set<number>>(new Set());
 
@@ -756,11 +793,13 @@ function CellMeeting({
   attendMap,
   onToggleAttend,
   onAdd,
+  showPast,
 }: {
   upcoming: CellMeetingItem[];
   attendMap: Record<string, boolean>;
   onToggleAttend: (key: string) => void;
   onAdd: () => void;
+  showPast: boolean;
 }) {
   return (
     <>
@@ -837,55 +876,73 @@ function CellMeeting({
         })}
       </div>
 
-      <div className="blessing-cell-section-label" style={{ marginTop: 8 }}>
-        <span>
-          <span className="blessing-cell-section-icon" aria-hidden>📋</span>
-          지난 모임
-        </span>
-      </div>
-      <div className="blessing-cell-mtg-list">
-        {CELL_PAST.map((m, i) => (
-          <article key={i} className="blessing-cell-mtg-past">
-            <div className="blessing-cell-mtg-past-date">{m.date}</div>
-            <div className="blessing-cell-mtg-past-body">
-              <div className="blessing-cell-mtg-topic">{m.topic}</div>
-              {m.highlight && (
-                <div className="blessing-cell-mtg-highlight">
-                  💬 {m.highlight}
+      {showPast && (
+        <>
+          <div
+            className="blessing-cell-section-label"
+            style={{ marginTop: 8 }}
+          >
+            <span>
+              <span className="blessing-cell-section-icon" aria-hidden>📋</span>
+              지난 모임
+            </span>
+          </div>
+          <div className="blessing-cell-mtg-list">
+            {CELL_PAST.map((m, i) => (
+              <article key={i} className="blessing-cell-mtg-past">
+                <div className="blessing-cell-mtg-past-date">{m.date}</div>
+                <div className="blessing-cell-mtg-past-body">
+                  <div className="blessing-cell-mtg-topic">{m.topic}</div>
+                  {m.highlight && (
+                    <div className="blessing-cell-mtg-highlight">
+                      💬 {m.highlight}
+                    </div>
+                  )}
+                  <div
+                    style={{
+                      fontSize: 11,
+                      color: "var(--blessing-fg-2)",
+                      fontFamily: "var(--blessing-mono)",
+                      marginTop: 4,
+                    }}
+                  >
+                    {m.attending}/{m.total}명 참석
+                  </div>
                 </div>
-              )}
-              <div
-                style={{
-                  fontSize: 11,
-                  color: "var(--blessing-fg-2)",
-                  fontFamily: "var(--blessing-mono)",
-                  marginTop: 4,
-                }}
-              >
-                {m.attending}/{m.total}명 참석
-              </div>
-            </div>
-          </article>
-        ))}
-      </div>
+              </article>
+            ))}
+          </div>
+        </>
+      )}
+      {upcoming.length === 0 && (
+        <div
+          className="blessing-event-detail-missing"
+          style={{ minHeight: 140 }}
+        >
+          <div>아직 예정된 모임이 없어요. &ldquo;+ 모임 추가&rdquo; 로 첫 모임을 등록해보세요.</div>
+        </div>
+      )}
     </>
   );
 }
 
 // ---------------------- Members tab ----------------------
 
-function CellMembers() {
+function CellMembers({ isCustom }: { isCustom: boolean }) {
   const router = useRouter();
+  const members = isCustom
+    ? [{ name: ME, role: "목자", verified: false, isMe: true }]
+    : MY_CELL.members;
   return (
     <>
       <div className="blessing-cell-section-label">
         <span>
           <span className="blessing-cell-section-icon" aria-hidden>👥</span>
-          목장 멤버 {MY_CELL.members.length}명
+          목장 멤버 {members.length}명
         </span>
       </div>
       <div className="blessing-cell-member-list">
-        {MY_CELL.members.map((m, i) => (
+        {members.map((m, i) => (
           <div key={i} className="blessing-cell-member-row">
             <Avatar name={m.name} size={40} seed={i * 11} />
             <div className="blessing-cell-member-info">
@@ -943,15 +1000,37 @@ function SheetBase({
   onClose: () => void;
   children: React.ReactNode;
 }) {
+  // Track whether mousedown happened on the backdrop itself so that a text
+  // drag-select that begins inside an input and ends outside the sheet does
+  // NOT trigger a close (onClick would, because the "click" ends on the
+  // backdrop even though it started on the input).
+  const downOnBackdrop = useRef(false);
   return (
     <div
       className="blessing-user-sheet-backdrop"
       role="dialog"
       aria-modal="true"
       aria-label={title}
-      onClick={onClose}
+      onMouseDown={(e) => {
+        downOnBackdrop.current = e.target === e.currentTarget;
+      }}
+      onMouseUp={(e) => {
+        const close =
+          downOnBackdrop.current && e.target === e.currentTarget;
+        downOnBackdrop.current = false;
+        if (close) onClose();
+      }}
+      onTouchStart={(e) => {
+        downOnBackdrop.current = e.target === e.currentTarget;
+      }}
+      onTouchEnd={(e) => {
+        const close =
+          downOnBackdrop.current && e.target === e.currentTarget;
+        downOnBackdrop.current = false;
+        if (close) onClose();
+      }}
     >
-      <div className="blessing-user-sheet" onClick={(e) => e.stopPropagation()}>
+      <div className="blessing-user-sheet">
         <div className="blessing-user-sheet-handle" aria-hidden />
         <div className="blessing-user-sheet-head">
           <div
@@ -1170,7 +1249,7 @@ function CreateSheet({
     <SheetBase
       title="목장 만들기"
       subtitle="나의 셀이나 목장을 직접 만들어보세요"
-      icon={<span style={{ fontSize: 24 }}>🫂</span>}
+      icon={<span style={{ fontSize: 24 }}>👥</span>}
       onClose={onClose}
     >
       <form

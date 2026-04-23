@@ -274,7 +274,7 @@ export default function CompleteProfilePage() {
             <div className="blessing-onboard-benefits">
               {[
                 { icon: "⛪", title: "내 교회 피드", desc: "같은 교회 성도들과 소통" },
-                { icon: "🫂", title: "셀·목장 참여", desc: "소그룹 나눔 및 기도" },
+                { icon: "👥", title: "셀·목장 참여", desc: "소그룹 나눔 및 기도" },
                 { icon: "✓", title: "인증 뱃지", desc: "신뢰할 수 있는 성도로 표시" },
               ].map((b) => (
                 <div key={b.icon} className="blessing-onboard-benefit">
