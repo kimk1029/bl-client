@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { findMeetup } from "@/lib/meetupsMock";
+import { meetupBookmarks, useMeetupBookmarked } from "@/lib/meetupBookmarks";
 import { shareOrCopy } from "@/lib/share";
 
 function IconBack() {
@@ -50,8 +51,10 @@ export default function MeetupDetailPage({
 }) {
   const router = useRouter();
   const { id } = use(params);
-  const m = findMeetup(Number(id));
+  const meetupId = Number(id);
+  const m = findMeetup(meetupId);
   const [joined, setJoined] = useState(false);
+  const bookmarked = useMeetupBookmarked(meetupId);
 
   if (!m) {
     return (
@@ -88,8 +91,17 @@ export default function MeetupDetailPage({
           <button
             type="button"
             className="blessing-detail-icon-btn"
-            aria-label="찜"
-            onClick={() => toast.message("모임 찜은 곧 추가됩니다.")}
+            aria-label={bookmarked ? "찜 해제" : "찜"}
+            aria-pressed={bookmarked}
+            style={
+              bookmarked
+                ? { color: "var(--blessing-accent-strong)" }
+                : undefined
+            }
+            onClick={() => {
+              meetupBookmarks.toggle(meetupId);
+              toast.success(bookmarked ? "찜을 해제했어요." : "모임을 찜했어요.");
+            }}
           >
             <IconBookmark />
           </button>

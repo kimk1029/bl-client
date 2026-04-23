@@ -284,9 +284,23 @@ button.blessing-cell-quick-input:hover {
   font-size: 11.5px;
   font-family: inherit;
   cursor: pointer;
+  transition: color 0.12s, transform 0.1s;
 }
-.blessing-cell-post-btn:hover {
+button.blessing-cell-post-btn:hover {
   color: var(--blessing-fg-0);
+}
+button.blessing-cell-post-btn:active {
+  transform: scale(0.94);
+}
+.blessing-cell-post-btn-on {
+  color: var(--blessing-accent-strong);
+  font-weight: 700;
+}
+.blessing-cell-post-btn-static {
+  cursor: default;
+}
+.blessing-cell-post-btn-static:hover {
+  color: var(--blessing-fg-2);
 }
 
 .blessing-cell-section-label {
@@ -344,9 +358,20 @@ button.blessing-cell-quick-input:hover {
   font-weight: 700;
   cursor: pointer;
   font-family: inherit;
+  transition: background 0.12s, color 0.12s, transform 0.1s;
 }
 .blessing-cell-pray-btn:hover {
   background: color-mix(in srgb, var(--blessing-accent-soft) 85%, var(--blessing-accent));
+}
+.blessing-cell-pray-btn:active {
+  transform: scale(0.97);
+}
+.blessing-cell-pray-btn-on {
+  background: var(--blessing-accent);
+  color: #fff;
+}
+.blessing-cell-pray-btn-on:hover {
+  background: var(--blessing-accent-strong);
 }
 .blessing-cell-prayer-compose {
   padding: 16px;
@@ -692,5 +717,46 @@ button.blessing-cell-quick-input:hover {
   color: #fff;
   border-color: var(--blessing-accent);
   font-weight: 700;
+}
+
+/* ---------- Notification toggles sheet ---------- */
+.blessing-notif-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.blessing-notif-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 10px;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background 0.12s;
+}
+.blessing-notif-row:hover {
+  background: var(--blessing-bg-2);
+}
+.blessing-notif-row-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.blessing-notif-row-label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--blessing-fg-0);
+  letter-spacing: -0.2px;
+}
+.blessing-notif-row-hint {
+  font-size: 11.5px;
+  color: var(--blessing-fg-3);
+  letter-spacing: -0.1px;
 }
 

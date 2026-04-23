@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { MEETUP_TAG_OPTIONS } from "@/lib/meetupsMock";
+import { shareOrCopy } from "@/lib/share";
 
 type Step = 1 | 2 | 3;
 
@@ -120,10 +121,14 @@ export default function CreateMeetupPage() {
               type="button"
               className="blessing-btn-secondary"
               onClick={() =>
-                toast.message("카카오톡 공유는 앱 연동 후 동작합니다.")
+                shareOrCopy({
+                  title: form.title,
+                  text: `${form.title} — ${form.date} · ${form.place}`,
+                  url: "/events",
+                })
               }
             >
-              카카오톡으로 초대 링크 공유
+              초대 링크 공유하기
             </button>
           </div>
         </div>

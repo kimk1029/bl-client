@@ -291,7 +291,33 @@ export default function PostContent({
   };
 
   const handleEdit = () => router.push(`${backUrl}/${post.id}/edit`);
-  const handleReport = () => toast.message("신고가 접수되었어요.");
+  const handleReport = async () => {
+    if (!token) {
+      toast.error("로그인 후 신고할 수 있어요.");
+      return;
+    }
+    try {
+      const res = await fetch("/api/report", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          target_type: "post",
+          target_id: post.id,
+          reason: "inappropriate",
+        }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json?.error || "신고 실패");
+      toast.success(
+        json.duplicate ? "이미 접수된 신고예요." : "신고가 접수되었어요.",
+      );
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "신고 실패");
+    }
+  };
 
   const isHot =
     (post as unknown as { hot?: boolean }).hot === true ||

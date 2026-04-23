@@ -176,6 +176,8 @@ export default function Header() {
     pathname === "/profile/edit"
   )
     return null;
+  // Settings sub-pages own their DetailHeader.
+  if (pathname.startsWith("/settings/")) return null;
 
   if (pathname === "/") {
     return (

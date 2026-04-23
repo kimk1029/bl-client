@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Avatar from "@/components/common/Avatar";
+import { shareOrCopy } from "@/lib/share";
 import {
   CELL_PAST,
   CELL_POSTS,
@@ -118,6 +119,8 @@ export default function CellPage() {
   const [upcoming, setUpcoming] = useState<CellMeetingItem[]>(CELL_UPCOMING);
   const [attendMap, setAttendMap] = useState<Record<string, boolean>>({});
   const [cellInfo, setCellInfo] = useState<CellInfoOverride>({});
+  const [showEdit, setShowEdit] = useState(false);
+  const [showNotif, setShowNotif] = useState(false);
 
   useEffect(() => {
     try {
@@ -143,7 +146,13 @@ export default function CellPage() {
 
   useEffect(() => {
     const open =
-      showInvite || showMore || showJoin || showCreate || showAddMtg;
+      showInvite ||
+      showMore ||
+      showJoin ||
+      showCreate ||
+      showAddMtg ||
+      showEdit ||
+      showNotif;
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
@@ -152,10 +161,12 @@ export default function CellPage() {
       setShowJoin(false);
       setShowCreate(false);
       setShowAddMtg(false);
+      setShowEdit(false);
+      setShowNotif(false);
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [showInvite, showMore, showJoin, showCreate, showAddMtg]);
+  }, [showInvite, showMore, showJoin, showCreate, showAddMtg, showEdit, showNotif]);
 
   const persistHasCell = (v: boolean) => {
     try {
@@ -223,6 +234,19 @@ export default function CellPage() {
     );
     setShowAddMtg(false);
     toast.success("새 모임이 등록되었어요.");
+  };
+
+  const handleEdit = (draft: CellDraft) => {
+    const next: CellInfoOverride = {
+      ...cellInfo,
+      name: draft.name,
+      type: draft.type,
+      meetDay: draft.meetDay || undefined,
+      meetPlace: draft.meetPlace || undefined,
+    };
+    persistInfo(next);
+    setShowEdit(false);
+    toast.success("목장 정보가 저장되었어요.");
   };
 
   const toggleAttend = (key: string) => {
@@ -397,9 +421,30 @@ export default function CellPage() {
         <MoreSheet
           onClose={() => setShowMore(false)}
           onLeave={handleLeave}
+          onEdit={() => {
+            setShowMore(false);
+            setShowEdit(true);
+          }}
+          onNotif={() => {
+            setShowMore(false);
+            setShowNotif(true);
+          }}
           cellName={myCell.name}
         />
       )}
+      {showEdit && (
+        <EditSheet
+          onClose={() => setShowEdit(false)}
+          onSubmit={handleEdit}
+          initial={{
+            name: myCell.name,
+            type: (myCell.type === "셀" ? "셀" : "목장") as "목장" | "셀",
+            meetDay: myCell.meetDay,
+            meetPlace: myCell.meetPlace,
+          }}
+        />
+      )}
+      {showNotif && <NotificationSheet onClose={() => setShowNotif(false)} />}
       {showAddMtg && (
         <AddMeetingSheet
           onClose={() => setShowAddMtg(false)}
@@ -462,6 +507,8 @@ function CellEmpty({
 function CellFeed() {
   const [posts, setPosts] = useState<CellPost[]>(CELL_POSTS);
   const [draft, setDraft] = useState("");
+  const [liked, setLiked] = useState<Set<number>>(new Set());
+  const [prayed, setPrayed] = useState<Set<number>>(new Set());
 
   const submit = () => {
     const text = draft.trim();
@@ -479,6 +526,24 @@ function CellFeed() {
     ]);
     setDraft("");
     toast.success("나눔이 올라갔어요.");
+  };
+
+  const toggleLike = (id: number) => {
+    setLiked((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const togglePray = (id: number) => {
+    setPrayed((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   };
 
   return (
@@ -537,13 +602,25 @@ function CellFeed() {
               </div>
               <div className="blessing-cell-post-text">{p.text}</div>
               <div className="blessing-cell-post-actions">
-                <button type="button" className="blessing-cell-post-btn">
-                  ❤️ {p.likes}
+                <button
+                  type="button"
+                  className={`blessing-cell-post-btn${liked.has(p.id) ? " blessing-cell-post-btn-on" : ""}`}
+                  onClick={() => toggleLike(p.id)}
+                  aria-pressed={liked.has(p.id)}
+                >
+                  {liked.has(p.id) ? "❤️" : "🤍"}{" "}
+                  {p.likes + (liked.has(p.id) ? 1 : 0)}
                 </button>
-                <button type="button" className="blessing-cell-post-btn">
+                <span className="blessing-cell-post-btn blessing-cell-post-btn-static">
                   💬 {p.comments}
-                </button>
-                <button type="button" className="blessing-cell-post-btn">
+                </span>
+                <button
+                  type="button"
+                  className={`blessing-cell-post-btn${prayed.has(p.id) ? " blessing-cell-post-btn-on" : ""}`}
+                  onClick={() => togglePray(p.id)}
+                  aria-pressed={prayed.has(p.id)}
+                  aria-label="중보"
+                >
                   🙏
                 </button>
               </div>
@@ -586,6 +663,7 @@ function CellFeed() {
 function CellPrayer() {
   const [prayers, setPrayers] = useState<CellPrayerItem[]>(CELL_PRAYERS);
   const [draft, setDraft] = useState("");
+  const [joined, setJoined] = useState<Set<number>>(new Set());
 
   const submit = () => {
     const text = draft.trim();
@@ -596,6 +674,15 @@ function CellPrayer() {
     ]);
     setDraft("");
     toast.success("목장 기도제목이 올라갔어요.");
+  };
+
+  const toggleJoin = (ts: number) => {
+    setJoined((prev) => {
+      const next = new Set(prev);
+      if (next.has(ts)) next.delete(ts);
+      else next.add(ts);
+      return next;
+    });
   };
 
   return (
@@ -623,8 +710,13 @@ function CellPrayer() {
                 </span>
               </div>
               <div className="blessing-cell-prayer-text">{p.text}</div>
-              <button type="button" className="blessing-cell-pray-btn">
-                🙏 중보 {p.prays}
+              <button
+                type="button"
+                className={`blessing-cell-pray-btn${joined.has(p.ts) ? " blessing-cell-pray-btn-on" : ""}`}
+                onClick={() => toggleJoin(p.ts)}
+                aria-pressed={joined.has(p.ts)}
+              >
+                🙏 중보 {p.prays + (joined.has(p.ts) ? 1 : 0)}
               </button>
             </div>
           </div>
@@ -783,6 +875,7 @@ function CellMeeting({
 // ---------------------- Members tab ----------------------
 
 function CellMembers() {
+  const router = useRouter();
   return (
     <>
       <div className="blessing-cell-section-label">
@@ -811,7 +904,9 @@ function CellMembers() {
                 className="blessing-cell-member-msg"
                 aria-label={`${m.name}님에게 쪽지`}
                 onClick={() =>
-                  toast.message("실제 쪽지 연결은 사용자 ID 매핑 후 동작합니다.")
+                  router.push(
+                    `/messages/new?q=${encodeURIComponent(m.name)}`,
+                  )
                 }
               >
                 <IconMessage />
@@ -920,10 +1015,14 @@ function InviteSheet({
         className="blessing-btn-primary"
         style={{ width: "100%" }}
         onClick={() =>
-          toast.message("카카오톡 공유는 실제 앱 연동 후 동작합니다.")
+          shareOrCopy({
+            title: `${cellName} 초대`,
+            text: `${cellName} 목장 초대 코드: ${inviteCode}`,
+            url: `/cell?invite=${encodeURIComponent(inviteCode)}`,
+          })
         }
       >
-        카카오톡으로 초대 링크 보내기
+        초대 링크 공유하기
       </button>
       <button
         type="button"
@@ -940,10 +1039,14 @@ function InviteSheet({
 function MoreSheet({
   onClose,
   onLeave,
+  onEdit,
+  onNotif,
   cellName,
 }: {
   onClose: () => void;
   onLeave: () => void;
+  onEdit: () => void;
+  onNotif: () => void;
   cellName: string;
 }) {
   return (
@@ -957,9 +1060,7 @@ function MoreSheet({
         <button
           type="button"
           className="blessing-user-sheet-item"
-          onClick={() =>
-            toast.message("목장 정보 수정은 방장만 가능합니다.")
-          }
+          onClick={onEdit}
         >
           <span>✏️</span>
           <span>목장 정보 수정</span>
@@ -967,9 +1068,7 @@ function MoreSheet({
         <button
           type="button"
           className="blessing-user-sheet-item"
-          onClick={() =>
-            toast.message("알림 설정은 곧 제공될 예정이에요.")
-          }
+          onClick={onNotif}
         >
           <span>🔔</span>
           <span>알림 설정</span>
@@ -1156,6 +1255,192 @@ function CreateSheet({
           취소
         </button>
       </form>
+    </SheetBase>
+  );
+}
+
+function EditSheet({
+  onClose,
+  onSubmit,
+  initial,
+}: {
+  onClose: () => void;
+  onSubmit: (draft: CellDraft) => void;
+  initial: { name: string; type: "목장" | "셀"; meetDay: string; meetPlace: string };
+}) {
+  const [name, setName] = useState(initial.name);
+  const [type, setType] = useState<"목장" | "셀">(initial.type);
+  const [meetDay, setMeetDay] = useState(initial.meetDay);
+  const [meetPlace, setMeetPlace] = useState(initial.meetPlace);
+  const valid = name.trim().length > 0;
+
+  return (
+    <SheetBase
+      title="목장 정보 수정"
+      subtitle={initial.name}
+      icon={<span style={{ fontSize: 22 }}>✏️</span>}
+      onClose={onClose}
+    >
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!valid) return;
+          onSubmit({
+            name: name.trim(),
+            type,
+            meetDay: meetDay.trim(),
+            meetPlace: meetPlace.trim(),
+          });
+        }}
+        className="blessing-cell-sheet-form"
+      >
+        <div className="blessing-cell-field-row">
+          <button
+            type="button"
+            className={`blessing-cell-type-pill${type === "목장" ? " blessing-cell-type-pill-on" : ""}`}
+            onClick={() => setType("목장")}
+          >
+            목장
+          </button>
+          <button
+            type="button"
+            className={`blessing-cell-type-pill${type === "셀" ? " blessing-cell-type-pill-on" : ""}`}
+            onClick={() => setType("셀")}
+          >
+            셀
+          </button>
+        </div>
+        <label className="blessing-cell-field">
+          <span className="blessing-cell-field-label">
+            {type} 이름 <span style={{ color: "var(--blessing-hot)" }}>*</span>
+          </span>
+          <input
+            type="text"
+            className="blessing-cell-field-input"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            autoFocus
+            maxLength={30}
+          />
+        </label>
+        <label className="blessing-cell-field">
+          <span className="blessing-cell-field-label">정기 모임 요일</span>
+          <input
+            type="text"
+            className="blessing-cell-field-input"
+            value={meetDay}
+            onChange={(e) => setMeetDay(e.target.value)}
+            maxLength={30}
+          />
+        </label>
+        <label className="blessing-cell-field">
+          <span className="blessing-cell-field-label">모임 장소</span>
+          <input
+            type="text"
+            className="blessing-cell-field-input"
+            value={meetPlace}
+            onChange={(e) => setMeetPlace(e.target.value)}
+            maxLength={40}
+          />
+        </label>
+        <button
+          type="submit"
+          className="blessing-btn-primary"
+          style={{ width: "100%", marginTop: 12 }}
+          disabled={!valid}
+        >
+          저장
+        </button>
+        <button
+          type="button"
+          className="blessing-btn-secondary"
+          style={{ width: "100%", marginTop: 8, minHeight: 40 }}
+          onClick={onClose}
+        >
+          취소
+        </button>
+      </form>
+    </SheetBase>
+  );
+}
+
+const NOTIF_KEY = "blessing.myCell.notif";
+type NotifPrefs = {
+  mentions: boolean;
+  posts: boolean;
+  prayers: boolean;
+  meetings: boolean;
+};
+const DEFAULT_NOTIF: NotifPrefs = {
+  mentions: true,
+  posts: true,
+  prayers: true,
+  meetings: true,
+};
+
+function NotificationSheet({ onClose }: { onClose: () => void }) {
+  const [prefs, setPrefs] = useState<NotifPrefs>(DEFAULT_NOTIF);
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(NOTIF_KEY);
+      if (raw) setPrefs({ ...DEFAULT_NOTIF, ...JSON.parse(raw) });
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const save = (next: NotifPrefs) => {
+    setPrefs(next);
+    try {
+      localStorage.setItem(NOTIF_KEY, JSON.stringify(next));
+    } catch {
+      /* ignore */
+    }
+  };
+  const toggle = (k: keyof NotifPrefs) => save({ ...prefs, [k]: !prefs[k] });
+
+  const rows: Array<[keyof NotifPrefs, string, string]> = [
+    ["mentions", "나를 언급한 댓글", "@ 멘션이 달리면 알림"],
+    ["posts", "새 나눔", "멤버가 글을 올리면 알림"],
+    ["prayers", "새 기도제목", "기도제목이 올라오면 알림"],
+    ["meetings", "모임 리마인더", "다음 모임 하루 전 알림"],
+  ];
+
+  return (
+    <SheetBase
+      title="알림 설정"
+      subtitle="이 목장의 알림만 개별 조정돼요"
+      icon={<span style={{ fontSize: 22 }}>🔔</span>}
+      onClose={onClose}
+    >
+      <div className="blessing-notif-list">
+        {rows.map(([key, label, hint]) => (
+          <button
+            key={key}
+            type="button"
+            className="blessing-notif-row"
+            onClick={() => toggle(key)}
+            aria-pressed={prefs[key]}
+          >
+            <span className="blessing-notif-row-body">
+              <span className="blessing-notif-row-label">{label}</span>
+              <span className="blessing-notif-row-hint">{hint}</span>
+            </span>
+            <span
+              className={`blessing-anon-switch${prefs[key] ? " blessing-anon-switch-on" : ""}`}
+              aria-hidden
+            />
+          </button>
+        ))}
+      </div>
+      <button
+        type="button"
+        className="blessing-btn-secondary"
+        style={{ width: "100%", marginTop: 10, minHeight: 40 }}
+        onClick={onClose}
+      >
+        닫기
+      </button>
     </SheetBase>
   );
 }

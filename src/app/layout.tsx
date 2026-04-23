@@ -20,6 +20,7 @@ import "@/styles/onboarding.css";
 import "@/styles/post-detail.css";
 import "@/styles/profile-auth.css";
 import "@/styles/search.css";
+import "@/styles/settings.css";
 import "@/styles/topbar.css";
 import "@/styles/topic-hub.css";
 import "@/styles/user-menu.css";

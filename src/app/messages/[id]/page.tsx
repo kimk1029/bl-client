@@ -107,6 +107,8 @@ export default function MessageThreadPage({
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [todayISO, setTodayISO] = useState<string>("");
+  const [showMore, setShowMore] = useState(false);
+  const [reporting, setReporting] = useState(false);
   useEffect(() => {
     setTodayISO(new Date().toISOString());
   }, []);
@@ -281,6 +283,7 @@ export default function MessageThreadPage({
             type="button"
             className="blessing-detail-icon-btn"
             aria-label="더보기"
+            onClick={() => setShowMore(true)}
           >
             <span style={{ fontSize: 18, lineHeight: 1 }}>⋯</span>
           </button>
@@ -341,7 +344,10 @@ export default function MessageThreadPage({
         <button
           type="button"
           className="blessing-detail-icon-btn"
-          aria-label="첨부"
+          aria-label="첨부 (준비 중)"
+          title="첨부 기능은 준비 중이에요"
+          disabled
+          style={{ opacity: 0.45, cursor: "not-allowed" }}
         >
           <IconPlus />
         </button>
@@ -361,6 +367,123 @@ export default function MessageThreadPage({
           {sending ? "전송 중..." : "전송"}
         </button>
       </form>
+
+      {showMore && (
+        <div
+          className="blessing-user-sheet-backdrop"
+          role="dialog"
+          aria-modal="true"
+          aria-label="대화 설정"
+          onClick={() => setShowMore(false)}
+        >
+          <div
+            className="blessing-user-sheet"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="blessing-user-sheet-handle" aria-hidden />
+            <div className="blessing-user-sheet-head">
+              <Avatar name={title} size={44} seed={other.id * 11} />
+              <div className="blessing-user-sheet-head-info">
+                <div className="blessing-user-sheet-name">{title}</div>
+                <div className="blessing-user-sheet-sub">{subtitle}</div>
+              </div>
+            </div>
+            <div className="blessing-user-sheet-menu">
+              <Link
+                href={`/users/${other.id}`}
+                className="blessing-user-sheet-item"
+                onClick={() => setShowMore(false)}
+              >
+                <span>👤</span>
+                <span>프로필 보기</span>
+              </Link>
+              <div className="blessing-user-sheet-divider" />
+              <button
+                type="button"
+                className="blessing-user-sheet-item blessing-user-sheet-item-danger"
+                disabled={reporting}
+                onClick={async () => {
+                  if (reporting || !token) return;
+                  setReporting(true);
+                  try {
+                    const res = await fetch("/api/report", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                      },
+                      body: JSON.stringify({
+                        target_type: "user",
+                        target_id: other.id,
+                        reason: "inappropriate",
+                        note: "쪽지 대화방에서 신고",
+                      }),
+                    });
+                    const json = await res.json().catch(() => ({}));
+                    if (!res.ok)
+                      throw new Error(json?.error || "신고에 실패했어요.");
+                    toast.success(
+                      json.duplicate
+                        ? "이미 접수된 신고예요. 운영팀이 검토 중입니다."
+                        : "신고가 접수되었어요.",
+                    );
+                  } catch (err) {
+                    toast.error(
+                      err instanceof Error ? err.message : "신고 실패",
+                    );
+                  } finally {
+                    setReporting(false);
+                    setShowMore(false);
+                  }
+                }}
+              >
+                <span>🚩</span>
+                <span>사용자 신고</span>
+              </button>
+              <button
+                type="button"
+                className="blessing-user-sheet-item blessing-user-sheet-item-danger"
+                onClick={async () => {
+                  if (!token) return;
+                  if (!window.confirm("이 사용자를 차단할까요? 서로 쪽지와 팔로우가 차단됩니다.")) return;
+                  try {
+                    const res = await fetch("/api/block", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                      },
+                      body: JSON.stringify({ targetId: other.id }),
+                    });
+                    if (!res.ok) {
+                      const err = await res.json().catch(() => ({}));
+                      throw new Error(err?.error || "차단 실패");
+                    }
+                    toast.success("차단되었어요.");
+                    setShowMore(false);
+                    router.replace("/messages");
+                  } catch (err) {
+                    toast.error(
+                      err instanceof Error ? err.message : "차단 실패",
+                    );
+                  }
+                }}
+              >
+                <span>🚫</span>
+                <span>차단하기</span>
+              </button>
+            </div>
+            <button
+              type="button"
+              className="blessing-btn-secondary"
+              style={{ width: "100%", marginTop: 8, minHeight: 40 }}
+              onClick={() => setShowMore(false)}
+            >
+              닫기
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

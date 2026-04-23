@@ -57,6 +57,44 @@ interface CommentRowProps {
 function CommentRow({ c, postAuthorId, nested, onReply }: CommentRowProps) {
   const name = c.author?.username ?? "익명";
   const isOp = postAuthorId != null && c.author?.id === postAuthorId;
+  const { data: session } = useSession();
+  const token = (session as { accessToken?: string } | null)?.accessToken;
+  const [reporting, setReporting] = useState(false);
+
+  const onReport = async () => {
+    if (!token) {
+      toast.error("로그인 후 신고할 수 있어요.");
+      return;
+    }
+    if (reporting) return;
+    setReporting(true);
+    try {
+      const res = await fetch("/api/report", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          target_type: "comment",
+          target_id: c.id,
+          reason: "inappropriate",
+        }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json?.error || "신고 실패");
+      toast.success(
+        json.duplicate
+          ? "이미 접수된 신고예요."
+          : "신고가 접수되었어요.",
+      );
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "신고 실패");
+    } finally {
+      setReporting(false);
+    }
+  };
+
   return (
     <div className={`blessing-comment${nested ? " blessing-comment-nested" : ""}`}>
       <Avatar name={name} size={30} seed={c.id} />
@@ -78,11 +116,8 @@ function CommentRow({ c, postAuthorId, nested, onReply }: CommentRowProps) {
         <div className="blessing-comment-text">{c.content}</div>
         <div className="blessing-comment-actions">
           <button type="button" onClick={() => onReply(c.id)}>답글</button>
-          <button
-            type="button"
-            onClick={() => toast.message("신고가 접수되었어요.")}
-          >
-            신고
+          <button type="button" onClick={onReport} disabled={reporting}>
+            {reporting ? "처리 중…" : "신고"}
           </button>
         </div>
       </div>

@@ -183,21 +183,21 @@ export default function ProfilePage() {
 
       <div className="blessing-profile-menu-group">
         <div className="blessing-profile-menu-title">설정</div>
-        <button className="blessing-profile-menu-row" type="button">
+        <Link href="/settings/theme" className="blessing-profile-menu-row">
           <span className="blessing-menu-emoji">🎨</span>
           <span className="blessing-menu-label">테마 및 표시</span>
           <MenuChevron />
-        </button>
-        <button className="blessing-profile-menu-row" type="button">
+        </Link>
+        <Link href="/settings/privacy" className="blessing-profile-menu-row">
           <span className="blessing-menu-emoji">🔒</span>
           <span className="blessing-menu-label">개인정보 및 보안</span>
           <MenuChevron />
-        </button>
-        <button className="blessing-profile-menu-row" type="button">
+        </Link>
+        <Link href="/settings/faq" className="blessing-profile-menu-row">
           <span className="blessing-menu-emoji">❓</span>
           <span className="blessing-menu-label">고객센터 · FAQ</span>
           <MenuChevron />
-        </button>
+        </Link>
         {status === "authenticated" && (
           <button
             className="blessing-profile-menu-row"

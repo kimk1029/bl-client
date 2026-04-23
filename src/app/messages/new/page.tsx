@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Avatar from "@/components/common/Avatar";
 
@@ -39,12 +39,13 @@ function IconSearch() {
   );
 }
 
-export default function NewMessagePage() {
+function NewMessageInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session, status } = useSession();
   const token = (session as { accessToken?: string } | null)?.accessToken;
 
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(() => searchParams.get("q") ?? "");
   const [results, setResults] = useState<UserResult[]>([]);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -205,5 +206,19 @@ export default function NewMessagePage() {
       )}
       <div style={{ height: 40 }} />
     </div>
+  );
+}
+
+export default function NewMessagePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="blessing-loading">
+          <div className="blessing-spinner" aria-label="Loading" />
+        </div>
+      }
+    >
+      <NewMessageInner />
+    </Suspense>
   );
 }
