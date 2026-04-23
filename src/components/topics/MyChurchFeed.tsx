@@ -1,11 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import { useSession } from "next-auth/react";
 import type { Post } from "@/types/type";
 import PostRow from "@/components/home/PostRow";
 import { countComments, pickHot } from "@/components/home/lib/postAdapters";
+import { Button } from "@/components/ui";
 
 type SortKey = "latest" | "hot" | "comments";
 
@@ -38,9 +38,7 @@ function ChurchCtaCard({
       </div>
       <div className="blessing-mychurch-empty-title">{title}</div>
       <div className="blessing-mychurch-empty-msg">{message}</div>
-      <Link href={actionHref} className="blessing-btn-primary">
-        {actionLabel}
-      </Link>
+      <Button href={actionHref}>{actionLabel}</Button>
     </div>
   );
 }

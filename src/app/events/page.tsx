@@ -5,6 +5,7 @@ import Link from "next/link";
 import useSWR from "swr";
 import { apiFetcher } from "@/lib/fetcher";
 import type { EventItem } from "@/types/type";
+import { Button } from "@/components/ui";
 import {
   eventBookmarks,
   useEventBookmarked,
@@ -318,12 +319,9 @@ export default function EventsPage() {
                       )}
                     </div>
                     <div className="blessing-event-featured-actions">
-                      <Link
-                        href={`/events/${featured.id}`}
-                        className="blessing-btn-primary"
-                      >
+                      <Button href={`/events/${featured.id}`}>
                         자세히 보기
-                      </Link>
+                      </Button>
                       <BookmarkBtn id={featured.id} />
                       <ShareBtn event={featured} />
                     </div>
