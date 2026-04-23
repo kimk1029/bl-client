@@ -19,8 +19,31 @@ import {
 
 const ME = "은혜충만";
 const HAS_CELL_KEY = "blessing.myCell.hasCell";
+const INFO_KEY = "blessing.myCell.info";
 
 type Tab = "feed" | "prayer" | "meeting" | "members";
+
+type CellInfoOverride = Partial<{
+  name: string;
+  type: string;
+  church: string;
+  meetDay: string;
+  meetPlace: string;
+  inviteCode: string;
+}>;
+
+type CellDraft = {
+  name: string;
+  type: string;
+  meetDay?: string;
+  meetPlace?: string;
+};
+
+function randomInviteCode(seed: string): string {
+  const base = seed.replace(/[^A-Z0-9가-힣]/gi, "").slice(0, 4).toUpperCase();
+  const tail = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `${base || "CELL"}-${tail}`;
+}
 
 function IconBack() {
   return (
@@ -94,15 +117,29 @@ export default function CellPage() {
   const [showAddMtg, setShowAddMtg] = useState(false);
   const [upcoming, setUpcoming] = useState<CellMeetingItem[]>(CELL_UPCOMING);
   const [attendMap, setAttendMap] = useState<Record<string, boolean>>({});
+  const [cellInfo, setCellInfo] = useState<CellInfoOverride>({});
 
   useEffect(() => {
     try {
       const v = localStorage.getItem(HAS_CELL_KEY);
       setHasCell(v !== "false");
+      const raw = localStorage.getItem(INFO_KEY);
+      if (raw) {
+        try {
+          setCellInfo(JSON.parse(raw) as CellInfoOverride);
+        } catch {
+          /* ignore invalid JSON */
+        }
+      }
     } catch {
       setHasCell(true);
     }
   }, []);
+
+  const myCell = useMemo(
+    () => ({ ...MY_CELL, ...cellInfo }),
+    [cellInfo],
+  );
 
   useEffect(() => {
     const open =
@@ -128,18 +165,39 @@ export default function CellPage() {
     }
   };
 
+  const persistInfo = (info: CellInfoOverride) => {
+    setCellInfo(info);
+    try {
+      localStorage.setItem(INFO_KEY, JSON.stringify(info));
+    } catch {
+      /* ignore storage failures */
+    }
+  };
+
   const handleJoin = (code: string) => {
+    const next: CellInfoOverride = { ...cellInfo, inviteCode: code };
+    // If no existing name (e.g., first join), leave the mock default so the
+    // user sees something meaningful; the backend would resolve the real name.
     persistHasCell(true);
+    persistInfo(next);
     setHasCell(true);
     setShowJoin(false);
     toast.success(`"${code}" 초대 코드로 목장에 가입했어요.`);
   };
 
-  const handleCreate = (name: string) => {
+  const handleCreate = (draft: CellDraft) => {
+    const next: CellInfoOverride = {
+      name: draft.name,
+      type: draft.type,
+      meetDay: draft.meetDay || undefined,
+      meetPlace: draft.meetPlace || undefined,
+      inviteCode: randomInviteCode(draft.name),
+    };
     persistHasCell(true);
+    persistInfo(next);
     setHasCell(true);
     setShowCreate(false);
-    toast.success(`"${name}" 목장이 만들어졌어요.`);
+    toast.success(`"${draft.name}" ${draft.type}이 만들어졌어요.`);
   };
 
   const handleLeave = () => {
@@ -147,6 +205,12 @@ export default function CellPage() {
       return;
     }
     persistHasCell(false);
+    setCellInfo({});
+    try {
+      localStorage.removeItem(INFO_KEY);
+    } catch {
+      /* ignore */
+    }
     setHasCell(false);
     setShowMore(false);
     setTab("feed");
@@ -230,9 +294,9 @@ export default function CellPage() {
           <IconBack />
         </button>
         <div className="blessing-detail-topbar-title-wrap">
-          <div className="blessing-dm-title">{MY_CELL.name}</div>
+          <div className="blessing-dm-title">{myCell.name}</div>
           <div className="blessing-dm-subtitle">
-            {MY_CELL.type} · {MY_CELL.church}
+            {myCell.type} · {myCell.church}
           </div>
         </div>
         <div className="blessing-detail-topbar-actions">
@@ -323,18 +387,26 @@ export default function CellPage() {
       {tab === "members" && <CellMembers />}
 
       {showInvite && (
-        <InviteSheet onClose={() => setShowInvite(false)} />
+        <InviteSheet
+          onClose={() => setShowInvite(false)}
+          cellName={myCell.name}
+          inviteCode={myCell.inviteCode}
+        />
       )}
       {showMore && (
         <MoreSheet
           onClose={() => setShowMore(false)}
           onLeave={handleLeave}
+          cellName={myCell.name}
         />
       )}
       {showAddMtg && (
         <AddMeetingSheet
           onClose={() => setShowAddMtg(false)}
           onSubmit={handleAddMeeting}
+          cellName={myCell.name}
+          defaultPlace={myCell.meetPlace}
+          totalMembers={myCell.members.length}
         />
       )}
 
@@ -807,24 +879,32 @@ function SheetBase({
   );
 }
 
-function InviteSheet({ onClose }: { onClose: () => void }) {
+function InviteSheet({
+  onClose,
+  cellName,
+  inviteCode,
+}: {
+  onClose: () => void;
+  cellName: string;
+  inviteCode: string;
+}) {
   return (
     <SheetBase
       title="멤버 초대"
-      subtitle={MY_CELL.name}
+      subtitle={cellName}
       icon={<IconInvite />}
       onClose={onClose}
     >
       <div className="blessing-cell-invite-code">
         <div className="blessing-cell-invite-label">초대 코드</div>
-        <div className="blessing-cell-invite-num">{MY_CELL.inviteCode}</div>
+        <div className="blessing-cell-invite-num">{inviteCode}</div>
         <button
           type="button"
           className="blessing-btn-secondary"
           style={{ height: 34, padding: "0 12px" }}
           onClick={async () => {
             try {
-              await navigator.clipboard.writeText(MY_CELL.inviteCode);
+              await navigator.clipboard.writeText(inviteCode);
               toast.success("초대 코드가 복사되었어요.");
             } catch {
               toast.error("복사에 실패했어요.");
@@ -860,14 +940,16 @@ function InviteSheet({ onClose }: { onClose: () => void }) {
 function MoreSheet({
   onClose,
   onLeave,
+  cellName,
 }: {
   onClose: () => void;
   onLeave: () => void;
+  cellName: string;
 }) {
   return (
     <SheetBase
       title="목장 설정"
-      subtitle={MY_CELL.name}
+      subtitle={cellName}
       icon={<IconMore />}
       onClose={onClose}
     >
@@ -977,7 +1059,7 @@ function CreateSheet({
   onSubmit,
 }: {
   onClose: () => void;
-  onSubmit: (name: string) => void;
+  onSubmit: (draft: CellDraft) => void;
 }) {
   const [name, setName] = useState("");
   const [type, setType] = useState<"목장" | "셀">("목장");
@@ -996,7 +1078,12 @@ function CreateSheet({
         onSubmit={(e) => {
           e.preventDefault();
           if (!valid) return;
-          onSubmit(name.trim());
+          onSubmit({
+            name: name.trim(),
+            type,
+            meetDay: meetDay.trim(),
+            meetPlace: meetPlace.trim(),
+          });
         }}
         className="blessing-cell-sheet-form"
       >
@@ -1076,14 +1163,20 @@ function CreateSheet({
 function AddMeetingSheet({
   onClose,
   onSubmit,
+  cellName,
+  defaultPlace,
+  totalMembers,
 }: {
   onClose: () => void;
   onSubmit: (m: CellMeetingItem) => void;
+  cellName: string;
+  defaultPlace: string;
+  totalMembers: number;
 }) {
   const [topic, setTopic] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("오후 7:30");
-  const [place, setPlace] = useState(MY_CELL.meetPlace);
+  const [place, setPlace] = useState(defaultPlace);
 
   const defaultDate = useMemo(() => {
     const d = new Date();
@@ -1099,7 +1192,7 @@ function AddMeetingSheet({
   return (
     <SheetBase
       title="모임 추가"
-      subtitle={MY_CELL.name}
+      subtitle={cellName}
       icon={<span style={{ fontSize: 22 }}>📅</span>}
       onClose={onClose}
     >
@@ -1110,10 +1203,10 @@ function AddMeetingSheet({
           onSubmit({
             date: date.trim() || defaultDate,
             time: time.trim() || "오후 7:30",
-            place: place.trim() || MY_CELL.meetPlace,
+            place: place.trim() || defaultPlace,
             topic: topic.trim(),
             attending: 0,
-            total: MY_CELL.members.length,
+            total: totalMembers,
           });
         }}
         className="blessing-cell-sheet-form"
@@ -1159,7 +1252,7 @@ function AddMeetingSheet({
           <input
             type="text"
             className="blessing-cell-field-input"
-            placeholder={MY_CELL.meetPlace}
+            placeholder={defaultPlace}
             value={place}
             onChange={(e) => setPlace(e.target.value)}
             maxLength={40}
