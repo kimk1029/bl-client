@@ -12,7 +12,11 @@ import {
   CELL_UPCOMING,
   MY_CELL,
   timeAgoKo,
+  type CellPost,
+  type CellPrayer as CellPrayerItem,
 } from "@/lib/cellMock";
+
+const ME = "은혜충만";
 
 type Tab = "feed" | "prayer" | "meeting" | "members";
 
@@ -84,8 +88,6 @@ export default function CellPage() {
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [showInvite]);
-
-  const goCompose = () => router.push("/posts/new?topic=cell");
 
   return (
     <div className="blessing-detail">
@@ -159,8 +161,8 @@ export default function CellPage() {
         <span className="blessing-cell-attend-btn">참석 확인</span>
       </button>
 
-      {tab === "feed" && <CellFeed onCompose={goCompose} />}
-      {tab === "prayer" && <CellPrayer onCompose={goCompose} />}
+      {tab === "feed" && <CellFeed />}
+      {tab === "prayer" && <CellPrayer />}
       {tab === "meeting" && <CellMeeting />}
       {tab === "members" && <CellMembers />}
 
@@ -240,31 +242,33 @@ export default function CellPage() {
   );
 }
 
-function CellFeed({ onCompose }: { onCompose: () => void }) {
+function CellFeed() {
+  const [posts, setPosts] = useState<CellPost[]>(CELL_POSTS);
+  const [draft, setDraft] = useState("");
+
+  const submit = () => {
+    const text = draft.trim();
+    if (!text) return;
+    setPosts((prev) => [
+      {
+        id: Date.now(),
+        author: ME,
+        text,
+        ts: Date.now(),
+        likes: 0,
+        comments: 0,
+      },
+      ...prev,
+    ]);
+    setDraft("");
+    toast.success("나눔이 올라갔어요.");
+  };
+
   return (
     <>
-      <div className="blessing-cell-quick-post">
-        <Avatar name="은혜충만" size={32} seed={1} />
-        <button
-          type="button"
-          className="blessing-cell-quick-input"
-          onClick={onCompose}
-        >
-          목장 식구들과 나누고 싶은 것이 있나요?
-        </button>
-        <button
-          type="button"
-          className="blessing-cell-quick-icon"
-          onClick={onCompose}
-          aria-label="새 나눔"
-        >
-          <IconPlus />
-        </button>
-      </div>
-
       <div className="blessing-cell-stats-bar">
         <div className="blessing-cell-stat">
-          <strong>{MY_CELL.postCount}</strong>
+          <strong>{MY_CELL.postCount + (posts.length - CELL_POSTS.length)}</strong>
           <span>나눔</span>
         </div>
         <div className="blessing-feed-stat-divider" />
@@ -287,14 +291,14 @@ function CellFeed({ onCompose }: { onCompose: () => void }) {
       </div>
 
       <div className="blessing-cell-post-list">
-        {CELL_POSTS.map((p) => (
+        {posts.map((p) => (
           <article key={p.id} className="blessing-cell-post">
             <Avatar name={p.author} size={34} seed={p.id * 7} />
             <div className="blessing-cell-post-body">
               <div className="blessing-cell-post-head">
                 <span className="blessing-cell-post-name">
                   {p.author}
-                  {p.author === "은혜충만" && (
+                  {p.author === ME && (
                     <span className="blessing-me-badge">나</span>
                   )}
                 </span>
@@ -318,33 +322,65 @@ function CellFeed({ onCompose }: { onCompose: () => void }) {
           </article>
         ))}
       </div>
+
+      <form
+        className="blessing-cell-quick-post blessing-cell-quick-post-sticky"
+        onSubmit={(e) => {
+          e.preventDefault();
+          submit();
+        }}
+      >
+        <Avatar name={ME} size={32} seed={1} />
+        <input
+          type="text"
+          className="blessing-cell-quick-input"
+          placeholder="목장 식구들과 나누고 싶은 것이 있나요?"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          maxLength={500}
+        />
+        <button
+          type="submit"
+          className="blessing-cell-quick-icon"
+          disabled={!draft.trim()}
+          aria-label="올리기"
+        >
+          <IconPlus />
+        </button>
+      </form>
     </>
   );
 }
 
-function CellPrayer({ onCompose }: { onCompose: () => void }) {
+function CellPrayer() {
+  const [prayers, setPrayers] = useState<CellPrayerItem[]>(CELL_PRAYERS);
   const [draft, setDraft] = useState("");
+
+  const submit = () => {
+    const text = draft.trim();
+    if (!text) return;
+    setPrayers((prev) => [
+      { author: ME, text, ts: Date.now(), prays: 0 },
+      ...prev,
+    ]);
+    setDraft("");
+    toast.success("목장 기도제목이 올라갔어요.");
+  };
+
   return (
     <>
       <div className="blessing-cell-section-label">
         <span>목장 기도제목</span>
-        <button
-          type="button"
-          className="blessing-cell-add-btn"
-          onClick={onCompose}
-        >
-          + 추가
-        </button>
       </div>
       <div className="blessing-cell-prayer-list">
-        {CELL_PRAYERS.map((p, i) => (
-          <div key={i} className="blessing-cell-prayer-item">
+        {prayers.map((p, i) => (
+          <div key={`${p.ts}-${i}`} className="blessing-cell-prayer-item">
             <Avatar name={p.author} size={30} seed={i * 13} />
             <div className="blessing-cell-prayer-body">
               <div className="blessing-cell-post-head">
                 <span className="blessing-cell-post-name">
                   {p.author}
-                  {p.author === "은혜충만" && (
+                  {p.author === ME && (
                     <span className="blessing-me-badge">나</span>
                   )}
                 </span>
@@ -360,26 +396,29 @@ function CellPrayer({ onCompose }: { onCompose: () => void }) {
           </div>
         ))}
       </div>
-      <div className="blessing-cell-prayer-compose">
+      <form
+        className="blessing-cell-prayer-compose blessing-cell-prayer-compose-sticky"
+        onSubmit={(e) => {
+          e.preventDefault();
+          submit();
+        }}
+      >
         <textarea
           className="blessing-cell-textarea"
           placeholder="목장 기도제목을 나눠주세요..."
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
+          maxLength={500}
         />
         <button
-          type="button"
+          type="submit"
           className="blessing-btn-primary"
           style={{ width: "100%", marginTop: 8 }}
           disabled={!draft.trim()}
-          onClick={() => {
-            toast.success("목장 기도제목이 올라갔어요.");
-            setDraft("");
-          }}
         >
           기도제목 올리기
         </button>
-      </div>
+      </form>
     </>
   );
 }

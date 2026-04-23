@@ -74,6 +74,26 @@
   background: var(--blessing-bg-0);
   border-bottom: 1px solid var(--blessing-border);
 }
+.blessing-cell-quick-post-sticky {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  border-top: 1px solid var(--blessing-border);
+  border-bottom: none;
+  box-shadow: 0 -4px 12px color-mix(in srgb, var(--blessing-fg-0) 6%, transparent);
+}
+input.blessing-cell-quick-input {
+  color: var(--blessing-fg-0);
+  cursor: text;
+  outline: none;
+}
+input.blessing-cell-quick-input::placeholder {
+  color: var(--blessing-fg-3);
+}
+input.blessing-cell-quick-input:focus {
+  background: var(--blessing-bg-1);
+  box-shadow: 0 0 0 2px var(--blessing-accent-soft);
+}
 .blessing-cell-quick-input {
   flex: 1;
   padding: 10px 14px;
@@ -86,8 +106,9 @@
   cursor: pointer;
   font-family: inherit;
   letter-spacing: -0.2px;
+  min-width: 0;
 }
-.blessing-cell-quick-input:hover {
+button.blessing-cell-quick-input:hover {
   background: var(--blessing-bg-3);
 }
 .blessing-cell-quick-icon {
@@ -102,6 +123,17 @@
   border: none;
   cursor: pointer;
   flex-shrink: 0;
+  transition: background 0.12s, transform 0.1s, opacity 0.12s;
+}
+.blessing-cell-quick-icon:hover {
+  background: var(--blessing-accent-strong);
+}
+.blessing-cell-quick-icon:active {
+  transform: scale(0.94);
+}
+.blessing-cell-quick-icon:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .blessing-cell-stats-bar {
@@ -265,6 +297,12 @@
   padding: 16px;
   background: var(--blessing-bg-0);
   border-top: 1px solid var(--blessing-border);
+}
+.blessing-cell-prayer-compose-sticky {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  box-shadow: 0 -4px 12px color-mix(in srgb, var(--blessing-fg-0) 6%, transparent);
 }
 .blessing-cell-textarea {
   width: 100%;
