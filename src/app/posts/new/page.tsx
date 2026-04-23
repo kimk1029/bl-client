@@ -1,14 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { TOPICS, TOPIC_BY_ID, type TopicId } from "@/components/home/data/topics";
 import { composeBus } from "@/lib/composeBus";
 
-export default function ComposePage() {
+function resolveInitialTopic(raw: string | null): TopicId {
+  if (raw && (raw in TOPIC_BY_ID)) return raw as TopicId;
+  return "free";
+}
+
+function ComposeInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session, status } = useSession();
 
   useEffect(() => {
@@ -17,10 +23,13 @@ export default function ComposePage() {
     }
   }, [status, router]);
 
-  const [topicId, setTopicId] = useState<TopicId>("free");
+  const initialTopic = resolveInitialTopic(searchParams.get("topic"));
+  const [topicId, setTopicId] = useState<TopicId>(initialTopic);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [anon, setAnon] = useState(false);
+  const [anon, setAnon] = useState<boolean>(
+    !!TOPIC_BY_ID[initialTopic]?.anon,
+  );
   const [showPicker, setShowPicker] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -170,5 +179,19 @@ export default function ComposePage() {
         </button>
       </div>
     </div>
+  );
+}
+
+export default function ComposePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="blessing-loading">
+          <div className="blessing-spinner" aria-label="Loading" />
+        </div>
+      }
+    >
+      <ComposeInner />
+    </Suspense>
   );
 }

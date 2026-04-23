@@ -197,9 +197,9 @@ function KebabMenu(props: KebabMenuProps) {
 
 export default function PostContent({
   post,
-  isAnonymous = false,
   backUrl,
 }: PostContentProps) {
+  const isAnonymous = !!post.is_anonymous;
   const router = useRouter();
   const { data: session } = useSession();
   const token = (session as { accessToken?: string } | null)?.accessToken;

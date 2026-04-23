@@ -31,7 +31,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 4px;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--blessing-border);
   cursor: pointer;
 }
@@ -55,7 +55,7 @@
 }
 .blessing-compose-title-input {
   width: 100%;
-  padding: 18px 4px;
+  padding: 18px 16px;
   font-size: 19px;
   font-weight: 700;
   border: none;
@@ -74,7 +74,7 @@
   width: 100%;
   flex: 1;
   min-height: 280px;
-  padding: 16px 4px;
+  padding: 16px;
   font-size: 15px;
   line-height: 1.7;
   border: none;
@@ -92,7 +92,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 10px 0 12px;
+  padding: 10px 16px 12px;
   border-top: 1px solid var(--blessing-border);
   margin-top: auto;
 }

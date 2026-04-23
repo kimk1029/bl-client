@@ -84,7 +84,7 @@ export default function PrayerStream() {
       <div className="blessing-prayer-stream">
         {prayers.length === 0 ? (
           <Link
-            href="/posts/new"
+            href="/posts/new?topic=prayer"
             className="blessing-prayer-item blessing-prayer-empty"
           >
             <span className="blessing-prayer-icon" aria-hidden>

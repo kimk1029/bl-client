@@ -39,6 +39,7 @@ export async function GET(
 
     return NextResponse.json({
       ...post,
+      author: post.is_anonymous ? null : post.author,
       category: post.tag,
       commentCount: post._count.comments,
       likeCount: post._count.likes,

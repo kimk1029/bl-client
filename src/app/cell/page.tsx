@@ -85,7 +85,7 @@ export default function CellPage() {
     return () => document.removeEventListener("keydown", onKey);
   }, [showInvite]);
 
-  const goCompose = () => router.push("/posts/new");
+  const goCompose = () => router.push("/posts/new?topic=cell");
 
   return (
     <div className="blessing-detail">

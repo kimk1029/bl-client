@@ -1,7 +1,9 @@
 "use client";
 
+import { Suspense, useMemo } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { topicByCategory } from "@/components/home/data/topics";
 
 function HomeIcon({ active }: { active?: boolean }) {
   return (
@@ -83,6 +85,29 @@ const TABS = [
   { href: "/profile", label: "나", Icon: UserIcon },
 ];
 
+function ComposeFab() {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const href = useMemo(() => {
+    if (pathname === "/posts") {
+      const cat = searchParams.get("category");
+      if (cat) {
+        const topic = topicByCategory(cat);
+        if (topic) return `/posts/new?topic=${topic.id}`;
+      }
+    }
+    if (pathname === "/cell") return "/posts/new?topic=cell";
+    return "/posts/new";
+  }, [pathname, searchParams]);
+
+  return (
+    <Link href={href} className="blessing-fab" aria-label="글쓰기">
+      <PlusIcon />
+    </Link>
+  );
+}
+
 export default function BottomNav() {
   const pathname = usePathname();
   const isActive = (href: string) =>
@@ -107,9 +132,15 @@ export default function BottomNav() {
           );
         })}
 
-        <Link href="/posts/new" className="blessing-fab" aria-label="글쓰기">
-          <PlusIcon />
-        </Link>
+        <Suspense
+          fallback={
+            <Link href="/posts/new" className="blessing-fab" aria-label="글쓰기">
+              <PlusIcon />
+            </Link>
+          }
+        >
+          <ComposeFab />
+        </Suspense>
 
         {TABS.slice(2).map(({ href, label, Icon }) => {
           const active = isActive(href);

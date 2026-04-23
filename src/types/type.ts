@@ -48,18 +48,18 @@ export interface PostContentProps {
         author?: {
             id: number;
             username: string;
-        };
+        } | null;
         views: number;
         likeCount: number;
         commentCount: number;
         liked?: boolean;
         anonymousId?: string;
+        is_anonymous?: boolean;
         images?: string[];
         // 상세 화면 메타 표기를 위해 카테고리/태그를 선택적으로 지원
         category?: Topic | string;
         tag?: string;
     };
-    isAnonymous?: boolean;
     backUrl: string;
     comments?: Comment[];
     onCommentSubmit?: (content: string) => Promise<void>;
