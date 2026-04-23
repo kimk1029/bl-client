@@ -256,18 +256,21 @@ export default function CellPage() {
 
       <div className="blessing-hub-tabs">
         {([
-          ["feed", "나눔피드"],
-          ["prayer", "기도제목"],
-          ["meeting", "모임일정"],
-          ["members", "멤버"],
-        ] as Array<[Tab, string]>).map(([id, label]) => (
+          ["feed", "나눔피드", "💬"],
+          ["prayer", "기도제목", "🙏"],
+          ["meeting", "모임일정", "📅"],
+          ["members", "멤버", "👥"],
+        ] as Array<[Tab, string, string]>).map(([id, label, icon]) => (
           <button
             key={id}
             type="button"
             className={`blessing-hub-tab ${tab === id ? "blessing-hub-tab-active" : ""}`}
             onClick={() => setTab(id)}
           >
-            {label}
+            <span className="blessing-cell-tab-icon" aria-hidden>
+              {icon}
+            </span>
+            <span>{label}</span>
           </button>
         ))}
       </div>
@@ -410,24 +413,36 @@ function CellFeed() {
       <div className="blessing-cell-stats-bar">
         <div className="blessing-cell-stat">
           <strong>{MY_CELL.postCount + (posts.length - CELL_POSTS.length)}</strong>
-          <span>나눔</span>
+          <span>
+            <span className="blessing-cell-stat-icon" aria-hidden>💬</span>
+            나눔
+          </span>
         </div>
         <div className="blessing-feed-stat-divider" />
         <div className="blessing-cell-stat">
           <strong>{MY_CELL.prayerCount}</strong>
-          <span>기도제목</span>
+          <span>
+            <span className="blessing-cell-stat-icon" aria-hidden>🙏</span>
+            기도제목
+          </span>
         </div>
         <div className="blessing-feed-stat-divider" />
         <div className="blessing-cell-stat">
           <strong>{MY_CELL.members.length}</strong>
-          <span>멤버</span>
+          <span>
+            <span className="blessing-cell-stat-icon" aria-hidden>👥</span>
+            멤버
+          </span>
         </div>
         <div className="blessing-feed-stat-divider" />
         <div className="blessing-cell-stat">
           <strong style={{ color: "var(--blessing-accent-strong)" }}>
             LIVE
           </strong>
-          <span>목장</span>
+          <span>
+            <span className="blessing-cell-stat-icon" aria-hidden>🫂</span>
+            목장
+          </span>
         </div>
       </div>
 
@@ -513,7 +528,10 @@ function CellPrayer() {
   return (
     <>
       <div className="blessing-cell-section-label">
-        <span>목장 기도제목</span>
+        <span>
+          <span className="blessing-cell-section-icon" aria-hidden>🙏</span>
+          목장 기도제목
+        </span>
       </div>
       <div className="blessing-cell-prayer-list">
         {prayers.map((p, i) => (
@@ -582,7 +600,10 @@ function CellMeeting({
   return (
     <>
       <div className="blessing-cell-section-label">
-        <span>예정된 모임</span>
+        <span>
+          <span className="blessing-cell-section-icon" aria-hidden>📅</span>
+          예정된 모임
+        </span>
         <button
           type="button"
           className="blessing-cell-add-btn"
@@ -652,7 +673,10 @@ function CellMeeting({
       </div>
 
       <div className="blessing-cell-section-label" style={{ marginTop: 8 }}>
-        <span>지난 모임</span>
+        <span>
+          <span className="blessing-cell-section-icon" aria-hidden>📋</span>
+          지난 모임
+        </span>
       </div>
       <div className="blessing-cell-mtg-list">
         {CELL_PAST.map((m, i) => (
@@ -689,7 +713,10 @@ function CellMembers() {
   return (
     <>
       <div className="blessing-cell-section-label">
-        <span>목장 멤버 {MY_CELL.members.length}명</span>
+        <span>
+          <span className="blessing-cell-section-icon" aria-hidden>👥</span>
+          목장 멤버 {MY_CELL.members.length}명
+        </span>
       </div>
       <div className="blessing-cell-member-list">
         {MY_CELL.members.map((m, i) => (

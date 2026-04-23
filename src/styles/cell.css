@@ -192,6 +192,30 @@ button.blessing-cell-quick-input:hover {
   font-size: 10px;
   color: var(--blessing-fg-2);
   letter-spacing: -0.2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.blessing-cell-stat-icon {
+  font-size: 11px;
+  line-height: 1;
+}
+.blessing-cell-tab-icon {
+  font-size: 13px;
+  line-height: 1;
+  opacity: 0.85;
+}
+.blessing-hub-tab-active .blessing-cell-tab-icon {
+  opacity: 1;
+}
+.blessing-cell-section-icon {
+  font-size: 13px;
+  line-height: 1;
+  margin-right: 5px;
+}
+.blessing-cell-section-label > span:first-child {
+  display: inline-flex;
+  align-items: center;
 }
 
 .blessing-cell-post-list {
