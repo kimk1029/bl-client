@@ -5,6 +5,7 @@ interface PostLite {
   id: number;
   title?: string;
   content?: string;
+  created_at?: string;
   author?: { username?: string } | null;
   is_anonymous?: boolean;
 }
@@ -66,10 +67,49 @@ export async function generateMetadata({
   };
 }
 
-export default function PostDetailLayout({
+export default async function PostDetailLayout({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: Promise<{ id: string }>;
 }) {
-  return children;
+  const { id } = await params;
+  const post = await fetchPost(id);
+  const siteUrl = getSiteUrl();
+
+  const articleJsonLd = post
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        headline: clip(post.title, 110) || "글",
+        description: clip(post.content, 160),
+        datePublished: post.created_at,
+        author: {
+          "@type": "Person",
+          name: post.is_anonymous ? "익명" : post.author?.username || "성도",
+        },
+        publisher: {
+          "@type": "Organization",
+          name: SITE.name,
+          logo: { "@type": "ImageObject", url: `${siteUrl}/icon` },
+        },
+        mainEntityOfPage: {
+          "@type": "WebPage",
+          "@id": `${siteUrl}/posts/${id}`,
+        },
+      }
+    : null;
+
+  return (
+    <>
+      {articleJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+        />
+      )}
+      {children}
+    </>
+  );
 }
