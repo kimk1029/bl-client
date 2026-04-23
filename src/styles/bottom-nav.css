@@ -13,6 +13,44 @@
   border-top: 1px solid var(--blessing-border);
   padding-bottom: env(safe-area-inset-bottom);
 }
+
+/* ---------- Main content bottom padding (accounts for BottomNav & ad) -- */
+.blessing-main-pad {
+  padding-bottom: calc(60px + env(safe-area-inset-bottom));
+}
+.blessing-main-pad-with-ad {
+  padding-bottom: calc(60px + 56px + env(safe-area-inset-bottom));
+}
+/* xl 이상은 사이드바 광고가 있어 모바일 하단 광고를 숨김 → 패딩도 기본값 */
+@media (min-width: 1280px) {
+  .blessing-main-pad-with-ad {
+    padding-bottom: calc(60px + env(safe-area-inset-bottom));
+  }
+}
+
+/* ---------- Mobile bottom ad (above BottomNav, below xl sidebar ads) -- */
+.blessing-mobile-ad {
+  position: fixed;
+  bottom: calc(60px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 35; /* BottomNav(40) 위로 오지 않도록 아래 z-index */
+  width: 100%;
+  max-width: 800px;
+  min-height: 56px;
+  background: var(--blessing-bg-0);
+  border-top: 1px solid var(--blessing-border);
+  border-bottom: 1px solid var(--blessing-border);
+  padding: 3px 0;
+}
+.blessing-mobile-ad .adsbygoogle {
+  margin: 0 auto;
+}
+@media (min-width: 1280px) {
+  .blessing-mobile-ad {
+    display: none;
+  }
+}
 .blessing-bottom-tabs {
   display: flex;
   align-items: center;

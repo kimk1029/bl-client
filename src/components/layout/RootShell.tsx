@@ -9,12 +9,14 @@ import { ThemeProvider, useTheme } from "@/context/ThemeContext";
 import Header from "@/components/layout/Header";
 import BottomNav from "@/components/layout/BottomNav";
 import GoogleAd from "@/components/layout/GoogleAd";
+import MobileBottomAd, { useMobileAdVisible } from "@/components/layout/MobileBottomAd";
 
 function RootLayoutContent({ children }: { children: React.ReactNode }) {
   const { theme } = useTheme();
   const pathname = usePathname();
   const isDark = theme === "dark";
-  const mainClass = "flex-1 w-full blessing-page-transition";
+  const adVisible = useMobileAdVisible();
+  const mainClass = `flex-1 w-full blessing-page-transition blessing-main-pad${adVisible ? " blessing-main-pad-with-ad" : ""}`;
 
   return (
     <div
@@ -31,15 +33,10 @@ function RootLayoutContent({ children }: { children: React.ReactNode }) {
           className={`flex flex-col min-h-screen w-full max-w-[800px] transition-colors duration-200 ${isDark ? "bg-gray-900" : "bg-white"} md:shadow-[0_0_40px_rgba(0,0,0,0.06)]`}
         >
           <Header />
-          <main
-            key={pathname}
-            className={mainClass}
-            style={{
-              paddingBottom: "calc(60px + env(safe-area-inset-bottom))",
-            }}
-          >
+          <main key={pathname} className={mainClass}>
             {children}
           </main>
+          <MobileBottomAd />
           <BottomNav />
         </div>
 
