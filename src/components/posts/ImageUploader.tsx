@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import Image from 'next/image';
 import { X, Upload } from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext';
 import imageCompression from 'browser-image-compression';
@@ -20,13 +21,13 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
 
     const MAX_FILE_SIZE = maxSize * 1024 * 1024; // MB to bytes
 
-    const compressImage = async (file: File): Promise<File> => {
+    const compressImage = useCallback(async (file: File): Promise<File> => {
         if (file.size <= MAX_FILE_SIZE) return file;
 
         const options = {
             maxSizeMB: maxSize,
             maxWidthOrHeight: 1920,
-            useWebWorker: true
+            useWebWorker: true,
         };
 
         try {
@@ -36,9 +37,9 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
             console.error('이미지 압축 실패:', error);
             return file;
         }
-    };
+    }, [MAX_FILE_SIZE, maxSize]);
 
-    const processImages = async (files: File[]) => {
+    const processImages = useCallback(async (files: File[]) => {
         setUploadProgress(0);
         const processedImages: File[] = [];
         const newPreviewUrls: string[] = [];
@@ -55,11 +56,14 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
             setUploadProgress(((i + 1) / files.length) * 100);
         }
 
-        setImages(prev => [...prev, ...processedImages]);
+        setImages(prev => {
+            const next = [...prev, ...processedImages];
+            onImagesChange(next);
+            return next;
+        });
         setPreviewUrls(prev => [...prev, ...newPreviewUrls]);
         setUploadProgress(100);
-        onImagesChange([...images, ...processedImages]);
-    };
+    }, [MAX_FILE_SIZE, compressImage, onImagesChange]);
 
     const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
@@ -89,7 +93,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         if (files.length > 0) {
             await processImages(files);
         }
-    }, []);
+    }, [processImages]);
 
     const removeImage = (index: number) => {
         const newImages = images.filter((_, i) => i !== index);
@@ -149,9 +153,12 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
                 <div className="mt-4 grid grid-cols-3 gap-4">
                     {previewUrls.map((url, index) => (
                         <div key={index} className="relative group">
-                            <img
+                            <Image
                                 src={url}
                                 alt={`Preview ${index + 1}`}
+                                width={350}
+                                height={96}
+                                unoptimized
                                 className="w-full h-24 object-cover rounded-lg max-w-[350px] max-h-[350px]"
                             />
                             <button

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -425,10 +426,14 @@ export default function PostContent({
         {Array.isArray(post.images) && post.images.length > 0 && (
           <div className="blessing-detail-images">
             {post.images.map((image, index) => (
-              <img
+              <Image
                 key={index}
                 src={`${process.env.NEXT_PUBLIC_IMG_URL ?? ""}/${image}`}
                 alt={`${post.title} 이미지 ${index + 1}`}
+                width={1200}
+                height={1200}
+                unoptimized
+                style={{ width: "100%", height: "auto" }}
               />
             ))}
           </div>

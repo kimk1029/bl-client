@@ -1,5 +1,6 @@
 "use client";
 import React from 'react';
+import Image from 'next/image';
 import { useTheme } from '@/context/ThemeContext';
 import useSWR from 'swr';
 import { apiFetcher } from '@/lib/fetcher';
@@ -26,7 +27,15 @@ export default function ChurchPostDetailPage() {
                         {Array.isArray(data.images) && data.images.length > 0 && (
                             <div className="mt-4 space-y-2">
                                 {data.images.map((src, idx) => (
-                                    <img key={idx} src={src} alt="attachment" className="max-h-96 rounded" />
+                                    <Image
+                                        key={idx}
+                                        src={src}
+                                        alt="attachment"
+                                        width={1000}
+                                        height={1000}
+                                        unoptimized
+                                        className="max-h-96 w-auto rounded"
+                                    />
                                 ))}
                             </div>
                         )}

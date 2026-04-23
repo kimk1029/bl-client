@@ -17,7 +17,10 @@ const WEEK = ["일", "월", "화", "수", "목", "금", "토"];
 
 export default function EventsCalendarPage() {
   const { data, isLoading } = useSWR<EventItem[]>("/api/events", apiFetcher);
-  const all = Array.isArray(data) ? data : [];
+  const all = useMemo<EventItem[]>(
+    () => (Array.isArray(data) ? data : []),
+    [data],
+  );
 
   // Stable month state: start with null to avoid SSR Date mismatch.
   const [cursor, setCursor] = useState<{ y: number; m: number } | null>(null);
