@@ -333,7 +333,7 @@ export default function CellPage() {
   const nextAttending = nextKey ? !!attendMap[nextKey] : false;
 
   return (
-    <div className="blessing-detail">
+    <div className="blessing-detail blessing-cell-detail">
       <header className="blessing-detail-topbar">
         <button
           type="button"
@@ -424,12 +424,8 @@ export default function CellPage() {
         </div>
       )}
 
-      {tab === "feed" && (
-        <CellFeed key={isCustom ? "custom" : "mock"} isCustom={isCustom} />
-      )}
-      {tab === "prayer" && (
-        <CellPrayer key={isCustom ? "custom" : "mock"} isCustom={isCustom} />
-      )}
+      {tab === "feed" && <CellFeed isCustom={isCustom} />}
+      {tab === "prayer" && <CellPrayer isCustom={isCustom} />}
       {tab === "meeting" && (
         <CellMeeting
           upcoming={upcoming}
@@ -540,6 +536,18 @@ function CellFeed({ isCustom }: { isCustom: boolean }) {
   const [draft, setDraft] = useState("");
   const [liked, setLiked] = useState<Set<number>>(new Set());
   const [prayed, setPrayed] = useState<Set<number>>(new Set());
+  const lastCustom = useRef<boolean | null>(null);
+
+  // isCustom 전환 시에만 mock ↔ 빈 리스트 리셋. 같은 상태 내에서
+  // 새 글을 올렸을 때는 절대 state를 덮어쓰지 않도록 ref 비교.
+  useEffect(() => {
+    if (lastCustom.current !== null && lastCustom.current !== isCustom) {
+      setPosts(isCustom ? [] : CELL_POSTS);
+      setLiked(new Set());
+      setPrayed(new Set());
+    }
+    lastCustom.current = isCustom;
+  }, [isCustom]);
 
   const submit = () => {
     const text = draft.trim();
@@ -578,7 +586,7 @@ function CellFeed({ isCustom }: { isCustom: boolean }) {
   };
 
   return (
-    <>
+    <div className="blessing-cell-feed-panel">
       <div className="blessing-cell-stats-bar">
         <div className="blessing-cell-stat">
           <strong>
@@ -620,6 +628,11 @@ function CellFeed({ isCustom }: { isCustom: boolean }) {
       </div>
 
       <div className="blessing-cell-post-list">
+        {posts.length === 0 ? (
+          <div className="blessing-cell-empty-list">
+            아직 나눔이 없어요. 첫 이야기를 남겨보세요.
+          </div>
+        ) : null}
         {posts.map((p) => (
           <article key={p.id} className="blessing-cell-post">
             <Avatar name={p.author} size={34} seed={p.id * 7} />
@@ -689,7 +702,7 @@ function CellFeed({ isCustom }: { isCustom: boolean }) {
           <IconPlus />
         </button>
       </form>
-    </>
+    </div>
   );
 }
 
@@ -701,6 +714,15 @@ function CellPrayer({ isCustom }: { isCustom: boolean }) {
   );
   const [draft, setDraft] = useState("");
   const [joined, setJoined] = useState<Set<number>>(new Set());
+  const lastCustom = useRef<boolean | null>(null);
+
+  useEffect(() => {
+    if (lastCustom.current !== null && lastCustom.current !== isCustom) {
+      setPrayers(isCustom ? [] : CELL_PRAYERS);
+      setJoined(new Set());
+    }
+    lastCustom.current = isCustom;
+  }, [isCustom]);
 
   const submit = () => {
     const text = draft.trim();
@@ -723,7 +745,7 @@ function CellPrayer({ isCustom }: { isCustom: boolean }) {
   };
 
   return (
-    <>
+    <div className="blessing-cell-feed-panel">
       <div className="blessing-cell-section-label">
         <span>
           <span className="blessing-cell-section-icon" aria-hidden>🙏</span>
@@ -731,6 +753,11 @@ function CellPrayer({ isCustom }: { isCustom: boolean }) {
         </span>
       </div>
       <div className="blessing-cell-prayer-list">
+        {prayers.length === 0 ? (
+          <div className="blessing-cell-empty-list">
+            아직 기도제목이 없어요. 첫 기도제목을 나눠보세요.
+          </div>
+        ) : null}
         {prayers.map((p, i) => (
           <div key={`${p.ts}-${i}`} className="blessing-cell-prayer-item">
             <Avatar name={p.author} size={30} seed={i * 13} />
@@ -782,7 +809,7 @@ function CellPrayer({ isCustom }: { isCustom: boolean }) {
           기도제목 올리기
         </button>
       </form>
-    </>
+    </div>
   );
 }
 
