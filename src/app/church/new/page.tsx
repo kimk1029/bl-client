@@ -29,8 +29,8 @@ export default function NewAffiliationPostPage() {
             }
             router.push('/church');
             router.refresh();
-        } catch (e: any) {
-            setError(e?.message || '등록 중 오류');
+        } catch (e) {
+            setError(e instanceof Error ? e.message : '등록 중 오류');
         } finally {
             setSubmitting(false);
         }

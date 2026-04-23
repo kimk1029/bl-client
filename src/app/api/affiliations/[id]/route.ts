@@ -67,7 +67,7 @@ export async function PUT(
     const fd = await request.formData();
     const title = fd.get('title');
     const content = fd.get('content');
-    const data: any = {};
+    const data: { title?: string; content?: string; images?: string[] } = {};
     if (typeof title === 'string' && title) data.title = title;
     if (typeof content === 'string' && content) data.content = content;
     const file = fd.get('image');

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { requireUser } from '@/lib/apiAuth';
 import { saveUploadedFile, toImageUrl } from '@/lib/uploads';
@@ -13,9 +14,9 @@ export async function GET(request: NextRequest) {
     const anonymous = url.searchParams.get('anonymous');
     const limitParam = url.searchParams.get('limit');
 
-    const where: any = {};
+    const where: Prisma.PostWhereInput = {};
     if (category && (VALID_TAGS as readonly string[]).includes(category)) {
-      where.tag = category;
+      where.tag = category as Tag;
     }
     if (anonymous === 'true') where.is_anonymous = true;
     else if (anonymous === 'false') where.is_anonymous = false;
@@ -32,7 +33,7 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const data = posts.map((p: any) => ({
+    const data = posts.map((p) => ({
       id: p.id,
       title: p.title,
       content: p.content,

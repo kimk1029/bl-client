@@ -17,8 +17,11 @@ export const getAuthUser = async (req: NextRequest): Promise<AuthUser | null> =>
     if (payload?.id) return { id: Number(payload.id) };
   }
 
-  const session = await getServerSession(authOptions as any);
-  const id = (session as any)?.user?.id ?? (session as any)?.user?.sub;
+  const session = await getServerSession(authOptions);
+  const sessionUser = session?.user as
+    | { id?: number | string; sub?: number | string }
+    | undefined;
+  const id = sessionUser?.id ?? sessionUser?.sub;
   if (id != null) return { id: Number(id) };
 
   return null;

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { requireUser } from '@/lib/apiAuth';
 
@@ -11,7 +12,7 @@ export async function GET(request: NextRequest) {
     const featuredParam = url.searchParams.get('featured');
     const take = limitParam ? Math.min(Math.max(parseInt(limitParam, 10) || 0, 1), 100) : undefined;
 
-    const where: any = {};
+    const where: Prisma.EventWhereInput = {};
     if (featuredParam === 'true') where.featured = true;
     else if (featuredParam === 'false') where.featured = false;
 

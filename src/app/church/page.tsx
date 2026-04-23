@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import useSWR from 'swr';
 import { useSession } from 'next-auth/react';
 import { useTheme } from '@/context/ThemeContext';
@@ -12,9 +12,9 @@ const fetcher = apiFetcher;
 export default function ChurchFeedPage() {
     const { data: session } = useSession();
     const { theme } = useTheme();
-    const affiliation = (session?.user as any)?.affiliation ?? null;
+    const affiliation = session?.user?.affiliation ?? null;
 
-    const { data, mutate, isLoading, error } = useSWR<AffiliationPostDTO[]>(
+    const { data, isLoading, error } = useSWR<AffiliationPostDTO[]>(
         '/api/affiliations',
         fetcher,
         { revalidateOnFocus: false }

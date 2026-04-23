@@ -30,7 +30,7 @@ export default function PostActions({ postId, backUrl, onDeleted }: Props) {
       showSuccess('게시글이 삭제되었습니다.');
       if (onDeleted) onDeleted();
       else router.push(backUrl);
-    } catch (e) {
+    } catch {
       showError('게시글 삭제 중 오류가 발생했습니다.');
     }
   };

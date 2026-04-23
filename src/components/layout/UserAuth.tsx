@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
-import { ChevronDown, User, FileText, Settings, LogOut } from 'lucide-react';
+import { ChevronDown, User, FileText, LogOut } from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext';
 import PostModal from '../posts/PostModal';
 import { Post } from '@/types/type';
@@ -9,14 +9,20 @@ import useSWR from 'swr';
 import { useEffect } from 'react';
 import { computeLevel } from '@/utils/level';
 
+interface AccountInfo {
+    user?: { points?: number; level?: number };
+    points?: number;
+    level?: number;
+}
+
 const UserAuth = () => {
     const [isOpen, setIsOpen] = useState(false);
     const { mutate } = useSWR<Post[]>('/api/posts', (url: string) => fetch(url, { cache: 'no-store' }).then((res) => res.json()));
     const { data: session, status, update } = useSession();
     const { theme } = useTheme();
-    const userId = (session?.user as unknown as { id?: string | number })?.id;
+    const userId = session?.user?.id;
     const accountKey = userId ? `/api/users/account/${userId}` : null;
-    const { data: account, mutate: mutateAccount } = useSWR(accountKey, (url: string) => fetch(url, { cache: 'no-store' }).then(res => res.json()));
+    const { data: account, mutate: mutateAccount } = useSWR<AccountInfo>(accountKey, (url: string) => fetch(url, { cache: 'no-store' }).then(res => res.json()));
     const detailsRef = useRef<HTMLDetailsElement>(null);
 
     useEffect(() => {
@@ -65,27 +71,25 @@ const UserAuth = () => {
                                 await mutateAccount?.(fresh, { revalidate: false });
 
                                 // 현재 사용자 정보를 백엔드에서 최신 데이터로 가져와서 세션 업데이트
-                                const userId = (session.user as any)?.id;
-                                if (userId) {
-                                    // 백엔드에서 최신 사용자 정보 가져오기 (/api/users/account/:id 사용)
-                                    const accountResponse = await fetch(`/api/users/account/${userId}`, {
+                                const currentId = session.user?.id;
+                                if (currentId) {
+                                    const accountResponse = await fetch(`/api/users/account/${currentId}`, {
                                         method: 'GET',
                                         cache: 'no-store'
                                     });
 
                                     if (accountResponse.ok) {
-                                        const accountData = await accountResponse.json();
+                                        const accountData: AccountInfo = await accountResponse.json();
                                         console.log('Latest account data from backend:', accountData);
 
-                                        // user 객체에서 포인트와 레벨만 추출하여 세션 업데이트
                                         if (accountData.user) {
                                             await update?.({
                                                 user: {
-                                                    ...(session.user as any),
-                                                    points: accountData.user.points ?? (session.user as any)?.points,
-                                                    level: accountData.user.level ?? (session.user as any)?.level,
-                                                }
-                                            } as any);
+                                                    ...session.user,
+                                                    points: accountData.user.points ?? session.user?.points,
+                                                    level: accountData.user.level ?? session.user?.level,
+                                                },
+                                            });
 
                                             console.log('Session updated with latest points and level');
                                         }
@@ -132,14 +136,14 @@ const UserAuth = () => {
                                 <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                                     {session.user.email ?? ''}
                                 </span>
-                                {((session.user as unknown as { affiliation?: string | null }).affiliation ?? '') && (
+                                {session.user?.affiliation && (
                                     <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                                        {((session.user as unknown as { affiliation?: string | null }).affiliation) as string}
+                                        {session.user.affiliation}
                                     </span>
                                 )}
                                 {(() => {
-                                    const points = (account?.points ?? (session.user as any)?.points) ?? 0;
-                                    const lvl = (account?.level ?? (session.user as any)?.level) as number | undefined;
+                                    const points = account?.points ?? session.user?.points ?? 0;
+                                    const lvl = account?.level ?? session.user?.level;
                                     const { level, progressPct } = computeLevel(points);
                                     const displayLevel = typeof lvl === 'number' ? lvl : level;
                                     return (

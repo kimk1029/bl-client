@@ -17,8 +17,8 @@ export default function GoogleAd({ slot = '0000000000', className = '', minHeigh
   useEffect(() => {
     if (!client) return;
     try {
-      // @ts-ignore
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
+      const w = window as Window & { adsbygoogle?: unknown[] };
+      (w.adsbygoogle = w.adsbygoogle || []).push({});
     } catch {
       // ignore — script may not be loaded yet
     }

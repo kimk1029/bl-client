@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { MEETUP_TAG_OPTIONS } from "@/lib/meetupsMock";
 import { shareOrCopy } from "@/lib/share";
 

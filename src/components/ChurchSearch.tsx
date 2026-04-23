@@ -21,7 +21,7 @@ export default function ChurchSearch({ onChange, theme, initialValue = '' }: Chu
   const [results, setResults] = useState<Church[]>([]);
   const [open, setOpen] = useState(false);
   const [locked, setLocked] = useState(false); // 선택 완료 상태
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // 외부 클릭 시 드롭다운 닫기

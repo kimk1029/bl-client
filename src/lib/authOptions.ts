@@ -1,3 +1,5 @@
+import type { NextAuthOptions, User } from "next-auth";
+import type { JWT } from "next-auth/jwt";
 import GoogleProvider from "next-auth/providers/google";
 import KakaoProvider from "next-auth/providers/kakao";
 import NaverProvider from "next-auth/providers/naver";
@@ -8,8 +10,8 @@ import { signToken } from "@/lib/jwt";
 import { computeLevel } from "@/utils/level";
 import { createApiUrl } from "@/utils/apiConfig";
 
-const stripBearer = (t?: string | null) => {
-  if (!t) return undefined as any;
+const stripBearer = (t?: string | null): string | undefined => {
+  if (!t) return undefined;
   return String(t).trim().replace(/^Bearer\s+/i, "");
 };
 
@@ -26,7 +28,6 @@ async function upsertSocialUser(args: {
 }) {
   const { providerAccountId, email, name, provider } = args;
 
-  // 이메일이 없을 때 고유성 확보용 합성 이메일 생성
   const effectiveEmail =
     (email && email.trim()) ||
     (providerAccountId
@@ -72,7 +73,16 @@ async function upsertSocialUser(args: {
   };
 }
 
-export const authOptions = {
+interface LoginResponseUser {
+  id: number;
+  username: string;
+  email: string;
+  affiliation?: string | null;
+  points?: number | null;
+  level?: number | null;
+}
+
+export const authOptions: NextAuthOptions = {
   debug: false,
   providers: [
     // ── Google ──────────────────────────────────────────────
@@ -113,7 +123,7 @@ export const authOptions = {
         email: { label: "이메일", type: "email" },
         password: { label: "비밀번호", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials): Promise<User | null> {
         if (!credentials?.email || !credentials.password) {
           throw new Error("이메일과 비밀번호를 모두 입력해주세요.");
         }
@@ -128,22 +138,28 @@ export const authOptions = {
             }),
           });
           if (!res.ok) {
-            const err = await res.json().catch(() => ({}));
+            const err = await res.json().catch(() => ({}) as { message?: string });
             throw new Error(err.message || "로그인에 실패했습니다.");
           }
-          const { user, token } = await res.json();
+          const { user, token } = (await res.json()) as {
+            user: LoginResponseUser;
+            token: string;
+          };
           if (!user?.id || !token) return null;
+          const accessToken = stripBearer(token);
           return {
             id: user.id,
             username: user.username,
             email: user.email,
-            accessToken: stripBearer(token),
+            accessToken,
             affiliation: user.affiliation ?? null,
             points: user.points ?? 0,
             level: Math.max(user.level ?? 1, 1),
-          } as any;
-        } catch (err: any) {
-          throw new Error(err.message || "서버 오류가 발생했습니다.");
+          };
+        } catch (err) {
+          const msg =
+            err instanceof Error ? err.message : "서버 오류가 발생했습니다.";
+          throw new Error(msg);
         }
       },
     }),
@@ -162,24 +178,23 @@ export const authOptions = {
   secret: process.env.NEXTAUTH_SECRET || "fallback-secret-for-development",
 
   callbacks: {
-    async jwt({ token, user, account, trigger, session }: any) {
+    async jwt({ token, user, account, trigger, session }) {
       // ── 최초 로그인 ──────────────────────────────────────
       if (user && account) {
-        const provider = account.provider as string;
+        const provider = account.provider;
 
         if (provider === "credentials") {
-          // 이메일/비밀번호 로그인
-          (token as any).accessToken = stripBearer((user as any).accessToken);
-          (token as any).id = user.id;
-          (token as any).username = (user as any).username;
-          (token as any).email = user.email;
-          (token as any).affiliation = (user as any).affiliation ?? null;
-          (token as any).points = (user as any).points ?? 0;
-          (token as any).level = Math.max((user as any).level ?? 1, 1);
+          token.accessToken = stripBearer(user.accessToken);
+          token.id = typeof user.id === "string" ? Number(user.id) : user.id;
+          token.username = user.username;
+          token.email = user.email ?? undefined;
+          token.affiliation = user.affiliation ?? null;
+          token.points = user.points ?? 0;
+          token.level = Math.max(user.level ?? 1, 1);
         } else {
           // 소셜 로그인 (google / kakao / naver)
           const providerAccountId =
-            (account?.providerAccountId as string | undefined) ??
+            account?.providerAccountId ??
             (user.id != null ? String(user.id) : null);
           const rawEmail =
             typeof user.email === "string" && user.email.trim()
@@ -198,13 +213,13 @@ export const authOptions = {
               name,
               provider,
             });
-            (token as any).accessToken = data.accessToken;
-            (token as any).id = data.id;
-            (token as any).username = data.username;
-            (token as any).email = data.email;
-            (token as any).affiliation = data.affiliation;
-            (token as any).points = data.points;
-            (token as any).level = data.level;
+            token.accessToken = data.accessToken;
+            token.id = data.id;
+            token.username = data.username;
+            token.email = data.email;
+            token.affiliation = data.affiliation;
+            token.points = data.points;
+            token.level = data.level;
           } catch (e) {
             console.error("소셜 로그인 upsert 실패:", e);
           }
@@ -213,31 +228,33 @@ export const authOptions = {
 
       // ── update 트리거 ────────────────────────────────────
       if (trigger === "update" && session) {
-        const src = (session as any).user || session;
-        if (typeof src.username === "string") (token as any).username = src.username;
-        if (typeof src.email === "string") (token as any).email = src.email;
+        type UpdatePatch = Partial<JWT>;
+        const src = (session as { user?: UpdatePatch } & UpdatePatch).user ??
+          (session as UpdatePatch);
+        if (typeof src.username === "string") token.username = src.username;
+        if (typeof src.email === "string") token.email = src.email;
         if (typeof src.affiliation !== "undefined")
-          (token as any).affiliation = src.affiliation ?? null;
+          token.affiliation = src.affiliation ?? null;
         if (typeof src.points !== "undefined")
-          (token as any).points = Number(src.points ?? 0);
+          token.points = Number(src.points ?? 0);
         if (typeof src.level !== "undefined")
-          (token as any).level = Number(src.level ?? 1);
+          token.level = Number(src.level ?? 1);
       }
 
       return token;
     },
 
-    async session({ session, token }: any) {
+    async session({ session, token }) {
       if (token && session.user) {
-        (session.user as any).id = (token as any).id;
-        session.user.name = (token as any).username;
-        session.user.email = (token as any).email;
-        (session.user as any).affiliation = (token as any).affiliation ?? null;
-        (session as any).accessToken = (token as any).accessToken;
-        (session.user as any).points = (token as any).points ?? 0;
-        (session.user as any).level = Math.max((token as any).level ?? 1, 1);
+        session.user.id = token.id;
+        session.user.name = token.username ?? session.user.name;
+        session.user.email = token.email ?? session.user.email;
+        session.user.affiliation = token.affiliation ?? null;
+        session.user.points = token.points ?? 0;
+        session.user.level = Math.max(token.level ?? 1, 1);
+        session.accessToken = token.accessToken;
       }
       return session;
     },
   },
-} as any;
+};

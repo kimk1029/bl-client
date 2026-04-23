@@ -18,7 +18,7 @@ export type GetAffiliationPostsResponse = AffiliationPostDTO[];
 export type GetAffiliationPostByIdResponse = AffiliationPostDTO;
 export type CreateAffiliationPostResponse = AffiliationPostDTO;
 export type UpdateAffiliationPostResponse = AffiliationPostDTO;
-export type DeleteAffiliationPostResponse = {};
+export type DeleteAffiliationPostResponse = Record<string, never>;
 
 export interface ErrorResponse {
   message: string;

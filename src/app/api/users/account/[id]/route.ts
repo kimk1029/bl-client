@@ -87,7 +87,12 @@ export async function PATCH(
       return NextResponse.json({ error: '본인 계정만 수정할 수 있습니다.' }, { status: 403 });
 
     const body = await request.json();
-    const data: any = {};
+    const data: {
+      username?: string;
+      password?: string;
+      affiliation?: string | null;
+      church_id?: number | null;
+    } = {};
     if (typeof body?.username === 'string' && body.username.trim()) data.username = body.username.trim();
     if (typeof body?.password === 'string' && body.password.length > 0) {
       data.password = await bcrypt.hash(body.password, 10);

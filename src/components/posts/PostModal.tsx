@@ -71,7 +71,7 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSuccess, apiEn
             formData.append('content', content);
             formData.append('category', category);
 
-            images.forEach((image, index) => {
+            images.forEach((image) => {
                 formData.append(`image`, image);
             });
 

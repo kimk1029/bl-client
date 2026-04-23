@@ -1,9 +1,9 @@
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/authOptions';
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/authOptions";
 
 export const getAccessToken = async (): Promise<string | undefined> => {
-  const session = await getServerSession(authOptions as any);
-  const raw = (session as any)?.accessToken as string | undefined;
+  const session = await getServerSession(authOptions);
+  const raw = session?.accessToken;
   if (!raw) return undefined;
   return String(raw).trim();
 };
