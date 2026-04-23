@@ -11,7 +11,6 @@ interface ChurchRow {
   phone: string | null;
 }
 
-const MIN_RESULTS_BEFORE_REMOTE = 5; // 로컬 결과가 이보다 적으면 ch114 보강
 const LOCAL_LIMIT = 10;
 const REMOTE_TIMEOUT_MS = 2500;
 
@@ -97,12 +96,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json([], { status: 200 });
   }
 
-  // 로컬만으로 충분하면 바로 반환 (ch114 호출 X)
-  if (local.length >= MIN_RESULTS_BEFORE_REMOTE) {
-    return NextResponse.json(local.slice(0, LOCAL_LIMIT));
-  }
-
-  // ch114.kr 라이브 질의해 보강 — 타임아웃·에러는 로컬로 graceful fallback
+  // ch114.kr 에도 항상 질의해, 우리 DB에 아직 없는 교회는 즉시 이름·주소
+  // (+ city/district/phone/pastor) 를 저장 (write-through 캐시).
+  // Next fetch 30분 캐시 덕분에 같은 키워드 재검색은 ch114 재호출 없음.
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), REMOTE_TIMEOUT_MS);
   let remote: Ch114Result[] = [];
