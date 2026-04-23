@@ -21,6 +21,44 @@ import {
 const ME = "은혜충만";
 const HAS_CELL_KEY = "blessing.myCell.hasCell";
 const INFO_KEY = "blessing.myCell.info";
+const POSTS_KEY = "blessing.myCell.posts";
+const PRAYERS_KEY = "blessing.myCell.prayers";
+const UPCOMING_KEY = "blessing.myCell.upcoming";
+const ATTEND_KEY = "blessing.myCell.attendMap";
+const LIKED_KEY = "blessing.myCell.liked";
+const PRAYED_KEY = "blessing.myCell.prayed";
+const JOINED_KEY = "blessing.myCell.joined";
+
+function loadJson<T>(key: string, fallback: T): T {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+    return JSON.parse(raw) as T;
+  } catch {
+    return fallback;
+  }
+}
+function saveJson(key: string, value: unknown): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    /* quota / privacy mode */
+  }
+}
+function clearCellData() {
+  if (typeof window === "undefined") return;
+  [POSTS_KEY, PRAYERS_KEY, UPCOMING_KEY, ATTEND_KEY, LIKED_KEY, PRAYED_KEY, JOINED_KEY].forEach(
+    (k) => {
+      try {
+        localStorage.removeItem(k);
+      } catch {
+        /* ignore */
+      }
+    },
+  );
+}
 
 type Tab = "feed" | "prayer" | "meeting" | "members";
 
@@ -129,8 +167,12 @@ export default function CellPage() {
   const [showJoin, setShowJoin] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [showAddMtg, setShowAddMtg] = useState(false);
-  const [upcoming, setUpcoming] = useState<CellMeetingItem[]>(CELL_UPCOMING);
-  const [attendMap, setAttendMap] = useState<Record<string, boolean>>({});
+  const [upcoming, setUpcoming] = useState<CellMeetingItem[]>(() =>
+    loadJson<CellMeetingItem[]>(UPCOMING_KEY, CELL_UPCOMING),
+  );
+  const [attendMap, setAttendMap] = useState<Record<string, boolean>>(() =>
+    loadJson<Record<string, boolean>>(ATTEND_KEY, {}),
+  );
   const [cellInfo, setCellInfo] = useState<CellInfoOverride>({});
   const [showEdit, setShowEdit] = useState(false);
   const [showNotif, setShowNotif] = useState(false);
@@ -142,11 +184,7 @@ export default function CellPage() {
       const raw = localStorage.getItem(INFO_KEY);
       if (raw) {
         try {
-          const info = JSON.parse(raw) as CellInfoOverride;
-          setCellInfo(info);
-          // Custom cell = 사용자가 직접 만들거나 가입한 목장.
-          // mock 초기 데이터(모임·피드·기도제목·멤버)를 노출하지 않음.
-          if (info.name) setUpcoming([]);
+          setCellInfo(JSON.parse(raw) as CellInfoOverride);
         } catch {
           /* ignore invalid JSON */
         }
@@ -155,6 +193,14 @@ export default function CellPage() {
       setHasCell(true);
     }
   }, []);
+
+  // upcoming · attendMap 도 localStorage에 자동 저장
+  useEffect(() => {
+    saveJson(UPCOMING_KEY, upcoming);
+  }, [upcoming]);
+  useEffect(() => {
+    saveJson(ATTEND_KEY, attendMap);
+  }, [attendMap]);
 
   const myCell = useMemo(
     () => ({ ...MY_CELL, ...cellInfo }),
@@ -209,6 +255,7 @@ export default function CellPage() {
       type: cellInfo.type ?? "목장",
       inviteCode: code,
     };
+    clearCellData();
     persistHasCell(true);
     persistInfo(next);
     setUpcoming([]);
@@ -226,6 +273,7 @@ export default function CellPage() {
       meetPlace: draft.meetPlace || undefined,
       inviteCode: randomInviteCode(draft.name),
     };
+    clearCellData();
     persistHasCell(true);
     persistInfo(next);
     setUpcoming([]);
@@ -241,6 +289,7 @@ export default function CellPage() {
     }
     persistHasCell(false);
     setCellInfo({});
+    clearCellData();
     setUpcoming(CELL_UPCOMING);
     setAttendMap({});
     try {
@@ -424,8 +473,18 @@ export default function CellPage() {
         </div>
       )}
 
-      {tab === "feed" && <CellFeed isCustom={isCustom} />}
-      {tab === "prayer" && <CellPrayer isCustom={isCustom} />}
+      {tab === "feed" && (
+        <CellFeed
+          key={myCell.inviteCode ?? "default"}
+          isCustom={isCustom}
+        />
+      )}
+      {tab === "prayer" && (
+        <CellPrayer
+          key={myCell.inviteCode ?? "default"}
+          isCustom={isCustom}
+        />
+      )}
       {tab === "meeting" && (
         <CellMeeting
           upcoming={upcoming}
@@ -530,24 +589,28 @@ function CellEmpty({
 // ---------------------- Feed tab ----------------------
 
 function CellFeed({ isCustom }: { isCustom: boolean }) {
-  const [posts, setPosts] = useState<CellPost[]>(
-    isCustom ? [] : CELL_POSTS,
+  // localStorage에 저장된 posts가 있으면 그걸 우선. 없으면 isCustom에
+  // 따라 빈 리스트(직접 만든 목장) 또는 CELL_POSTS(기본 mock).
+  const [posts, setPosts] = useState<CellPost[]>(() =>
+    loadJson<CellPost[]>(POSTS_KEY, isCustom ? [] : CELL_POSTS),
   );
   const [draft, setDraft] = useState("");
-  const [liked, setLiked] = useState<Set<number>>(new Set());
-  const [prayed, setPrayed] = useState<Set<number>>(new Set());
-  const lastCustom = useRef<boolean | null>(null);
+  const [liked, setLiked] = useState<Set<number>>(() =>
+    new Set(loadJson<number[]>(LIKED_KEY, [])),
+  );
+  const [prayed, setPrayed] = useState<Set<number>>(() =>
+    new Set(loadJson<number[]>(PRAYED_KEY, [])),
+  );
 
-  // isCustom 전환 시에만 mock ↔ 빈 리스트 리셋. 같은 상태 내에서
-  // 새 글을 올렸을 때는 절대 state를 덮어쓰지 않도록 ref 비교.
   useEffect(() => {
-    if (lastCustom.current !== null && lastCustom.current !== isCustom) {
-      setPosts(isCustom ? [] : CELL_POSTS);
-      setLiked(new Set());
-      setPrayed(new Set());
-    }
-    lastCustom.current = isCustom;
-  }, [isCustom]);
+    saveJson(POSTS_KEY, posts);
+  }, [posts]);
+  useEffect(() => {
+    saveJson(LIKED_KEY, [...liked]);
+  }, [liked]);
+  useEffect(() => {
+    saveJson(PRAYED_KEY, [...prayed]);
+  }, [prayed]);
 
   const submit = () => {
     const text = draft.trim();
@@ -709,20 +772,20 @@ function CellFeed({ isCustom }: { isCustom: boolean }) {
 // ---------------------- Prayer tab ----------------------
 
 function CellPrayer({ isCustom }: { isCustom: boolean }) {
-  const [prayers, setPrayers] = useState<CellPrayerItem[]>(
-    isCustom ? [] : CELL_PRAYERS,
+  const [prayers, setPrayers] = useState<CellPrayerItem[]>(() =>
+    loadJson<CellPrayerItem[]>(PRAYERS_KEY, isCustom ? [] : CELL_PRAYERS),
   );
   const [draft, setDraft] = useState("");
-  const [joined, setJoined] = useState<Set<number>>(new Set());
-  const lastCustom = useRef<boolean | null>(null);
+  const [joined, setJoined] = useState<Set<number>>(() =>
+    new Set(loadJson<number[]>(JOINED_KEY, [])),
+  );
 
   useEffect(() => {
-    if (lastCustom.current !== null && lastCustom.current !== isCustom) {
-      setPrayers(isCustom ? [] : CELL_PRAYERS);
-      setJoined(new Set());
-    }
-    lastCustom.current = isCustom;
-  }, [isCustom]);
+    saveJson(PRAYERS_KEY, prayers);
+  }, [prayers]);
+  useEffect(() => {
+    saveJson(JOINED_KEY, [...joined]);
+  }, [joined]);
 
   const submit = () => {
     const text = draft.trim();
