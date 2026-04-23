@@ -13,11 +13,20 @@
   color: var(--blessing-accent-strong);
   font-family: inherit;
   text-align: left;
-  cursor: pointer;
-  transition: background 0.12s;
 }
-.blessing-cell-meeting-banner:hover {
-  background: color-mix(in srgb, var(--blessing-accent-soft) 85%, white);
+.blessing-cell-meeting-info-btn {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  color: inherit;
 }
 .blessing-cell-meeting-dot {
   width: 8px;
@@ -58,12 +67,34 @@
 }
 .blessing-cell-attend-btn {
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   padding: 8px 14px;
   background: var(--blessing-accent);
   color: #fff;
   font-size: 12px;
   font-weight: 700;
+  border: none;
   border-radius: 100px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.12s, transform 0.1s;
+}
+.blessing-cell-attend-btn:hover {
+  background: var(--blessing-accent-strong);
+}
+.blessing-cell-attend-btn:active {
+  transform: scale(0.96);
+}
+.blessing-cell-attend-btn-on {
+  background: var(--blessing-bg-0);
+  color: var(--blessing-accent-strong);
+  border: 1px solid var(--blessing-accent);
+  padding: 7px 13px;
+}
+.blessing-cell-attend-btn-on:hover {
+  background: var(--blessing-bg-2);
 }
 
 .blessing-cell-quick-post {
@@ -524,4 +555,118 @@ button.blessing-cell-quick-input:hover {
 }
 .blessing-cell-invite-or::before { left: 4%; }
 .blessing-cell-invite-or::after { right: 4%; }
+
+/* ---------- Empty state (no cell yet) ---------- */
+.blessing-cell-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px 32px;
+  gap: 10px;
+  text-align: center;
+  min-height: calc(100vh - 56px - 60px - 80px);
+}
+.blessing-cell-empty-emoji {
+  font-size: 54px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.blessing-cell-empty-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--blessing-fg-0);
+  letter-spacing: -0.4px;
+}
+.blessing-cell-empty-msg {
+  font-size: 13px;
+  color: var(--blessing-fg-2);
+  line-height: 1.55;
+  letter-spacing: -0.2px;
+  max-width: 320px;
+  margin-bottom: 18px;
+}
+.blessing-cell-empty-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 280px;
+}
+.blessing-cell-empty-actions .blessing-btn-primary,
+.blessing-cell-empty-actions .blessing-btn-secondary {
+  width: 100%;
+  min-height: 44px;
+}
+.blessing-cell-empty-alt {
+  background: transparent;
+}
+
+/* ---------- Shared bottom-sheet form (join / create / add meeting) ---------- */
+.blessing-cell-sheet-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 4px;
+}
+.blessing-cell-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.blessing-cell-field-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--blessing-fg-1);
+  letter-spacing: -0.2px;
+  padding-left: 2px;
+}
+.blessing-cell-field-input {
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
+  background: var(--blessing-bg-2);
+  border: 1px solid var(--blessing-border);
+  border-radius: 10px;
+  font-size: 13.5px;
+  color: var(--blessing-fg-0);
+  font-family: inherit;
+  outline: none;
+  letter-spacing: -0.2px;
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+.blessing-cell-field-input::placeholder {
+  color: var(--blessing-fg-3);
+}
+.blessing-cell-field-input:focus {
+  border-color: var(--blessing-accent);
+  box-shadow: 0 0 0 3px var(--blessing-accent-soft);
+}
+.blessing-cell-field-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+.blessing-cell-type-pill {
+  flex: 1;
+  padding: 9px 12px;
+  background: var(--blessing-bg-2);
+  color: var(--blessing-fg-1);
+  border: 1px solid var(--blessing-border);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.blessing-cell-type-pill:hover {
+  background: var(--blessing-bg-3);
+}
+.blessing-cell-type-pill-on {
+  background: var(--blessing-accent);
+  color: #fff;
+  border-color: var(--blessing-accent);
+  font-weight: 700;
+}
 
