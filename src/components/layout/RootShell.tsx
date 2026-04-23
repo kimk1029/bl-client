@@ -1,6 +1,7 @@
 "use client";
 
 import Script from "next/script";
+import { usePathname } from "next/navigation";
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from "sonner";
 import CustomSessionProvider from "@/components/SessionProvider";
@@ -11,8 +12,9 @@ import GoogleAd from "@/components/layout/GoogleAd";
 
 function RootLayoutContent({ children }: { children: React.ReactNode }) {
   const { theme } = useTheme();
+  const pathname = usePathname();
   const isDark = theme === "dark";
-  const mainClass = "flex-1 w-full";
+  const mainClass = "flex-1 w-full blessing-page-transition";
 
   return (
     <div
@@ -30,6 +32,7 @@ function RootLayoutContent({ children }: { children: React.ReactNode }) {
         >
           <Header />
           <main
+            key={pathname}
             className={mainClass}
             style={{
               paddingBottom: "calc(60px + env(safe-area-inset-bottom))",

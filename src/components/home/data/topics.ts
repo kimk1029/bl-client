@@ -13,6 +13,12 @@ export interface TopicMeta {
   anon: boolean;
   hot?: boolean;
   mapsTo?: RealCategory;
+  /**
+   * Optional title-keyword filter for topics that must share a backend
+   * category with another topic. Posts whose title includes any of these
+   * keywords (case-insensitive) are considered part of this topic.
+   */
+  titleKeywords?: string[];
 }
 
 // Map the 16 prototype topics onto the 7 real backend categories
@@ -22,7 +28,7 @@ export const TOPICS: TopicMeta[] = [
   { id: "prayer",    ko: "기도제목",      en: "Prayer",        emoji: "🙏", anon: false, hot: true,  mapsTo: "prayer" },
   { id: "testimony", ko: "간증·신앙나눔", en: "Testimony",     emoji: "✨", anon: false,             mapsTo: "faith" },
   { id: "sermon",    ko: "설교노트",      en: "Sermon Notes",  emoji: "📖", anon: false,             mapsTo: "worship" },
-  { id: "qt",        ko: "큐티·묵상",     en: "QT",            emoji: "🌱", anon: false,             mapsTo: "prayer" },
+  { id: "qt",        ko: "큐티·묵상",     en: "QT",            emoji: "🌱", anon: false,             mapsTo: "worship", titleKeywords: ["QT", "큐티", "묵상", "말씀", "말씀묵상"] },
   { id: "youth",     ko: "청년부",        en: "Young Adults",  emoji: "🎸", anon: false, hot: true,  mapsTo: "youth" },
   { id: "market",    ko: "중고·나눔",     en: "Market",        emoji: "🛍️", anon: false,             mapsTo: "life" },
   { id: "notice",    ko: "공지·행사",     en: "Notice",        emoji: "📣", anon: false,             mapsTo: "life" },

@@ -6,7 +6,7 @@ import { apiFetcher } from "@/lib/fetcher";
 import type { Post } from "@/types/type";
 
 import HeroVerse from "@/components/home/HeroVerse";
-import PinnedNotice from "@/components/home/PinnedNotice";
+import NoticeTicker from "@/components/home/NoticeTicker";
 import TopicStrip from "@/components/home/TopicStrip";
 import HotSection from "@/components/home/HotSection";
 import PrayerStream from "@/components/home/PrayerStream";
@@ -35,20 +35,13 @@ export default function Home() {
   const { data: posts, error } = useSWR<Post[]>("/api/posts", apiFetcher);
 
   const list = Array.isArray(posts) ? posts : [];
-  const NOTICE_MARK = /^(📌|\[공지\]|\[교회 공지\]|📣)|공지|안내/;
-  const pinned =
-    list.find((p) => (p as Post & { pinned?: boolean }).pinned) ??
-    list.find((p) => NOTICE_MARK.test(p.title)) ??
-    list.find((p) => p.category === "life") ??
-    list[0] ??
-    null;
   const hotIds = new Set<number>();
   const loaded = !!posts || !!error;
 
   return (
     <div className="blessing-home">
       <HeroVerse />
-      <PinnedNotice post={pinned} />
+      <NoticeTicker posts={list} />
       <TopicStrip />
 
       {!loaded ? (

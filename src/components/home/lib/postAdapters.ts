@@ -44,13 +44,23 @@ export function pickHot(posts: Post[], limit = 5): Post[] {
     .slice(0, limit);
 }
 
-export function postsByCategory(posts: Post[], cat: string, opts?: { anonymous?: boolean }): Post[] {
+export function postsByCategory(
+  posts: Post[],
+  cat: string,
+  opts?: { anonymous?: boolean; titleKeywords?: string[] },
+): Post[] {
+  const kws = opts?.titleKeywords?.map((k) => k.toLowerCase()).filter(Boolean);
   return posts
-    .filter(p => p.category === cat)
-    .filter(p => {
+    .filter((p) => p.category === cat)
+    .filter((p) => {
       if (opts?.anonymous === true) return !!p.is_anonymous;
       if (opts?.anonymous === false) return !p.is_anonymous;
       return true;
+    })
+    .filter((p) => {
+      if (!kws || kws.length === 0) return true;
+      const t = (p.title || "").toLowerCase();
+      return kws.some((k) => t.includes(k));
     })
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 }

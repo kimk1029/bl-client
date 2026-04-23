@@ -81,3 +81,23 @@
   color: var(--blessing-fg-3);
   font-family: var(--blessing-mono);
 }
+
+/* ---------- Route-change transition (remounted via key={pathname}) ---------- */
+.blessing-page-transition {
+  animation: blessing-page-enter 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes blessing-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .blessing-page-transition {
+    animation: none;
+  }
+}
